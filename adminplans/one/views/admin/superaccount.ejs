@@ -1,0 +1,669 @@
+<%- include('../partials/head.ejs', { title: 'super account' }) %>
+
+        body {
+            background-color: #000000;
+        }
+        .border-bottom-left-to-right {
+            position: relative;
+            border-radius: 0.75rem;
+        }
+        .border-bottom-left-to-right:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #DC2626;
+            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        }
+        @keyframes borderLeftToRight {
+            to {
+                width: 100%;
+            }
+        }
+        .icon-button {
+            transition: transform 0.2s;
+        }
+        .icon-button:hover {
+            transform: scale(1.1);
+        }
+        #mobile-menu-overlay {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+            width: 16rem;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: auto;
+            will-change: transform, opacity;
+        }
+        .mobile-menu-open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #mobile-menu-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        #mobile-menu-backdrop.active {
+            display: block;
+        }
+        .table-container table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table-container th {
+            background-color: #1F2937;
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 2px solid #4B5563;
+        }
+        .table-container td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #4B5563;
+        }
+        .table-container tr:hover {
+            background-color: #374151;
+        }
+        .selector {
+            background-color: #1F2937;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            width: 200px;
+        }
+        .category-image, .brand-image, .news-image, .model-image, .user-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins']">
+    
+<%- include('../partials/navbar') %>
+
+    <!-- Main Section -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+        <div class="space-y-8">
+            <!-- Toggle Section -->
+            <div class="flex justify-center space-x-4 mb-6">
+                <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('content')">Content</button>
+                <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('users')">Users</button>
+            </div>
+            <!-- Sub-Toggle Section -->
+            <div id="subToggleSection" class="flex justify-center space-x-4 mb-6 hidden"></div>
+            <!-- Content Area -->
+            <div id="contentArea" class="bg-gray-800 rounded-lg shadow-lg p-6 border-bottom-left-to-right"></div>
+            <!-- Create Author Modal -->
+            <div id="createAuthorModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                    <h3 class="text-2xl font-bold text-white mb-4">Create Author</h3>
+                    <form id="createAuthorFormData" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                            <input type="file" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                            <input type="text" name="name" placeholder="Enter Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                            <input type="text" name="username" placeholder="Enter Username" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                            <input type="password" name="password" placeholder="Enter Password" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Position</label>
+                            <select name="position" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                                <option value="">Select Position</option>
+                                <option value="level2">Level 2 Author</option>
+                                <option value="level1">Level 1 Author</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-between">
+                            <button type="button" id="close-create-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Upload Vehicle Type Modal -->
+            <div id="uploadVehicleTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                    <h3 class="text-2xl font-bold text-white mb-4">Upload Vehicle Type</h3>
+                    <form id="uploadVehicleTypeFormData" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Image</label>
+                            <input type="file" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type Name</label>
+                            <input type="text" name="vehicleTypeName" placeholder="Enter Vehicle Type" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        <div class="flex justify-between">
+                            <button type="button" id="close-upload-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Upload</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<%- include('../partials/footer') %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded');
+
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+            const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+            if (!mobileMenuButton || !mobileMenuOverlay || !mobileMenuBackdrop || !closeMobileMenuButton) {
+                console.error('Mobile menu elements missing:', {
+                    mobileMenuButton: !!mobileMenuButton,
+                    mobileMenuOverlay: !!mobileMenuOverlay,
+                    mobileMenuBackdrop: !!mobileMenuBackdrop,
+                    closeMobileMenuButton: !!closeMobileMenuButton
+                });
+                return;
+            }
+
+            const toggleMenu = () => {
+                console.log('Toggling menu');
+                mobileMenuOverlay.classList.toggle('mobile-menu-open');
+                mobileMenuBackdrop.classList.toggle('active');
+            };
+
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Hamburger menu clicked');
+                toggleMenu();
+            }, { passive: false });
+
+            mobileMenuButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Hamburger menu touched');
+                toggleMenu();
+            }, { passive: false });
+
+            closeMobileMenuButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Close menu clicked');
+                mobileMenuOverlay.classList.remove('mobile-menu-open');
+                mobileMenuBackdrop.classList.remove('active');
+            }, { passive: false });
+
+            mobileMenuBackdrop.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Backdrop clicked, closing menu');
+                mobileMenuOverlay.classList.remove('mobile-menu-open');
+                mobileMenuBackdrop.classList.remove('active');
+            }, { passive: false });
+
+            mobileMenuOverlay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('Clicked inside menu, preventing close');
+            }, { passive: false });
+
+            // Search Functionality
+            document.getElementById('search-button').addEventListener('click', () => {
+                const query = document.getElementById('search-input').value;
+                console.log('Search button clicked, query:', query);
+                if (query) {
+                    alert('Searching for: ' + query);
+                } else {
+                    alert('Please enter a search query.');
+                }
+            });
+
+            // Highlight Active Nav Link
+            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
+            const currentPath = window.location.pathname;
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-red-600', 'text-white');
+                    link.classList.remove('hover:bg-red-600');
+                }
+            });
+
+            // Toggle Content
+            window.showContent = (type) => {
+                const contentArea = document.getElementById('contentArea');
+                const subToggleSection = document.getElementById('subToggleSection');
+                document.querySelectorAll('.toggle-item').forEach(item => {
+                    item.classList.toggle('bg-red-600', item.getAttribute('onclick') === `showContent('${type}')`);
+                    item.classList.toggle('hover:bg-red-600', item.getAttribute('onclick') !== `showContent('${type}')`);
+                });
+
+                contentArea.innerHTML = '';
+                subToggleSection.classList.add('hidden');
+                subToggleSection.innerHTML = '';
+
+                switch (type) {
+                    case 'content':
+                        subToggleSection.classList.remove('hidden');
+                        subToggleSection.innerHTML = `
+                            <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showSubContent('category')">Category</button>
+                            <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showSubContent('brand')">Brand</button>
+                            <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showSubContent('model')">Model</button>
+                            <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showSubContent('news')">News</button>
+                            <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showSubContent('vehicleType')">Vehicle Type</button>
+                        `;
+                        showSubContent('vehicleType');
+                        break;
+                    case 'users':
+                        contentArea.innerHTML = `
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Password</th>
+                                            <th>Position</th>
+                                            <th>Creation Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <tr onclick="alert('Redirect to John Doe profile')">
+                                            <td><img src="https://via.placeholder.com/50" alt="Profile" class="user-image"></td>
+                                            <td>John Doe</td>
+                                            <td>johndoe</td>
+                                            <td>password123</td>
+                                            <td>Level 1 Author</td>
+                                            <td>Oct 10, 2025</td>
+                                        </tr>
+                                        <tr onclick="alert('Redirect to Jane Smith profile')">
+                                            <td><img src="https://via.placeholder.com/50" alt="Profile" class="user-image"></td>
+                                            <td>Jane Smith</td>
+                                            <td>janesmith</td>
+                                            <td>password456</td>
+                                            <td></td>
+                                            <td>Oct 11, 2025</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-start mt-6">
+                                <button id="createAuthorButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Create Author</button>
+                            </div>
+                        `;
+                        document.getElementById('createAuthorButton').addEventListener('click', () => {
+                            console.log('Create author button clicked');
+                            document.getElementById('createAuthorModal').classList.remove('hidden');
+                        });
+                        break;
+                }
+            };
+
+            // Sub-Toggle Content
+            window.showSubContent = (type) => {
+                const contentArea = document.getElementById('contentArea');
+                document.querySelectorAll('.sub-toggle-item').forEach(item => {
+                    item.classList.toggle('bg-red-600', item.getAttribute('onclick') === `showSubContent('${type}')`);
+                    item.classList.toggle('hover:bg-red-600', item.getAttribute('onclick') !== `showSubContent('${type}')`);
+                });
+
+                let contentHTML = '';
+                switch (type) {
+                    case 'category':
+                        contentHTML = `
+                            <select class="selector" id="vehicleTypeSelector" onchange="filterCategory(this.value)">
+                                <option value="">Select Vehicle Type</option>
+                                <option value="car">Car</option>
+                                <option value="truck">Truck</option>
+                            </select>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Category Name</th>
+                                            <th>Image</th>
+                                            <th>Published At</th>
+                                            <th>Published By</th>
+                                            <th>Edited By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-type="car" onclick="alert('Redirect to SUV details')">
+                                            <td>SUV</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="SUV" class="category-image"></td>
+                                            <td>Oct 10, 2025</td>
+                                            <td>John Doe</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr data-type="car" onclick="alert('Redirect to Sedan details')">
+                                            <td>Sedan</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Sedan" class="category-image"></td>
+                                            <td>Oct 11, 2025</td>
+                                            <td>Jane Smith</td>
+                                            <td>John Doe</td>
+                                        </tr>
+                                        <tr data-type="truck" onclick="alert('Redirect to Pickup details')">
+                                            <td>Pickup</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Pickup" class="category-image"></td>
+                                            <td>Oct 12, 2025</td>
+                                            <td>John Doe</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        break;
+                    case 'brand':
+                        contentHTML = `
+                            <select class="selector" id="vehicleTypeSelector" onchange="filterBrand(this.value)">
+                                <option value="">Select Vehicle Type</option>
+                                <option value="car">Car</option>
+                                <option value="truck">Truck</option>
+                            </select>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Brand Name</th>
+                                            <th>Image</th>
+                                            <th>Published At</th>
+                                            <th>Published By</th>
+                                            <th>Edited By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr data-type="car" onclick="alert('Redirect to Toyota details')">
+                                            <td>Toyota</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Toyota" class="brand-image"></td>
+                                            <td>Oct 10, 2025</td>
+                                            <td>John Doe</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr data-type="car" onclick="alert('Redirect to Honda details')">
+                                            <td>Honda</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Honda" class="brand-image"></td>
+                                            <td>Oct 11, 2025</td>
+                                            <td>Jane Smith</td>
+                                            <td>John Doe</td>
+                                        </tr>
+                                        <tr data-type="truck" onclick="alert('Redirect to Ford details')">
+                                            <td>Ford</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Ford" class="brand-image"></td>
+                                            <td>Oct 12, 2025</td>
+                                            <td>John Doe</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        break;
+                    case 'model':
+                        contentHTML = `
+                            <select class="selector" id="vehicleTypeSelector" onchange="showBrandSelector(this.value)">
+                                <option value="">Select Vehicle Type</option>
+                                <option value="car">Car</option>
+                                <option value="truck">Truck</option>
+                            </select>
+                            <select class="selector hidden" id="brandSelector" onchange="showModelData(this.value)"></select>
+                            <div id="modelTable" class="table-container hidden">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Model Name</th>
+                                            <th>Price</th>
+                                            <th>Image</th>
+                                            <th>Published At</th>
+                                            <th>Published By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        `;
+                        break;
+                    case 'news':
+                        contentHTML = `
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Publish Date</th>
+                                            <th>Published By</th>
+                                            <th>Edited By</th>
+                                            <th>Image</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr onclick="alert('Redirect to New Car Launch article')">
+                                            <td>New Car Launch</td>
+                                            <td>Oct 15, 2025</td>
+                                            <td>John Doe</td>
+                                            <td></td>
+                                            <td><img src="https://via.placeholder.com/50" alt="News 1" class="news-image"></td>
+                                        </tr>
+                                        <tr onclick="alert('Redirect to Auto Show 2025 article')">
+                                            <td>Auto Show 2025</td>
+                                            <td>Oct 14, 2025</td>
+                                            <td>Jane Smith</td>
+                                            <td>John Doe</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="News 2" class="news-image"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        break;
+                    case 'vehicleType':
+                        contentHTML = `
+                            <select class="selector" id="vehicleTypeSelector" onchange="filterVehicleType(this.value)">
+                                <option value="">Select Vehicle Type</option>
+                                <option value="car">Car</option>
+                                <option value="truck">Truck</option>
+                            </select>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Vehicle Type Name</th>
+                                            <th>Image</th>
+                                            <th>Published At</th>
+                                            <th>Published By</th>
+                                            <th>Edited By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vehicleTypeTableBody">
+                                        <tr data-type="car" onclick="alert('Redirect to Car details')">
+                                            <td>Car</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Car" class="category-image"></td>
+                                            <td>Oct 10, 2025</td>
+                                            <td>John Doe</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr data-type="truck" onclick="alert('Redirect to Truck details')">
+                                            <td>Truck</td>
+                                            <td><img src="https://via.placeholder.com/50" alt="Truck" class="category-image"></td>
+                                            <td>Oct 11, 2025</td>
+                                            <td>Jane Smith</td>
+                                            <td>John Doe</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-start mt-6">
+                                <button id="uploadVehicleTypeButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Upload Vehicle Type</button>
+                            </div>
+                        `;
+                        break;
+                }
+                contentArea.innerHTML = contentHTML;
+                if (type === 'vehicleType') {
+                    document.getElementById('uploadVehicleTypeButton').addEventListener('click', () => {
+                        console.log('Upload vehicle type button clicked');
+                        document.getElementById('uploadVehicleTypeModal').classList.remove('hidden');
+                    });
+                }
+            };
+
+            // Filter Functions
+            window.filterCategory = (vehicleType) => {
+                const tableRows = document.querySelectorAll('#categoryTable tbody tr');
+                tableRows.forEach(row => {
+                    row.style.display = vehicleType ? (row.getAttribute('data-type') === vehicleType ? '' : 'none') : '';
+                });
+            };
+
+            window.filterBrand = (vehicleType) => {
+                const tableRows = document.querySelectorAll('#brandTable tbody tr');
+                tableRows.forEach(row => {
+                    row.style.display = vehicleType ? (row.getAttribute('data-type') === vehicleType ? '' : 'none') : '';
+                });
+            };
+
+            window.filterVehicleType = (vehicleType) => {
+                const tableRows = document.querySelectorAll('#vehicleTypeTableBody tr');
+                tableRows.forEach(row => {
+                    row.style.display = vehicleType ? (row.getAttribute('data-type') === vehicleType ? '' : 'none') : '';
+                });
+            };
+
+            window.showBrandSelector = (vehicleType) => {
+                const brandSelector = document.getElementById('brandSelector');
+                const modelTable = document.getElementById('modelTable');
+                brandSelector.classList.add('hidden');
+                modelTable.classList.add('hidden');
+                brandSelector.innerHTML = '<option value="">Select Brand</option>';
+
+                if (vehicleType) {
+                    const brands = vehicleType === 'car' ? ['Toyota', 'Honda'] : ['Ford'];
+                    brandSelector.innerHTML += brands.map(brand => `<option value="${brand.toLowerCase()}">${brand}</option>`).join('');
+                    brandSelector.classList.remove('hidden');
+                }
+            };
+
+            window.showModelData = (brand) => {
+                const tableBody = document.querySelector('#modelTable tbody');
+                const modelTable = document.getElementById('modelTable');
+                tableBody.innerHTML = '';
+                modelTable.classList.add('hidden');
+
+                if (brand) {
+                    let models = [];
+                    if (brand === 'toyota') {
+                        models = [
+                            { name: 'Camry', price: '$25,000', publishedAt: 'Oct 10, 2025', publishedBy: 'John Doe' },
+                            { name: 'RAV4', price: '$28,000', publishedAt: 'Oct 11, 2025', publishedBy: 'Jane Smith' }
+                        ];
+                    } else if (brand === 'honda') {
+                        models = [
+                            { name: 'Civic', price: '$22,000', publishedAt: 'Oct 10, 2025', publishedBy: 'John Doe' },
+                            { name: 'CR-V', price: '$27,000', publishedAt: 'Oct 11, 2025', publishedBy: 'Jane Smith' }
+                        ];
+                    } else if (brand === 'ford') {
+                        models = [
+                            { name: 'F-150', price: '$35,000', publishedAt: 'Oct 12, 2025', publishedBy: 'John Doe' },
+                            { name: 'Ranger', price: '$30,000', publishedAt: 'Oct 13, 2025', publishedBy: 'Jane Smith' }
+                        ];
+                    }
+                    tableBody.innerHTML = models.map(model => `
+                        <tr onclick="alert('Redirect to ${model.name} details')">
+                            <td>${model.name}</td>
+                            <td>${model.price}</td>
+                            <td><img src="https://via.placeholder.com/50" alt="${model.name}" class="model-image"></td>
+                            <td>${model.publishedAt}</td>
+                            <td>${model.publishedBy}</td>
+                        </tr>
+                    `).join('');
+                    modelTable.classList.remove('hidden');
+                }
+            };
+
+            // Create Author Form
+            const createAuthorFormData = document.getElementById('createAuthorFormData');
+            const closeCreateModal = document.getElementById('close-create-modal');
+            createAuthorFormData.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Create author form submitted');
+                const formData = new FormData(createAuthorFormData);
+                const name = formData.get('name');
+                const username = formData.get('username');
+                const password = formData.get('password');
+                const position = formData.get('position');
+                const creationDate = new Date().toLocaleDateString();
+
+                const tableBody = document.getElementById('usersTableBody');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><img src="https://via.placeholder.com/50" alt="Profile" class="user-image"></td>
+                    <td>${name}</td>
+                    <td>${username}</td>
+                    <td>${password}</td>
+                    <td>${position === 'level2' ? 'Level 2 Author' : 'Level 1 Author'}</td>
+                    <td>${creationDate}</td>
+                `;
+                newRow.onclick = () => alert(`Redirect to ${name} profile`);
+                tableBody.appendChild(newRow);
+                document.getElementById('createAuthorModal').classList.add('hidden');
+            });
+
+            closeCreateModal.addEventListener('click', () => {
+                console.log('Close create modal clicked');
+                document.getElementById('createAuthorModal').classList.add('hidden');
+            });
+
+            // Upload Vehicle Type Form
+            const uploadVehicleTypeFormData = document.getElementById('uploadVehicleTypeFormData');
+            const closeUploadModal = document.getElementById('close-upload-modal');
+            uploadVehicleTypeFormData.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Upload vehicle type form submitted');
+                const formData = new FormData(uploadVehicleTypeFormData);
+                const vehicleTypeName = formData.get('vehicleTypeName');
+                const publishedAt = new Date().toLocaleDateString();
+                const publishedBy = 'John Doe';
+
+                const tableBody = document.querySelector('#vehicleTypeTableBody');
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-type', vehicleTypeName.toLowerCase());
+                newRow.innerHTML = `
+                    <td>${vehicleTypeName}</td>
+                    <td><img src="https://via.placeholder.com/50" alt="${vehicleTypeName}" class="category-image"></td>
+                    <td>${publishedAt}</td>
+                    <td>${publishedBy}</td>
+                    <td></td>
+                `;
+                newRow.onclick = () => alert(`Redirect to ${vehicleTypeName} details`);
+                tableBody.appendChild(newRow);
+                document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+            });
+
+            closeUploadModal.addEventListener('click', () => {
+                console.log('Close upload modal clicked');
+                document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+            });
+
+            // Initial Load
+            showContent('content');
+        });
+    </script>
+</body>
+</html>

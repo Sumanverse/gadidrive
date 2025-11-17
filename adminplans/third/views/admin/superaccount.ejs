@@ -1,0 +1,534 @@
+<%- include('../partials/head.ejs', { title: 'super account' }) %>
+
+<style>
+    body {
+        background-color: #000000;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to {
+            width: 100%;
+        }
+    }
+    .icon-button {
+        transition: transform 0.2s;
+    }
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+        will-change: transform, opacity;
+    }
+    .mobile-menu-open {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    #mobile-menu-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        pointer-events: auto;
+    }
+    #mobile-menu-backdrop.active {
+        display: block;
+    }
+    .table-container table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .table-container th {
+        background-color: #1F2937;
+        color: white;
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 2px solid #4B5563;
+    }
+    .table-container td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #4B5563;
+    }
+    .table-container tr:hover {
+        background-color: #374151;
+    }
+    .selector {
+        background-color: #1F2937;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        padding: 0.5rem;
+        width: 200px;
+    }
+    .category-image, .brand-image, .news-image, .model-image, .user-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.25rem;
+    }
+
+    /* ========== NEW BEAUTIFUL CARD STYLES ========== */
+    .notification-card {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 300px;
+        max-width: 400px;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        font-family: 'Poppins', sans-serif;
+        backdrop-filter: blur(10px);
+    }
+    .notification-card.show {
+        transform: translateX(0);
+    }
+    .notification-card.success {
+        background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+        border: 1px solid #10B981;
+        color: #10B981;
+    }
+    .notification-card.error {
+        background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+        border: 1px solid #EF4444;
+        color: #EF4444;
+    }
+    .notification-card h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .notification-card p {
+        margin: 0 0 1rem 0;
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+    .notification-card.success h4::before {
+        content: "✅";
+    }
+    .notification-card.error h4::before {
+        content: "❌";
+    }
+    .notification-card .close-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1.2rem;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+    .notification-card .close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    @keyframes slideIn {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); }
+        to { transform: translateX(100%); }
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <div class="space-y-8">
+        <div class="flex justify-center space-x-4 mb-6">
+            <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('content')">Content</button>
+            <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('users')">Users</button>
+        </div>
+        <div id="subToggleSection" class="flex justify-center space-x-4 mb-6 hidden"></div>
+        <div id="contentArea" class="bg-gray-800 rounded-lg shadow-lg p-6 border-bottom-left-to-right"></div>
+
+        <!-- EXISTING MODALS (same रहन्छ) -->
+        <div id="createAuthorModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Create Author</h3>
+                <form id="createAuthorFormData" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                        <input type="text" name="name" placeholder="Enter Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <input type="text" name="username" placeholder="Enter Username" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <input type="password" name="password" placeholder="Enter Password" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Position</label>
+                        <select name="position" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                            <option value="">Select Position</option>
+                            <option value="level2">Level 2 Author</option>
+                            <option value="level1">Level 1 Author</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-create-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="uploadVehicleTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Upload Vehicle Type</h3>
+                <form id="uploadVehicleTypeFormData" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Image</label>
+                        <input type="file" name="vechicle_type_photo" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type Name</label>
+                        <input type="text" name="vehicleTypeName" placeholder="Enter Vehicle Type (e.g. SUV)" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-upload-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded');
+
+        // --- EJS Data ---
+        const USERS_DATA = JSON.parse('<%- JSON.stringify(users || []) %>');
+        const VEHICLE_TYPES_DATA = JSON.parse('<%- JSON.stringify(vehicleTypes || []) %>');
+
+        // ========== NOTIFICATION FUNCTION ==========
+        const showNotification = (message, type = 'success') => {
+            document.querySelectorAll('.notification-card').forEach(card => card.remove());
+            const card = document.createElement('div');
+            card.className = `notification-card ${type}`;
+            card.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+                <h4>${type === 'success' ? 'Success!' : 'Error!'}</h4>
+                <p>${message}</p>
+            `;
+            document.body.appendChild(card);
+            setTimeout(() => card.classList.add('show'), 100);
+            setTimeout(() => {
+                card.style.animation = 'slideOut 0.4s forwards';
+                setTimeout(() => card.remove(), 400);
+            }, 4000);
+        };
+
+        // ========== CONFIRMATION DIALOG ==========
+        const showConfirmation = (title, message, onConfirm) => {
+            const dialog = document.createElement('div');
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-10000';
+            dialog.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                    <h3 class="text-xl font-bold text-white mb-4">${title}</h3>
+                    <p class="text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button id="confirm-delete" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Delete</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+            
+            document.getElementById('confirm-delete').onclick = async () => {
+                dialog.remove();
+                await onConfirm();
+            };
+        };
+
+        // ========== USERS TABLE - ✅ FIXED: user_id use ==========
+        window.showContent = (type) => {
+            const contentArea = document.getElementById('contentArea');
+            const subToggleSection = document.getElementById('subToggleSection');
+            
+            document.querySelectorAll('.toggle-item').forEach(item => {
+                item.classList.toggle('bg-red-600', item.getAttribute('onclick') === `showContent('${type}')`);
+                item.classList.toggle('hover:bg-red-600', item.getAttribute('onclick') !== `showContent('${type}')`);
+            });
+
+            contentArea.innerHTML = '';
+            subToggleSection.classList.add('hidden');
+
+            if (type === 'content') {
+                subToggleSection.classList.remove('hidden');
+                subToggleSection.innerHTML = `
+                    <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="showSubContent('category')">Category</button>
+                    <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="showSubContent('brand')">Brand</button>
+                    <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="showSubContent('model')">Model</button>
+                    <button class="sub-toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600" onclick="showSubContent('news')">News</button>
+                    <button class="sub-toggle-item bg-red-600 text-white px-4 py-2 rounded-lg" onclick="showSubContent('vehicleType')">Vehicle Type</button>
+                `;
+                showSubContent('vehicleType');
+            } else if (type === 'users') {
+                const usersRows = USERS_DATA.map(user => `
+                    <tr>
+                        <td><img src="${user.profile_picture || 'https://via.placeholder.com/50'}" alt="${user.name}" class="user-image"></td>
+                        <td>${user.name}</td>
+                        <td>${user.username}</td>
+                        <td>${user.position === 'level2' ? 'Level 2 Author' : user.position === 'level1' ? 'Level 1 Author' : user.position}</td>
+                        <td>${new Date(user.created_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editUser(${user.user_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteUser(${user.user_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Image</th><th>Name</th><th>Username</th><th>Position</th><th>Creation Date</th><th>Actions</th></tr></thead>
+                            <tbody>${usersRows}</tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-start mt-6">
+                        <button id="createAuthorButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Create Author</button>
+                    </div>
+                `;
+                
+                document.getElementById('createAuthorButton').onclick = () => {
+                    document.getElementById('createAuthorModal').classList.remove('hidden');
+                };
+            }
+        };
+
+        // ========== VEHICLE TYPE TABLE - ✅ FIXED: vechicle_type_id use ==========
+        window.showSubContent = (type) => {
+            const contentArea = document.getElementById('contentArea');
+            document.querySelectorAll('.sub-toggle-item').forEach(item => {
+                item.classList.toggle('bg-red-600', item.getAttribute('onclick') === `showSubContent('${type}')`);
+            });
+
+            if (type === 'vehicleType') {
+                const vehicleRows = VEHICLE_TYPES_DATA.map(vehicle => `
+                    <tr>
+                        <td>${vehicle.vechicle_type_name}</td>
+                        <td><img src="${vehicle.vechicle_type_photo_path || 'https://via.placeholder.com/50'}" alt="${vehicle.vechicle_type_name}" class="category-image"></td>
+                        <td>${new Date(vehicle.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>Admin</td>
+                        <td>N/A</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editVehicleType(${vehicle.vechicle_type_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteVehicleType(${vehicle.vechicle_type_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Name</th><th>Image</th><th>Published</th><th>By</th><th>Edited</th><th>Actions</th></tr></thead>
+                            <tbody>${vehicleRows}</tbody>
+                        </table>
+                    </div>
+                    <button id="uploadVehicleTypeButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 mt-6">Upload Vehicle Type</button>
+                `;
+                
+                document.getElementById('uploadVehicleTypeButton').onclick = () => {
+                    document.getElementById('uploadVehicleTypeModal').classList.remove('hidden');
+                };
+            }
+        };
+
+        // ========== DELETE FUNCTIONS ==========
+        window.deleteUser = (userId) => {
+            showConfirmation(
+                'Delete User',
+                'This action cannot be undone!',
+                async () => {
+                    try {
+                        const response = await fetch(`/admin/superaccount/delete-user/${userId}`, { method: 'DELETE' });
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            showNotification('User deleted successfully!', 'success');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showNotification(result.message || 'Delete failed', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Network error', 'error');
+                    }
+                }
+            );
+        };
+
+        window.deleteVehicleType = (vehicleId) => {
+            showConfirmation(
+                'Delete Vehicle Type',
+                'This action cannot be undone!',
+                async () => {
+                    try {
+                        const response = await fetch(`/admin/superaccount/delete-vehicle-type/${vehicleId}`, { method: 'DELETE' });
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            showNotification('Vehicle type deleted successfully!', 'success');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showNotification(result.message || 'Delete failed', 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Network error', 'error');
+                    }
+                }
+            );
+        };
+
+        // ========== EDIT FUNCTIONS ==========
+        window.editUser = async (userId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/edit-user/${userId}`);
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showNotification(`Editing: ${result.user.name}`, 'success');
+                    alert(`EDIT MODAL - Name: ${result.user.name}\nUsername: ${result.user.username}`);
+                } else {
+                    showNotification('User not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load user', 'error');
+                console.error(error);
+            }
+        };
+
+        window.editVehicleType = async (vehicleId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/edit-vehicle-type/${vehicleId}`);
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showNotification(`Editing: ${result.vehicleType.vechicle_type_name}`, 'success');
+                    alert(`EDIT MODAL - Name: ${result.vehicleType.vechicle_type_name}`);
+                } else {
+                    showNotification('Vehicle type not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load vehicle type', 'error');
+                console.error(error);
+            }
+        };
+
+        // ========== FORM SUBMISSIONS - FIXED MODAL CLOSE ==========
+        document.getElementById('createAuthorFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/admin/superaccount/save-user', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Author created!', 'success');
+                    document.getElementById('createAuthorModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Create failed', 'error');
+            }
+        };
+
+        document.getElementById('uploadVehicleTypeFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/admin/superaccount/save-vehicle-type', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Vehicle type uploaded!', 'success');
+                    document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Upload failed', 'error');
+            }
+        };
+
+        // Modal close
+        document.getElementById('close-create-modal').onclick = () => {
+            document.getElementById('createAuthorModal').classList.add('hidden');
+            document.getElementById('createAuthorFormData').reset();
+        };
+        document.getElementById('close-upload-modal').onclick = () => {
+            document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+            document.getElementById('uploadVehicleTypeFormData').reset();
+        };
+
+        // Initial load
+        showContent('users');
+    });
+</script>
+</body>
+</html>

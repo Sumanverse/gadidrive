@@ -1,0 +1,265 @@
+<%- include('../partials/head.ejs', { title: 'USA - Brand Admin' }) %>
+
+<style>
+    body { background-color: #000000; }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight { to { width: 100%; } }
+    .icon-button { transition: transform 0.2s; }
+    .icon-button:hover { transform: scale(1.1); }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+    }
+    .mobile-menu-open { transform: translateX(0); opacity: 1; }
+    #mobile-menu-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+    #mobile-menu-backdrop.active { display: block; }
+
+    /* Modern Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: #1F2937;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        z-index: 1001;
+        width: 90%;
+        max-width: 420px;
+        text-align: center;
+        color: white;
+    }
+    .modal.active { display: block; }
+    .modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 1000;
+    }
+    .modal-backdrop.active { display: block; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<!-- Subnavbar -->
+<nav class="bg-gray-800 py-4">
+    <div class="container mx-auto px-4 flex justify-center space-x-6">
+        <a href="/admin/category" class="text-white text-lg font-semibold hover:text-red-600 transition">Category</a>
+        <a href="/admin/brand" class="text-white text-lg font-semibold hover:text-red-600 transition border-b-2 border-red-600">Brands</a>
+        <a href="/admin/model" class="text-white text-lg font-semibold hover:text-red-600 transition">Model</a>
+        <a href="/admin/article" class="text-white text-lg font-semibold hover:text-red-600 transition">Article</a>
+    </div>
+</nav>
+
+<!-- Main Section -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <!-- Upload Brand -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-white mb-6">Upload Your Brand</h2>
+        <form id="brand-form" class="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Brand Logo</label>
+                <input type="file" name="brandImage" accept="image/*" required class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Brand Name</label>
+                <input type="text" name="brandName" placeholder="Enter brand name" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type</label>
+                <select name="vehicleType" required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <% vehicleTypes.forEach(type => { %>
+                        <option value="<%= type.vehicle_type_id %>"><%= type.vehicle_type_name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-red-600 text-white font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-red-700 transition">Create Brand</button>
+        </form>
+    </section>
+
+    <!-- Published Brands -->
+    <section>
+        <h2 class="text-3xl font-bold text-white mb-6">Published Brands</h2>
+        <select id="filter" class="w-full max-w-xs bg-gray-700 text-white px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-600">
+            <option value="">All Vehicle Types</option>
+            <% vehicleTypes.forEach(type => { %>
+                <option value="<%= type.vehicle_type_id %>"><%= type.vehicle_type_name %></option>
+            <% }) %>
+        </select>
+
+        <div id="brand-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% if (brands && brands.length > 0) { %>
+                <% brands.forEach(brand => { %>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl p-5 text-center shadow-xl border-bottom-left-to-right" data-type="<%= brand.vehicle_type_id %>">
+                        <img src="<%= brand.image_path %>" alt="<%= brand.name %>" class="w-full h-32 object-cover rounded-lg mb-3">
+                        <div class="font-bold text-lg line-clamp-1"><%= brand.name %></div>
+                        <div class="text-sm text-gray-300">By <%= brand.author_name %></div>
+                        <div class="flex justify-center gap-2 mt-3">
+                            <button class="edit-btn bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 text-sm" data-id="<%= brand.brand_id %>">Edit</button>
+                            <button class="delete-btn bg-red-600 px-3 py-1 rounded hover:bg-red-700 text-sm" data-id="<%= brand.brand_id %>">Delete</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-gray-400 col-span-full text-center">No brands published yet.</p>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<!-- Modern Modal -->
+<div id="modal" class="modal">
+    <h3 id="modal-title" class="text-xl font-bold mb-3"></h3>
+    <div id="modal-content" class="mb-5 text-gray-300"></div>
+    <div class="flex justify-center gap-4">
+        <button id="modal-cancel" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+        <button id="modal-ok" class="bg-red-600 px-4 py-2 rounded hover:bg-red-700">Confirm</button>
+    </div>
+</div>
+<div id="modal-backdrop" class="modal-backdrop"></div>
+
+<%- include('../partials/footer') %>
+
+<script>
+    // Pass vehicleTypes to JS safely
+    const vehicleTypes = <%- JSON.stringify(vehicleTypes) %>;
+
+    const modal = document.getElementById('modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    const cancel = document.getElementById('modal-cancel');
+    const ok = document.getElementById('modal-ok');
+
+    function showModal(t, html, onConfirm) {
+        title.textContent = t;
+        content.innerHTML = html;
+        modal.classList.add('active');
+        backdrop.classList.add('active');
+        ok.onclick = () => {
+            modal.classList.remove('active');
+            backdrop.classList.remove('active');
+            onConfirm();
+        };
+        cancel.onclick = () => {
+            modal.classList.remove('active');
+            backdrop.classList.remove('active');
+        };
+    }
+
+    // Mobile Menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+    const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+    const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+    const toggleMenu = () => {
+        mobileMenuOverlay?.classList.toggle('mobile-menu-open');
+        mobileMenuBackdrop?.classList.toggle('active');
+    };
+    mobileMenuButton?.addEventListener('click', toggleMenu);
+    closeMobileMenuButton?.addEventListener('click', toggleMenu);
+    mobileMenuBackdrop?.addEventListener('click', toggleMenu);
+
+    // Upload with Modal
+    document.getElementById('brand-form').onsubmit = function(e) {
+        e.preventDefault();
+        showModal('Confirm Upload', 'Create this brand?', () => {
+            const fd = new FormData(this);
+            fetch('/admin/brand', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(res => {
+                    alert(res.message);
+                    if (res.success) location.reload();
+                })
+                .catch(() => alert('Upload failed.'));
+        });
+    };
+
+    // Filter
+    document.getElementById('filter').onchange = function() {
+        const val = this.value;
+        document.querySelectorAll('#brand-grid > div').forEach(el => {
+            el.classList.toggle('hidden', val && el.dataset.type !== val);
+        });
+    };
+
+    // Edit & Delete
+    document.getElementById('brand-grid').onclick = function(e) {
+        const target = e.target;
+        const id = target.dataset.id;
+
+        if (target.classList.contains('edit-btn')) {
+            fetch(`/admin/brand/${id}`).then(r => r.json()).then(data => {
+                if (!data.success) return alert('Brand not found');
+                const b = data.brand;
+
+                // Build options in JS (no EJS inside modal)
+                const options = vehicleTypes.map(t => 
+                    `<option value="${t.vehicle_type_id}" ${b.vehicle_type_id == t.vehicle_type_id ? 'selected' : ''}>${t.vehicle_type_name}</option>`
+                ).join('');
+
+                const formHTML = `
+                    <form id="edit-form" class="space-y-4">
+                        <input type="hidden" name="brandId" value="${b.brand_id}">
+                        <img src="${b.image_path}" class="w-32 h-24 object-contain mx-auto rounded mb-3">
+                        <input type="file" name="brandImage" class="w-full mb-3">
+                        <input type="text" name="brandName" value="${b.name}" required class="w-full p-2 bg-gray-700 rounded text-white mb-3">
+                        <select name="vehicleType" required class="w-full p-2 bg-gray-700 rounded text-white mb-3">
+                            ${options}
+                        </select>
+                        <button type="submit" class="w-full bg-green-600 p-2 rounded hover:bg-green-700">Update Brand</button>
+                    </form>
+                `;
+
+                showModal('Edit Brand', formHTML, () => {
+                    const fd = new FormData(document.getElementById('edit-form'));
+                    fetch('/admin/brand/update', { method: 'POST', body: fd })
+                        .then(r => r.json())
+                        .then(res => {
+                            alert(res.message);
+                            if (res.success) location.reload();
+                        });
+                });
+            });
+        }
+
+        if (target.classList.contains('delete-btn')) {
+            showModal('Delete Brand', 'This action cannot be undone!', () => {
+                fetch('/admin/brand/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ brandId: id })
+                }).then(r => r.json()).then(res => {
+                    alert(res.message);
+                    if (res.success) target.closest('div').remove();
+                });
+            });
+        }
+    };
+</script>
+</body>
+</html>

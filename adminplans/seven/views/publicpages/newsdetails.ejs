@@ -1,0 +1,265 @@
+<%- include('../partials/head.ejs', { title: 'News title' }) %>
+
+        body {
+            background-color: #000000;
+            font-family: 'Poppins', sans-serif;
+        }
+        .box-hover-effect {
+            transition: transform 0.3s ease-in-out;
+        }
+        .box-hover-effect:hover {
+            transform: scale(1.02);
+        }
+        .expandable {
+            transition: max-height 0.5s ease-in-out;
+            overflow: hidden;
+            max-height: 0;
+        }
+        .expanded {
+            max-height: 1000px; /* Adjustable based on content */
+        }
+        .comment-section {
+            max-height: 400px; /* Initial height */
+            overflow-y: auto;
+        }
+        .comment-section.expanded {
+            max-height: 800px; /* Expanded height */
+        }
+        .specs-group {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .specs-group:hover {
+            background: #333;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white">
+    
+<%- include('../partials/navbar') %>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+        <!-- Author Info -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 mb-8 flex items-center">
+            <img src="https://placehold.co/50x50?text=Author" alt="Author Profile" class="w-12 h-12 rounded-full mr-4">
+            <div>
+                <h3 class="text-lg font-semibold text-white">John Doe</h3>
+                <p class="text-sm text-gray-300">Auto Enthusiast | <a href="https://twitter.com/johndoe" class="hover:text-red-600">Twitter</a> | <a href="https://instagram.com/johndoe" class="hover:text-red-600">Instagram</a></p>
+            </div>
+        </section>
+
+        <!-- News Content -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 mb-8">
+            <h1 class="text-3xl font-bold text-white mb-4">New Electric SUV Unveiled</h1>
+            <p class="text-gray-300 mb-4">Published: October 17, 2025, 08:47 AM +0545</p>
+            <div class="mb-4">
+                <video controls class="w-full h-64 rounded-lg" src="https://placehold.co/800x400.mp4?text=Video+Placeholder" alt="News Video" title="Credit: Gyarage Media"></video>
+                <p class="text-sm text-gray-400 mt-1">Credit: Gyarage Media</p>
+            </div>
+            <div class="mb-4">
+                <img src="https://placehold.co/800x400?text=Photo+1" alt="News Photo 1" class="w-full h-64 rounded-lg object-cover">
+                <p class="text-sm text-gray-400 mt-1">Credit: AutoWorld</p>
+            </div>
+            <p class="text-gray-300 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...</p>
+            <a href="https://example.com" target="_blank" class="text-red-600 hover:underline">Read More on Source</a>
+            <div class="mt-4">
+                <h2 class="text-xl font-bold text-white mb-2">Comparison Table</h2>
+                <table class="w-full text-gray-300">
+                    <thead>
+                        <tr>
+                            <th class="p-2 border-b">Feature</th>
+                            <th class="p-2 border-b">New SUV</th>
+                            <th class="p-2 border-b">Competitor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-2 border-b">Range (miles)</td>
+                            <td class="p-2 border-b">300</td>
+                            <td class="p-2 border-b">250</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border-b">Price ($)</td>
+                            <td class="p-2 border-b">60,000</td>
+                            <td class="p-2 border-b">55,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4">
+                <img src="https://placehold.co/300x100?text=Ad+Banner" alt="Advertisement" class="w-full h-24 rounded-lg object-cover">
+                <p class="text-sm text-gray-400 mt-1">Ad Credit: SponsorX</p>
+            </div>
+        </section>
+
+        <!-- Specs List Format -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Key Highlights</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="specs-group p-4 bg-black rounded-xl border-t-4 border-red-600" onclick="window.location.href='/specs/range'">
+                    <div class="bg-gradient-to-b from-red-500 to-black text-white font-bold text-center py-3 rounded-lg mb-4">Range</div>
+                    <ul class="list-disc list-inside text-gray-300">
+                        <li>Up to 300 miles</li>
+                        <li>Fast Charging: 80% in 30 mins</li>
+                    </ul>
+                </div>
+                <div class="specs-group p-4 bg-black rounded-xl border-t-4 border-red-600" onclick="window.location.href='/specs/performance'">
+                    <div class="bg-gradient-to-b from-red-500 to-black text-white font-bold text-center py-3 rounded-lg mb-4">Performance</div>
+                    <ul class="list-disc list-inside text-gray-300">
+                        <li>0-60 mph: 5.5s</li>
+                        <li>Top Speed: 130 mph</li>
+                    </ul>
+                </div>
+                <!-- Add more as needed -->
+            </div>
+        </section>
+
+        <!-- Comment Section -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Comments</h2>
+            <div class="comment-section" id="comment-section">
+                <div class="flex mb-4">
+                    <img src="https://placehold.co/40x40?text=User1" alt="User1" class="w-10 h-10 rounded-full mr-3">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold">User1</span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-300 hover:text-red-600">Like</button>
+                                <button class="text-gray-300 hover:text-red-600">Reply</button>
+                                <button class="text-gray-300">...</button>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mt-1">Great article! Looking forward to this SUV.</p>
+                        <span class="text-xs text-gray-400">1 min ago</span>
+                    </div>
+                </div>
+                <!-- More comments can be added dynamically -->
+            </div>
+            <div class="mt-4">
+                <textarea id="comment-input" class="w-full p-2 text-black rounded-lg resize-none" placeholder="Write a comment..." rows="3"></textarea>
+                <button id="post-comment" class="mt-2 bg-white text-black font-semibold py-2 px-4 rounded-lg hover:bg-red-600 hover:text-white transition">Post</button>
+            </div>
+            <button id="expand-comments" class="mt-2 text-red-600">Show More Comments</button>
+        </section>
+
+        <!-- Additional News, Models, Brands, Categories -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-4 flex flex-col items-center text-center box-hover-effect">
+                <div class="w-full h-28 bg-white rounded-lg mb-4"></div>
+                <div class="text-white font-semibold"><b>Next News: EV Trends</b></div>
+                <a href="#" class="mt-2 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white">Check out</a>
+            </div>
+            <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-4 flex flex-col items-center text-center box-hover-effect">
+                <div class="w-full h-28 bg-white rounded-lg mb-4"></div>
+                <div class="text-white font-semibold"><b>Tesla Model Y</b></div>
+                <a href="#" class="mt-2 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white">Check out</a>
+            </div>
+            <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-4 flex flex-col items-center text-center box-hover-effect">
+                <div class="w-full h-28 bg-white rounded-lg mb-4"></div>
+                <div class="text-white font-semibold"><b>Mercedes</b></div>
+                <a href="#" class="mt-2 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white">Check out</a>
+            </div>
+            <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-4 flex flex-col items-center text-center box-hover-effect">
+                <div class="w-full h-28 bg-white rounded-lg mb-4"></div>
+                <div class="text-white font-semibold"><b>SUV Category</b></div>
+                <a href="#" class="mt-2 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white">Check out</a>
+            </div>
+        </section>
+
+        <!-- Social Share Icons (Side or Bottom) -->
+        <div class="flex justify-center space-x-4 mb-8">
+            <a href="#" class="text-gray-300 hover:text-red-600"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.744.083-.729.083-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.834 2.807 1.304 3.492.998.108-.775.418-1.305.762-1.605-2.665-.303-5.466-1.332-5.466-5.93 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.489 11.489 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a>
+            <a href="#" class="text-gray-300 hover:text-red-600"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.618 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+            <a href="#" class="text-gray-300 hover:text-red-600" onclick="navigator.clipboard.writeText(window.location.href)">Copy Link</a>
+        </div>
+
+        <!-- Sources -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Sources</h2>
+            <ul class="text-gray-300 list-disc pl-5">
+                <li><a href="https://example.com/news1" class="hover:text-red-600">Source 1</a></li>
+                <li><a href="https://example.com/news2" class="hover:text-red-600">Source 2</a></li>
+            </ul>
+        </section>
+    </main>
+
+    
+<%- include('../partials/footer') %>
+
+
+    <script>
+        // Mobile Menu Script
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop.classList.toggle('active');
+        };
+
+        mobileMenuButton.addEventListener('click', toggleMenu);
+        closeMobileMenuButton.addEventListener('click', toggleMenu);
+        mobileMenuBackdrop.addEventListener('click', toggleMenu);
+
+        // Search Functionality
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            alert('Search: ' + query);
+        });
+
+        // Auth Simulate
+        const isSignedIn = false;
+        if (isSignedIn) {
+            document.getElementById('auth-link').innerHTML = 'Profile';
+        }
+
+        // Comment Posting
+        document.getElementById('post-comment').addEventListener('click', () => {
+            if (!isSignedIn) {
+                window.location.href = '/signin';
+            } else {
+                const comment = document.getElementById('comment-input').value;
+                if (comment) {
+                    const commentSection = document.getElementById('comment-section');
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'flex mb-4';
+                    commentDiv.innerHTML = `
+                        <img src="https://placehold.co/40x40?text=User" alt="User" class="w-10 h-10 rounded-full mr-3">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <span class="font-semibold">CurrentUser</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-gray-300 hover:text-red-600">Like</button>
+                                    <button class="text-gray-300 hover:text-red-600">Reply</button>
+                                    <button class="text-gray-300">...</button>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 mt-1">${comment}</p>
+                            <span class="text-xs text-gray-400">Just now</span>
+                        </div>
+                    `;
+                    commentSection.appendChild(commentDiv);
+                    document.getElementById('comment-input').value = '';
+                }
+            }
+        });
+
+        // Expand Comments
+        document.getElementById('expand-comments').addEventListener('click', () => {
+            document.getElementById('comment-section').classList.toggle('expanded');
+        });
+
+        // Highlight Nav
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link').forEach(link => {
+                if (link.getAttribute('href') === '/usa/news') {
+                    link.classList.add('bg-red-700');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

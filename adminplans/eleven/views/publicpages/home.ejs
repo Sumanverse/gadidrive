@@ -1,0 +1,300 @@
+<%- include('../partials/head.ejs', { title: 'Gyarage' }) %>
+
+        #country-selector option {
+            background-color: white;
+            color: black;
+        }
+        #country-selector option:hover {
+            background-color: #DC2626;
+            color: white;
+        }
+        .border-bottom-left-to-right {
+            position: relative;
+            border-radius: 0.75rem; /* rounded-xl */
+        }
+        .border-bottom-left-to-right:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #DC2626;
+            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        }
+        @keyframes borderLeftToRight {
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-black text-white font-['Poppins']">
+    <!-- Navbar -->
+<%- include('../partials/navbar') %>
+
+    <!-- Main Section -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+
+        <!-- Breadcrumb and Filter -->
+        <div class="flex flex-row justify-between items-center mb-4">
+            <div class="breadcrumb text-white text-sm sm:text-base flex items-center">
+                <a href="/" class="hover:text-red-600">Gyarage</a> <span class="mx-2 text-red-600">&gt;&gt;</span> 
+                <a href="/usa" class="text-red-600 font-bold">USA</a>
+            </div>
+            <div>
+                <button id="filter-button" class="filter-button bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition">
+                    Filter
+                </button>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="text-center mb-16 mt-10">
+            <h1 class="text-3xl sm:text-5xl md:text-7xl font-extrabold text-white leading-tight drop-shadow-lg">
+                Welcome to <span class="text-red-600">Gyarage</span>
+            </h1>
+            <p class="text-base sm:text-xl md:text-2xl text-white bg-red-600 inline-block px-4 py-2 sm:px-8 sm:py-3 rounded-lg shadow-lg mt-4">
+                Global Hub for Automotive Information
+            </p>
+        </div>
+
+       <!-- Vehicle Types -->
+        <section class="vehicle-types mx-auto max-w-screen-2xl mt-12">
+            <div class="text-3xl font-bold text-white mb-6">Vehicle Types</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Car</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Bike</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Bus</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Truck</b></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles after Vehicle Types -->
+        <section class="article-main-box mx-auto max-w-screen-2xl mt-12">
+            <div class="article-boxes grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Electric Cars Surge in USA Market
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Motorcycle Trends in the USA
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="categories mx-auto max-w-screen-2xl mt-12">
+            <div class="text-3xl font-bold text-white mb-6">Categories</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>SUV</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Sedan</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Hatchback</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Coupe</b></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles after Categories -->
+        <section class="article-main-box mx-auto max-w-screen-2xl mt-12">
+            <div class="article-boxes grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                SUVs Dominate USA Sales in 2025
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Sedan Innovations in the USA
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Brands -->
+        <section class="brands mx-auto max-w-screen-2xl mt-12">
+            <div class="text-3xl font-bold text-white mb-6">Brands</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Tesla</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Ford</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>BMW</b></div>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-lg line-clamp-1"><b>Toyota</b></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles after Brands -->
+        <section class="article-main-box mx-auto max-w-screen-2xl mt-12">
+            <div class="article-boxes grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Tesla's New Factory in the USA
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Ford's Electric Vehicle Push
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Models -->
+        <section class="models mx-auto max-w-screen-2xl mt-12">
+            <div class="text-3xl font-bold text-white mb-6">Models</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>BMW S1000 RR</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$32,000</div>
+                    <a href="/usa/models/bmw-s1000rr" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Tesla Model 3</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$40,000</div>
+                    <a href="/usa/models/tesla-model3" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Ford F-150</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$50,000</div>
+                    <a href="/usa/models/ford-f150" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Toyota Corolla</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$25,000</div>
+                    <a href="/usa/models/toyota-corolla" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles after Models -->
+        <section class="article-main-box mx-auto max-w-screen-2xl mt-12">
+            <div class="article-boxes grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                BMW S1000 RR Sets New Speed Records
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Tesla Model 3 Upgrades for 2025
+                            </div>
+                            <div class="date font-semibold">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    
+<%- include('../partials/footer') %>
+
+
+    <script>
+        // Country Selector Redirect
+        document.getElementById('country-selector').addEventListener('change', (e) => {
+            const country = e.target.value;
+            if (country) {
+                window.location.href = `/${country}`;
+            }
+        });
+
+        // Simulate Sign-In Status (Replace with actual auth logic later)
+        const isSignedIn = false; // This will come from backend session/auth
+        const authLink = document.getElementById('auth-link');
+        if (isSignedIn) {
+            authLink.innerHTML = '<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 18.364A4 4 0 018 17h8a4 4 0 012.879 1.364M15 10a3 3 0 11-6 0 3 3 0 016 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            authLink.href = '/profile';
+        } else {
+            authLink.textContent = 'Sign In';
+            authLink.href = '/signin';
+        }
+    </script>
+</body>
+</html>

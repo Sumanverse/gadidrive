@@ -1,0 +1,1276 @@
+<%- include('../partials/head.ejs', { title: 'Model Admin' }) %>
+<style>
+    body {
+        background-color: #000000;
+    }
+    select option {
+        background-color: white;
+        color: black;
+    }
+    select option:hover {
+        background-color: #DC2626;
+        color: white;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to {
+            width: 100%;
+        }
+    }
+    .icon-button {
+        transition: transform 0.2s;
+    }
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+        will-change: transform, opacity;
+    }
+    .mobile-menu-open {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    #mobile-menu-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        pointer-events: auto;
+    }
+    #mobile-menu-backdrop.active {
+        display: block;
+    }
+    .current-image {
+        display: inline-block;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    .current-image img {
+        border: 2px solid #DC2626;
+        border-radius: 4px;
+        max-width: 100px;
+        max-height: 100px;
+        object-fit: cover;
+    }
+    .model-box-image {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+    }
+    .placeholder-image {
+        width: 100%;
+        height: 160px;
+        background-color: #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        color: #9CA3AF;
+        font-size: 0.875rem;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+<%- include('../partials/navbar') %>
+<!-- Subnavbar -->
+<nav class="bg-gray-800 py-4">
+    <div class="container mx-auto px-4 flex justify-center space-x-6">
+        <a href="/admin/category" class="text-white text-lg font-semibold hover:text-red-600 transition">Category</a>
+        <a href="/admin/brand" class="text-white text-lg font-semibold hover:text-red-600 transition">Brands</a>
+        <a href="/admin/model" class="text-white text-lg font-semibold hover:text-red-600 transition border-b-2 border-red-600">Model</a>
+        <a href="/admin/article" class="text-white text-lg font-semibold hover:text-red-600 transition">Article</a>
+    </div>
+</nav>
+<!-- Main Section -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <!-- Upload Model Section -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-white mb-6"><%= model ? 'Update Model' : 'Publish Model' %></h2>
+        <!-- Model Creation/Update Form -->
+        <form id="model-form" action="<%= model ? '/admin/model/update/' + model.id : '/admin/model' %>" method="POST" enctype="multipart/form-data" class="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div>
+                <label for="vehicle-type" class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type</label>
+                <select id="vehicle-type" name="vehicleType" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled <%= typeof model === 'undefined' || !model ? 'selected' : '' %>>Select Vehicle Type</option>
+                    <% vehicleTypes.forEach(vt => { %>
+                        <option value="<%= vt.vehicle_type_name %>" <%= typeof model !== 'undefined' && model && model.vehicle_type_id === vt.vehicle_type_id ? 'selected' : '' %>><%= vt.vehicle_type_name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-300 mb-1">Category</label>
+                <select id="category" name="category" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600" <%= typeof model === 'undefined' || !model ? 'disabled' : '' %>>
+                    <option value="" disabled <%= typeof model === 'undefined' || !model ? 'selected' : '' %>>Select Category</option>
+                    <% if (typeof model !== 'undefined' && model) { categories.filter(c => c.vehicle_type_id === model.vehicle_type_id).forEach(cat => { %>
+                        <option value="<%= cat.name %>" <%= model && model.category_name === cat.name ? 'selected' : '' %>><%= cat.name %></option>
+                    <% }) } %>
+                </select>
+            </div>
+            <div>
+                <label for="brand" class="block text-sm font-medium text-gray-300 mb-1">Brand</label>
+                <select id="brand" name="brand" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600" <%= typeof model === 'undefined' || !model ? 'disabled' : '' %>>
+                    <option value="" disabled <%= typeof model === 'undefined' || !model ? 'selected' : '' %>>Select Brand</option>
+                    <% if (typeof model !== 'undefined' && model) { brands.filter(b => b.vehicle_type_id === model.vehicle_type_id).forEach(brand => { %>
+                        <option value="<%= brand.name %>" <%= model && model.brand_name === brand.name ? 'selected' : '' %>><%= brand.name %></option>
+                    <% }) } %>
+                </select>
+            </div>
+            <div>
+                <label for="model-image" class="block text-sm font-medium text-gray-300 mb-1">Model Image</label>
+                <input type="file" id="model-image" name="modelImage" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                <% if (typeof model !== 'undefined' && model && model.model_image) { %>
+                    <p class="text-sm text-gray-400 mt-1">Current image:
+                        <span class="current-image">
+                            <img src="<%= model.model_image.startsWith('/') ? model.model_image : '/' + model.model_image %>" alt="Current Model Image" class="h-16 w-16 object-cover rounded">
+                        </span>
+                    </p>
+                <% } %>
+            </div>
+            <div>
+                <label for="model-name" class="block text-sm font-medium text-gray-300 mb-1">Model Name</label>
+                <input type="text" id="model-name" name="modelName" value="<%= typeof model !== 'undefined' && model ? model.model_name : '' %>" placeholder="Enter model name" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+            </div>
+            <div class="flex space-x-4">
+                <div class="w-1/2">
+                    <label for="safety-rating" class="block text-sm font-medium text-gray-300 mb-1">Safety Rating</label>
+                    <input type="number" id="safety-rating" name="safetyRating" value="<%= typeof model !== 'undefined' && model && model.safety_rating !== null ? model.safety_rating : '' %>" placeholder="Enter safety rating (0-5)" min="0" max="5" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                </div>
+                <div class="w-1/2">
+                    <label for="safety-link" class="block text-sm font-medium text-gray-300 mb-1">Safety Rating Link</label>
+                    <input type="text" id="safety-link" name="safetyLink" value="<%= typeof model !== 'undefined' && model && model.safety_link ? model.safety_link : '' %>" placeholder="Enter NCAP link" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                </div>
+            </div>
+            <div>
+                <label for="engine-type" class="block text-sm font-medium text-gray-300 mb-1">Engine Type</label>
+                <select id="engine-type" name="engineType" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled <%= typeof model === 'undefined' || !model ? 'selected' : '' %>>Select Engine Type</option>
+                    <option value="ice" <%= typeof model !== 'undefined' && model && model.engine_type === 'ice' ? 'selected' : '' %>>ICE Engine</option>
+                    <option value="electric" <%= typeof model !== 'undefined' && model && model.engine_type === 'electric' ? 'selected' : '' %>>Electric</option>
+                    <option value="hybrid" <%= typeof model !== 'undefined' && model && model.engine_type === 'hybrid' ? 'selected' : '' %>>Hybrid</option>
+                    <option value="hydrogen" <%= typeof model !== 'undefined' && model && model.engine_type === 'hydrogen' ? 'selected' : '' %>>Hydrogen</option>
+                </select>
+            </div>
+            <div>
+                <label for="starting-price" class="block text-sm font-medium text-gray-300 mb-1">Starting Price</label>
+                <input type="text" id="starting-price" name="startingPrice" value="<%= typeof model !== 'undefined' && model && model.starting_price ? model.starting_price : '' %>" placeholder="Enter starting price (e.g., $25,000)" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+            </div>
+            <div class="flex space-x-4">
+                <div class="w-1/2">
+                    <label for="release-year" class="block text-sm font-medium text-gray-300 mb-1">Release Year</label>
+                    <input type="number" id="release-year" name="releaseYear" 
+                    value="<%= typeof model !== 'undefined' && model && model.release_year ? model.release_year : '' %>"
+                    placeholder="Enter release year (e.g., 2024)" 
+                    min="1900" max="2030" 
+                    class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                </div>
+                <div class="w-1/2">
+                    <label for="seater" class="block text-sm font-medium text-gray-300 mb-1">Seater Capacity</label>
+                    <select id="seater" name="seater" class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                        <option value="" <%= typeof model === 'undefined' || !model || !model.seater ? 'selected' : '' %>>Select Seater</option>
+                        <option value="1" <%= typeof model !== 'undefined' && model && model.seater === '1' ? 'selected' : '' %>>1 Seater</option>
+                        <option value="2" <%= typeof model !== 'undefined' && model && model.seater === '2' ? 'selected' : '' %>>2 Seater</option>
+                        <option value="3" <%= typeof model !== 'undefined' && model && model.seater === '3' ? 'selected' : '' %>>3 Seater</option>
+                        <option value="4" <%= typeof model !== 'undefined' && model && model.seater === '4' ? 'selected' : '' %>>4 Seater</option>
+                        <option value="5" <%= typeof model !== 'undefined' && model && model.seater === '5' ? 'selected' : '' %>>5 Seater</option>
+                        <option value="6" <%= typeof model !== 'undefined' && model && model.seater === '6' ? 'selected' : '' %>>6 Seater</option>
+                        <option value="7" <%= typeof model !== 'undefined' && model && model.seater === '7' ? 'selected' : '' %>>7 Seater</option>
+                        <option value="8" <%= typeof model !== 'undefined' && model && model.seater === '8' ? 'selected' : '' %>>8 Seater</option>
+                        <option value="9+" <%= typeof model !== 'undefined' && model && model.seater === '9+' ? 'selected' : '' %>>9+ Seater</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                <select id="status" name="status" class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="import" <%= typeof model !== 'undefined' && model && model.status === 'import' ? 'selected' : '' %>>Import</option>
+                    <option value="upcoming" <%= typeof model !== 'undefined' && model && model.status === 'upcoming' ? 'selected' : '' %>>Upcoming</option>
+                    <option value="discontinued" <%= typeof model !== 'undefined' && model && model.status === 'discontinued' ? 'selected' : '' %>>Discontinued</option>
+                    <option value="not-available" <%= typeof model !== 'undefined' && model && model.status === 'not-available' ? 'selected' : '' %>>Not Available</option>
+                </select>
+            </div>
+            <!-- Exterior Colors -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Exterior Color</h3>
+                <div id="exterior-colors">
+                    <% if (typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.exteriorColors && details.exteriorColors.length) { %>
+                        <% details.exteriorColors.forEach((color, index) => { %>
+                            <div class="exterior-color-group mb-4 relative">
+                                <div class="flex space-x-4 mb-2">
+                                    <div class="w-1/2">
+                                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                                        <input type="file" accept="image/*" name="exteriorColorImage<%= index + 1 %>" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                        <% if (color.color_image) { %>
+                                            <p class="text-sm text-gray-400 mt-1">Current image:
+                                                <span class="current-image">
+                                                    <img src="<%= color.color_image.startsWith('/') ? color.color_image : '/' + color.color_image %>" alt="Current Color Image" class="h-16 w-16 object-cover rounded">
+                                                </span>
+                                            </p>
+                                        <% } %>
+                                    </div>
+                                    <div class="w-1/2">
+                                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                                        <input type="text" name="exteriorColorName<%= index + 1 %>" value="<%= color.color_name %>" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Midnight Black)">
+                                    </div>
+                                </div>
+                                <div class="color-images mb-2">
+                                    <% (details.exteriorColorImages && details.exteriorColorImages.filter(img => img.exterior_color_id === color.id) || []).forEach((img, imgIndex) => { %>
+                                        <div class="mb-2 relative">
+                                            <input type="file" accept="image/*" name="exteriorAdditionalColorImage<%= index + 1 %>_<%= imgIndex + 1 %>" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                            <p class="text-sm text-gray-400 mt-1">Current image:
+                                                <span class="current-image">
+                                                    <img src="<%= img.image_path.startsWith('/') ? img.image_path : '/' + img.image_path %>" alt="Additional Color Image" class="h-16 w-16 object-cover rounded">
+                                                </span>
+                                            </p>
+                                        </div>
+                                    <% }) %>
+                                    <input type="file" accept="image/*" name="exteriorAdditionalColorImage<%= index + 1 %>_<%= (details.exteriorColorImages ? details.exteriorColorImages.filter(img => img.exterior_color_id === color.id).length + 1 : 1) %>" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                                    <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                                </div>
+                                <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="exterior-color-group mb-4 relative">
+                            <div class="flex space-x-4 mb-2">
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                                    <input type="file" accept="image/*" name="exteriorColorImage1" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                                    <input type="text" name="exteriorColorName1" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Midnight Black)">
+                                </div>
+                            </div>
+                            <div class="color-images mb-2">
+                                <input type="file" accept="image/*" name="exteriorAdditionalColorImage1_1" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                                <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                            </div>
+                            <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+                <button type="button" id="add-exterior-color" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Color</button>
+            </div>
+            <!-- Interior Colors -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Interior Color</h3>
+                <div id="interior-colors">
+                    <% if (typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.interiorColors && details.interiorColors.length) { %>
+                        <% details.interiorColors.forEach((color, index) => { %>
+                            <div class="interior-color-group mb-4 relative">
+                                <div class="flex space-x-4 mb-2">
+                                    <div class="w-1/2">
+                                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                                        <input type="file" accept="image/*" name="interiorColorImage<%= index + 1 %>" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                        <% if (color.color_image) { %>
+                                            <p class="text-sm text-gray-400 mt-1">Current image:
+                                                <span class="current-image">
+                                                    <img src="<%= color.color_image.startsWith('/') ? color.color_image : '/' + color.color_image %>" alt="Current Color Image" class="h-16 w-16 object-cover rounded">
+                                                </span>
+                                            </p>
+                                        <% } %>
+                                    </div>
+                                    <div class="w-1/2">
+                                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                                        <input type="text" name="interiorColorName<%= index + 1 %>" value="<%= color.color_name %>" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Ebony Leather)">
+                                    </div>
+                                </div>
+                                <div class="color-images mb-2">
+                                    <% (details.interiorColorImages && details.interiorColorImages.filter(img => img.interior_color_id === color.id) || []).forEach((img, imgIndex) => { %>
+                                        <div class="mb-2 relative">
+                                            <input type="file" accept="image/*" name="interiorAdditionalColorImage<%= index + 1 %>_<%= imgIndex + 1 %>" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                            <p class="text-sm text-gray-400 mt-1">Current image:
+                                                <span class="current-image">
+                                                    <img src="<%= img.image_path.startsWith('/') ? img.image_path : '/' + img.image_path %>" alt="Additional Color Image" class="h-16 w-16 object-cover rounded">
+                                                </span>
+                                            </p>
+                                        </div>
+                                    <% }) %>
+                                    <input type="file" accept="image/*" name="interiorAdditionalColorImage<%= index + 1 %>_<%= (details.interiorColorImages ? details.interiorColorImages.filter(img => img.interior_color_id === color.id).length + 1 : 1) %>" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                                    <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                                </div>
+                                <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="interior-color-group mb-4 relative">
+                            <div class="flex space-x-4 mb-2">
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                                    <input type="file" accept="image/*" name="interiorColorImage1" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                                    <input type="text" name="interiorColorName1" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Ebony Leather)">
+                                </div>
+                            </div>
+                            <div class="color-images mb-2">
+                                <input type="file" accept="image/*" name="interiorAdditionalColorImage1_1" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                                <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                            </div>
+                            <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+                <button type="button" id="add-interior-color" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Color</button>
+            </div>
+            <!-- Variants -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Variants</h3>
+                <div id="variants">
+                    <% if (typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.variants && details.variants.length) { %>
+                        <% details.variants.forEach((variant, index) => { %>
+                            <div class="variant-group flex space-x-4 mb-4 relative">
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Variant Name</label>
+                                    <input type="text" name="variantName<%= index + 1 %>" value="<%= variant.name %>" class="variant-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant name (e.g., XLE)">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Variant Price</label>
+                                    <input type="text" name="variantPrice<%= index + 1 %>" value="<%= variant.price %>" class="variant-price w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant price (e.g., $30,000)">
+                                </div>
+                                <button type="button" class="delete-variant-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Variant">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="variant-group flex space-x-4 mb-4 relative">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Variant Name</label>
+                                <input type="text" name="variantName1" class="variant-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant name (e.g., XLE)">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Variant Price</label>
+                                <input type="text" name="variantPrice1" class="variant-price w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant price (e.g., $30,000)">
+                            </div>
+                            <button type="button" class="delete-variant-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Variant">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+                <button type="button" id="add-variant" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Variant</button>
+            </div>
+            <!-- About/Bio -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload About or Bio of Model</h3>
+                <div class="flex space-x-4 mb-4">
+                    <button type="button" id="article-icon" class="icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </button>
+                    <button type="button" id="photo-icon" class="icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </button>
+                    <button type="button" id="link-icon" class="icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                    </button>
+                </div>
+                <div id="content-area" class="relative">
+                    <% if (typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.aboutContents && details.aboutContents.length) { %>
+                        <% details.aboutContents.forEach((content, index) => { %>
+                            <div class="relative mb-4" id="<%= content.type %>-placeholder-<%= index + 1 %>">
+                                <% if (content.type === 'article') { %>
+                                    <textarea name="aboutContent<%= index + 1 %>" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" rows="6" placeholder="Write your article or model description here..."><%= content.value || '' %></textarea>
+                                    <input type="hidden" name="aboutContentType<%= index + 1 %>" value="article">
+                                <% } else if (content.type === 'photo') { %>
+                                    <input type="file" accept="image/*" name="aboutPhoto<%= index + 1 %>" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                    <% if (content.image_path) { %>
+                                        <p class="text-sm text-gray-400 mt-1">Current image:
+                                            <span class="current-image">
+                                                <img src="<%= content.image_path.startsWith('/') ? content.image_path : '/' + content.image_path %>" alt="Current About Image" class="h-16 w-16 object-cover rounded">
+                                            </span>
+                                        </p>
+                                    <% } %>
+                                    <input type="text" name="aboutSource<%= index + 1 %>" value="<%= content.source || '' %>" class="w-full px-4 py-2 mt-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Image source (e.g., forbes.com)">
+                                    <input type="hidden" name="aboutContentType<%= index + 1 %>" value="photo">
+                                <% } else if (content.type === 'link') { %>
+                                    <input type="text" name="aboutContent<%= index + 1 %>" value="<%= content.value || '' %>" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link (e.g., youtube.com, forbes.com)">
+                                    <input type="hidden" name="aboutContentType<%= index + 1 %>" value="link">
+                                <% } %>
+                                <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+            <!-- Available On -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Available On</h3>
+                <div id="available-sites">
+                    <% if (typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.availableSites && details.availableSites.length) { %>
+                        <% details.availableSites.forEach((site, index) => { %>
+                            <div class="site-group flex space-x-4 mb-4 relative">
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Site Name</label>
+                                    <input type="text" name="siteName<%= index + 1 %>" value="<%= site.name %>" class="site-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter site name (e.g., Toyota Official)">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Site Link/Phone</label>
+                                    <input type="text" name="siteLink<%= index + 1 %>" value="<%= site.link_phone || '' %>" class="site-link w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link or phone number">
+                                </div>
+                                <button type="button" class="delete-site-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Site">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="site-group flex space-x-4 mb-4 relative">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Site Name</label>
+                                <input type="text" name="siteName1" class="site-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter site name (e.g., Toyota Official)">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Site Link/Phone</label>
+                                <input type="text" name="siteLink1" class="site-link w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link or phone number">
+                            </div>
+                            <button type="button" class="delete-site-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Site">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+                <button type="button" id="add-site" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Site</button>
+            </div>
+            <!-- Specifications -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Specifications</h3>
+                <div id="specifications">
+                    <% if (typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.specifications && details.specifications.length) { %>
+                        <% details.specifications.forEach((spec, specIndex) => { %>
+                            <div class="spec-group border border-gray-500 p-4 rounded-lg mb-4 relative">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Specification Title</label>
+                                <input type="text" name="specTitle<%= specIndex + 1 %>" value="<%= spec.title %>" class="spec-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specification title (e.g., Engine and Displacement)">
+                                <div class="spec-lists mt-4">
+                                    <% (details.specificationLists && details.specificationLists.filter(list => list.specification_id === spec.id) || []).forEach((list, listIndex) => { %>
+                                        <div class="spec-list-group mb-4">
+                                            <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                                            <input type="text" name="specListTitle<%= specIndex + 1 %>_<%= listIndex + 1 %>" value="<%= list.title || '' %>" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                                            <div class="spec-content-area relative">
+                                                <% (details.specContents && details.specContents.filter(content => content.list_id === list.id) || []).forEach((content, contentIndex) => { %>
+                                                    <div class="relative mb-4" id="<%= content.type %>-placeholder-<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>">
+                                                        <% if (content.type === 'article') { %>
+                                                            <textarea name="specContent<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" rows="6" placeholder="Write specification article..."><%= content.value || '' %></textarea>
+                                                            <input type="hidden" name="specContentType<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" value="article">
+                                                        <% } else if (content.type === 'photo') { %>
+                                                            <input type="file" accept="image/*" name="specPhoto<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                                            <% if (content.image_path) { %>
+                                                                <p class="text-sm text-gray-400 mt-1">Current image:
+                                                                    <span class="current-image">
+                                                                        <img src="<%= content.image_path.startsWith('/') ? content.image_path : '/' + content.image_path %>" alt="Current Spec Image" class="h-16 w-16 object-cover rounded">
+                                                                    </span>
+                                                                </p>
+                                                            <% } %>
+                                                            <input type="text" name="specSource<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" value="<%= content.source || '' %>" class="w-full px-4 py-2 mt-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Image source (e.g., forbes.com)">
+                                                            <input type="hidden" name="specContentType<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" value="photo">
+                                                        <% } else if (content.type === 'link') { %>
+                                                            <input type="text" name="specContent<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" value="<%= content.value || '' %>" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link (e.g., youtube.com, forbes.com)">
+                                                            <input type="hidden" name="specContentType<%= specIndex + 1 %>_<%= listIndex + 1 %>_<%= contentIndex + 1 %>" value="link">
+                                                        <% } %>
+                                                        <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                        </button>
+                                                    </div>
+                                                <% }) %>
+                                            </div>
+                                            <div class="flex space-x-4 my-4">
+                                                <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                </button>
+                                                <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                </button>
+                                                <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                                <button type="button" class="add-spec-list bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Specs List</button>
+                                <button type="button" class="delete-spec-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Specification">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="spec-group border border-gray-500 p-4 rounded-lg mb-4 relative">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Specification Title</label>
+                            <input type="text" name="specTitle1" class="spec-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specification title (e.g., Engine and Displacement)">
+                            <div class="spec-lists mt-4">
+                                <div class="spec-list-group mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                                    <input type="text" name="specListTitle1_1" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                                    <div class="flex space-x-4 my-4">
+                                        <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                        </button>
+                                        <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        </button>
+                                        <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                        </button>
+                                    </div>
+                                    <div class="spec-content-area relative"></div>
+                                </div>
+                            </div>
+                            <button type="button" class="add-spec-list bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Specs List</button>
+                            <button type="button" class="delete-spec-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Specification">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+                <button type="button" id="add-spec" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Specs</button>
+            </div>
+            <button type="submit" id="publish-model-btn" class="w-full bg-red-600 text-white text-lg font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-red-700 transition"><%= typeof model !== 'undefined' && model ? 'Update Model' : 'Publish Model' %></button>
+        </form>
+    </section>
+    <!-- Already Published Models -->
+    <section>
+        <h2 class="text-3xl font-bold text-white mb-6">Already Published Models</h2>
+        <select id="published-vehicle-type-selector" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-600">
+            <option value="" disabled selected>Select Vehicle Type</option>
+            <% vehicleTypes.forEach(vt => { %>
+                <option value="<%= vt.vehicle_type_name %>"><%= vt.vehicle_type_name %></option>
+            <% }) %>
+        </select>
+        <select id="published-brand-selector" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-600" disabled>
+            <option value="" disabled selected>Select Brand</option>
+        </select>
+        <div id="published-model-boxes" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dynamically populated model boxes -->
+        </div>
+    </section>
+</main>
+<%- include('../partials/footer') %>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+    const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+    const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+    const toggleMenu = () => {
+        mobileMenuOverlay.classList.toggle('mobile-menu-open');
+        mobileMenuBackdrop.classList.toggle('active');
+    };
+    mobileMenuButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleMenu();
+    });
+    closeMobileMenuButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        mobileMenuOverlay.classList.remove('mobile-menu-open');
+        mobileMenuBackdrop.classList.remove('active');
+    });
+    mobileMenuBackdrop.addEventListener('click', (e) => {
+        e.preventDefault();
+        mobileMenuOverlay.classList.remove('mobile-menu-open');
+        mobileMenuBackdrop.classList.remove('active');
+    });
+    // Search Functionality
+    document.getElementById('search-button').addEventListener('click', () => {
+        const query = document.getElementById('search-input').value;
+        if (query) {
+            alert('Search for: ' + query);
+        } else {
+            alert('Please enter a search query.');
+        }
+    });
+    // Highlight Active Nav Link
+    const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
+    const currentPath = window.location.pathname;
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('bg-red-600', 'text-white');
+            link.classList.remove('hover:bg-red-600');
+        }
+    });
+    // Populate Category and Brand Selectors
+    const vehicleTypeSelector = document.getElementById('vehicle-type');
+    const categorySelector = document.getElementById('category');
+    const brandSelector = document.getElementById('brand');
+    const vehicleTypes = <%- JSON.stringify(vehicleTypes) %>;
+    const categories = <%- JSON.stringify(categories) %>;
+    const brands = <%- JSON.stringify(brands) %>;
+    vehicleTypeSelector.addEventListener('change', () => {
+        const type = vehicleTypeSelector.value;
+        categorySelector.innerHTML = '<option value="" disabled selected>Select Category</option>';
+        brandSelector.innerHTML = '<option value="" disabled selected>Select Brand</option>';
+        if (type) {
+            const vehicleTypeId = vehicleTypes.find(vt => vt.vehicle_type_name === type)?.vehicle_type_id;
+            if (vehicleTypeId) {
+                categories.filter(c => c.vehicle_type_id === vehicleTypeId).forEach(cat => {
+                    categorySelector.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+                });
+                brands.filter(b => b.vehicle_type_id === vehicleTypeId).forEach(brand => {
+                    brandSelector.innerHTML += `<option value="${brand.name}">${brand.name}</option>`;
+                });
+                categorySelector.disabled = false;
+                brandSelector.disabled = false;
+            } else {
+                categorySelector.disabled = true;
+                brandSelector.disabled = true;
+            }
+        } else {
+            categorySelector.disabled = true;
+            brandSelector.disabled = true;
+            categorySelector.value = '';
+            brandSelector.value = '';
+        }
+    });
+
+    // FIXED: Color Image Management Functions
+    function addColorImageListener(group) {
+        const addImageBtn = group.querySelector('.add-color-image');
+        const colorImages = group.querySelector('.color-images');
+        const groupIndex = getColorGroupIndex(group);
+        const isExterior = group.classList.contains('exterior-color-group');
+        let imageCount = group.querySelectorAll('.color-images input[type="file"]').length;
+        
+        addImageBtn.addEventListener('click', () => {
+            if (imageCount < 8) {
+                const input = document.createElement('div');
+                input.className = 'mb-2 relative';
+                input.innerHTML = `
+                    <input type="file" accept="image/*" name="${isExterior ? 'exteriorAdditionalColorImage' : 'interiorAdditionalColorImage'}${groupIndex}_${imageCount + 1}" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                    <button type="button" class="remove-image-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Remove Image">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+                colorImages.insertBefore(input, addImageBtn);
+                imageCount++;
+                
+                // Update the button text to show remaining images
+                addImageBtn.textContent = `Add Another Image (${8 - imageCount} remaining)`;
+                
+                input.querySelector('.remove-image-btn').addEventListener('click', () => {
+                    input.remove();
+                    imageCount--;
+                    addImageBtn.disabled = false;
+                    addImageBtn.textContent = `Add Another Image (${8 - imageCount} remaining)`;
+                    // Re-index all images in this group after removal
+                    reindexColorImages(group);
+                });
+            }
+            
+            if (imageCount >= 8) {
+                addImageBtn.disabled = true;
+                addImageBtn.textContent = 'Maximum 8 images reached';
+            }
+        });
+        
+        // Initialize button text
+        addImageBtn.textContent = `Add Another Image (${8 - imageCount} remaining)`;
+        if (imageCount >= 8) {
+            addImageBtn.disabled = true;
+            addImageBtn.textContent = 'Maximum 8 images reached';
+        }
+    }
+
+    // FIXED: Get correct color group index
+    function getColorGroupIndex(group) {
+        const isExterior = group.classList.contains('exterior-color-group');
+        const container = isExterior ? document.getElementById('exterior-colors') : document.getElementById('interior-colors');
+        const groups = Array.from(container.querySelectorAll(isExterior ? '.exterior-color-group' : '.interior-color-group'));
+        return groups.indexOf(group) + 1;
+    }
+
+    // FIXED: Re-index images when one is removed
+    function reindexColorImages(group) {
+        const groupIndex = getColorGroupIndex(group);
+        const isExterior = group.classList.contains('exterior-color-group');
+        const imageInputs = group.querySelectorAll('.color-images input[type="file"]');
+        
+        imageInputs.forEach((input, index) => {
+            input.name = `${isExterior ? 'exteriorAdditionalColorImage' : 'interiorAdditionalColorImage'}${groupIndex}_${index + 1}`;
+        });
+    }
+
+    function addDeleteListener(element, buttonSelector, parent) {
+        element.querySelector(buttonSelector).addEventListener('click', () => {
+            const groups = parent.children;
+            if (groups.length > 1) {
+                element.remove();
+                // Update all color group indices after deletion
+                updateColorGroupIndices();
+            } else {
+                alert('At least one item is required.');
+            }
+        });
+    }
+
+    function updateColorGroupIndices() {
+        // Update exterior color indices
+        const exteriorGroups = document.querySelectorAll('.exterior-color-group');
+        exteriorGroups.forEach((group, index) => {
+            const newIndex = index + 1;
+            
+            // Update main color image field
+            const colorImageInput = group.querySelector('input[class="color-image"]');
+            if (colorImageInput) {
+                colorImageInput.name = `exteriorColorImage${newIndex}`;
+            }
+            
+            // Update color name field
+            const colorNameInput = group.querySelector('input[class="color-name"]');
+            if (colorNameInput) {
+                colorNameInput.name = `exteriorColorName${newIndex}`;
+            }
+            
+            // Update additional image fields
+            const additionalInputs = group.querySelectorAll('.color-images input[type="file"]');
+            additionalInputs.forEach((input, imgIndex) => {
+                input.name = `exteriorAdditionalColorImage${newIndex}_${imgIndex + 1}`;
+            });
+        });
+
+        // Update interior color indices
+        const interiorGroups = document.querySelectorAll('.interior-color-group');
+        interiorGroups.forEach((group, index) => {
+            const newIndex = index + 1;
+            
+            // Update main color image field
+            const colorImageInput = group.querySelector('input[class="color-image"]');
+            if (colorImageInput) {
+                colorImageInput.name = `interiorColorImage${newIndex}`;
+            }
+            
+            // Update color name field
+            const colorNameInput = group.querySelector('input[class="color-name"]');
+            if (colorNameInput) {
+                colorNameInput.name = `interiorColorName${newIndex}`;
+            }
+            
+            // Update additional image fields
+            const additionalInputs = group.querySelectorAll('.color-images input[type="file"]');
+            additionalInputs.forEach((input, imgIndex) => {
+                input.name = `interiorAdditionalColorImage${newIndex}_${imgIndex + 1}`;
+            });
+        });
+
+        // Update global counters
+        exteriorColorCount = exteriorGroups.length;
+        interiorColorCount = interiorGroups.length;
+    }
+
+    // Exterior Colors
+    let exteriorColorCount = <%= typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.exteriorColors ? details.exteriorColors.length : 1 %>;
+    document.getElementById('add-exterior-color').addEventListener('click', () => {
+        const exteriorColors = document.getElementById('exterior-colors');
+        const div = document.createElement('div');
+        div.className = 'exterior-color-group mb-4 relative';
+        div.innerHTML = `
+            <div class="flex space-x-4 mb-2">
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                    <input type="file" accept="image/*" name="exteriorColorImage${exteriorColorCount + 1}" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                    <input type="text" name="exteriorColorName${exteriorColorCount + 1}" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Midnight Black)">
+                </div>
+            </div>
+            <div class="color-images mb-2">
+                <input type="file" accept="image/*" name="exteriorAdditionalColorImage${exteriorColorCount + 1}_1" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image (7 remaining)</button>
+            </div>
+            <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        exteriorColors.appendChild(div);
+        exteriorColorCount++;
+        addColorImageListener(div);
+        addDeleteListener(div, '.delete-color-btn', exteriorColors);
+    });
+
+    // Interior Colors
+    let interiorColorCount = <%= typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.interiorColors ? details.interiorColors.length : 1 %>;
+    document.getElementById('add-interior-color').addEventListener('click', () => {
+        const interiorColors = document.getElementById('interior-colors');
+        const div = document.createElement('div');
+        div.className = 'interior-color-group mb-4 relative';
+        div.innerHTML = `
+            <div class="flex space-x-4 mb-2">
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                    <input type="file" accept="image/*" name="interiorColorImage${interiorColorCount + 1}" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                    <input type="text" name="interiorColorName${interiorColorCount + 1}" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Ebony Leather)">
+                </div>
+            </div>
+            <div class="color-images mb-2">
+                <input type="file" accept="image/*" name="interiorAdditionalColorImage${interiorColorCount + 1}_1" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image (7 remaining)</button>
+            </div>
+            <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        interiorColors.appendChild(div);
+        interiorColorCount++;
+        addColorImageListener(div);
+        addDeleteListener(div, '.delete-color-btn', interiorColors);
+    });
+
+    // Initialize existing color groups
+    document.querySelectorAll('.exterior-color-group').forEach(addColorImageListener);
+    document.querySelectorAll('.interior-color-group').forEach(addColorImageListener);
+
+    // Variants
+    let variantCount = <%= typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.variants ? details.variants.length : 1 %>;
+    document.getElementById('add-variant').addEventListener('click', () => {
+        const variants = document.getElementById('variants');
+        const div = document.createElement('div');
+        div.className = 'variant-group flex space-x-4 mb-4 relative';
+        div.innerHTML = `
+            <div class="w-1/2">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Variant Name</label>
+                <input type="text" name="variantName${variantCount + 1}" class="variant-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant name (e.g., XLE)">
+            </div>
+            <div class="w-1/2">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Variant Price</label>
+                <input type="text" name="variantPrice${variantCount + 1}" class="variant-price w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant price (e.g., $30,000)">
+            </div>
+            <button type="button" class="delete-variant-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Variant">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        variants.appendChild(div);
+        variantCount++;
+        addDeleteListener(div, '.delete-variant-btn', variants);
+    });
+
+    // About Content
+    let contentCount = <%= typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.aboutContents ? details.aboutContents.length : 0 %>;
+    const contentArea = document.getElementById('content-area');
+    document.getElementById('article-icon').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'relative mb-4';
+        div.id = `article-placeholder-${++contentCount}`;
+        div.innerHTML = `
+            <textarea name="aboutContent${contentCount}" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" rows="6" placeholder="Write your article or model description here..."></textarea>
+            <input type="hidden" name="aboutContentType${contentCount}" value="article">
+            <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        contentArea.appendChild(div);
+        addDeleteListener(div, '.remove-content-btn', contentArea);
+    });
+    document.getElementById('photo-icon').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'relative mb-4';
+        div.id = `photo-placeholder-${++contentCount}`;
+        div.innerHTML = `
+            <input type="file" accept="image/*" name="aboutPhoto${contentCount}" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+            <input type="text" name="aboutSource${contentCount}" class="w-full px-4 py-2 mt-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Image source (e.g., forbes.com)">
+            <input type="hidden" name="aboutContentType${contentCount}" value="photo">
+            <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        contentArea.appendChild(div);
+        addDeleteListener(div, '.remove-content-btn', contentArea);
+    });
+    document.getElementById('link-icon').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = 'relative mb-4';
+        div.id = `link-placeholder-${++contentCount}`;
+        div.innerHTML = `
+            <input type="text" name="aboutContent${contentCount}" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link (e.g., youtube.com, forbes.com)">
+            <input type="hidden" name="aboutContentType${contentCount}" value="link">
+            <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        contentArea.appendChild(div);
+        addDeleteListener(div, '.remove-content-btn', contentArea);
+    });
+
+    // Specifications
+    let specCount = <%= typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.specifications ? details.specifications.length : 1 %>;
+    document.getElementById('add-spec').addEventListener('click', () => {
+        const specifications = document.getElementById('specifications');
+        const div = document.createElement('div');
+        div.className = 'spec-group border border-gray-500 p-4 rounded-lg mb-4 relative';
+        div.innerHTML = `
+            <label class="block text-sm font-medium text-gray-300 mb-1">Specification Title</label>
+            <input type="text" name="specTitle${specCount + 1}" class="spec-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specification title (e.g., Engine and Displacement)">
+            <div class="spec-lists mt-4">
+                <div class="spec-list-group mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                    <input type="text" name="specListTitle${specCount + 1}_1" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                    <div class="flex space-x-4 my-4">
+                        <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </button>
+                        <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </button>
+                        <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        </button>
+                    </div>
+                    <div class="spec-content-area relative"></div>
+                </div>
+            </div>
+            <button type="button" class="add-spec-list bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Specs List</button>
+            <button type="button" class="delete-spec-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Specification">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        specifications.appendChild(div);
+        specCount++;
+        addSpecListListener(div);
+        addDeleteListener(div, '.delete-spec-btn', specifications);
+    });
+
+    function addSpecListListener(specGroup) {
+        const addSpecListBtn = specGroup.querySelector('.add-spec-list');
+        const specLists = specGroup.querySelector('.spec-lists');
+        const specIndex = Array.from(document.querySelectorAll('.spec-group')).indexOf(specGroup) + 1;
+        let specListCount = specGroup.querySelectorAll('.spec-list-group').length;
+        
+        addSpecListBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'spec-list-group mb-4';
+            div.innerHTML = `
+                <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                <input type="text" name="specListTitle${specIndex}_${specListCount + 1}" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                <div class="flex space-x-4 my-4">
+                    <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </button>
+                    <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </button>
+                    <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                    </button>
+                </div>
+                <div class="spec-content-area relative"></div>
+            `;
+            specLists.appendChild(div);
+            specListCount++;
+            
+            // Initialize content listeners for the new spec list
+            addSpecContentListeners(div);
+        });
+        
+        // Initialize content listeners for existing spec lists
+        specGroup.querySelectorAll('.spec-list-group').forEach(addSpecContentListeners);
+    }
+
+    function addSpecContentListeners(specListGroup) {
+        const specIndex = Array.from(document.querySelectorAll('.spec-group')).indexOf(specListGroup.closest('.spec-group')) + 1;
+        const listIndex = Array.from(specListGroup.closest('.spec-lists').querySelectorAll('.spec-list-group')).indexOf(specListGroup) + 1;
+        const contentArea = specListGroup.querySelector('.spec-content-area');
+        let specContentCount = specListGroup.querySelectorAll('.spec-content-area > div').length;
+
+        // Remove existing event listeners and add new ones
+        const articleBtn = specListGroup.querySelector('.spec-article-icon');
+        const photoBtn = specListGroup.querySelector('.spec-photo-icon');
+        const linkBtn = specListGroup.querySelector('.spec-link-icon');
+
+        // Clone and replace to remove existing listeners
+        const newArticleBtn = articleBtn.cloneNode(true);
+        const newPhotoBtn = photoBtn.cloneNode(true);
+        const newLinkBtn = linkBtn.cloneNode(true);
+        
+        articleBtn.parentNode.replaceChild(newArticleBtn, articleBtn);
+        photoBtn.parentNode.replaceChild(newPhotoBtn, photoBtn);
+        linkBtn.parentNode.replaceChild(newLinkBtn, linkBtn);
+
+        // Add new event listeners
+        newArticleBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'relative mb-4';
+            div.id = `article-placeholder-${specIndex}_${listIndex}_${++specContentCount}`;
+            div.innerHTML = `
+                <textarea name="specContent${specIndex}_${listIndex}_${specContentCount}" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" rows="6" placeholder="Write specification article..."></textarea>
+                <input type="hidden" name="specContentType${specIndex}_${listIndex}_${specContentCount}" value="article">
+                <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            contentArea.appendChild(div);
+            addDeleteListener(div, '.remove-content-btn', contentArea);
+        });
+
+        newPhotoBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'relative mb-4';
+            div.id = `photo-placeholder-${specIndex}_${listIndex}_${++specContentCount}`;
+            div.innerHTML = `
+                <input type="file" accept="image/*" name="specPhoto${specIndex}_${listIndex}_${specContentCount}" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                <input type="text" name="specSource${specIndex}_${listIndex}_${specContentCount}" class="w-full px-4 py-2 mt-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Image source (e.g., forbes.com)">
+                <input type="hidden" name="specContentType${specIndex}_${listIndex}_${specContentCount}" value="photo">
+                <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            contentArea.appendChild(div);
+            addDeleteListener(div, '.remove-content-btn', contentArea);
+        });
+
+        newLinkBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'relative mb-4';
+            div.id = `link-placeholder-${specIndex}_${listIndex}_${++specContentCount}`;
+            div.innerHTML = `
+                <input type="text" name="specContent${specIndex}_${listIndex}_${specContentCount}" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link (e.g., youtube.com, forbes.com)">
+                <input type="hidden" name="specContentType${specIndex}_${listIndex}_${specContentCount}" value="link">
+                <button type="button" class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            contentArea.appendChild(div);
+            addDeleteListener(div, '.remove-content-btn', contentArea);
+        });
+    }
+
+    // Initialize all existing spec groups and lists on page load
+    document.querySelectorAll('.spec-group').forEach(addSpecListListener);
+    document.querySelectorAll('.spec-list-group').forEach(addSpecContentListeners);
+
+    // Available Sites
+    let siteCount = <%= typeof model !== 'undefined' && model && typeof details !== 'undefined' && details.availableSites ? details.availableSites.length : 1 %>;
+    document.getElementById('add-site').addEventListener('click', () => {
+        const sites = document.getElementById('available-sites');
+        const div = document.createElement('div');
+        div.className = 'site-group flex space-x-4 mb-4 relative';
+        div.innerHTML = `
+            <div class="w-1/2">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Site Name</label>
+                <input type="text" name="siteName${siteCount + 1}" class="site-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter site name (e.g., Toyota Official)">
+            </div>
+            <div class="w-1/2">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Site Link/Phone</label>
+                <input type="text" name="siteLink${siteCount + 1}" class="site-link w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link or phone number">
+            </div>
+            <button type="button" class="delete-site-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Site">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        sites.appendChild(div);
+        siteCount++;
+        addDeleteListener(div, '.delete-site-btn', sites);
+    });
+
+    // Initialize delete listeners for existing elements
+    document.querySelectorAll('.exterior-color-group').forEach(group => addDeleteListener(group, '.delete-color-btn', document.getElementById('exterior-colors')));
+    document.querySelectorAll('.interior-color-group').forEach(group => addDeleteListener(group, '.delete-color-btn', document.getElementById('interior-colors')));
+    document.querySelectorAll('.variant-group').forEach(group => addDeleteListener(group, '.delete-variant-btn', document.getElementById('variants')));
+    document.querySelectorAll('.site-group').forEach(group => addDeleteListener(group, '.delete-site-btn', document.getElementById('available-sites')));
+    document.querySelectorAll('.spec-group').forEach(group => addDeleteListener(group, '.delete-spec-btn', document.getElementById('specifications')));
+    document.querySelectorAll('#content-area > div').forEach(group => addDeleteListener(group, '.remove-content-btn', contentArea));
+    document.querySelectorAll('.spec-content-area > div').forEach(group => addDeleteListener(group, '.remove-content-btn', group.parentElement));
+
+    // Published Models
+    const publishedVehicleTypeSelector = document.getElementById('published-vehicle-type-selector');
+    const publishedBrandSelector = document.getElementById('published-brand-selector');
+    const modelBoxes = document.getElementById('published-model-boxes');
+    publishedVehicleTypeSelector.addEventListener('change', () => {
+        const type = publishedVehicleTypeSelector.value;
+        publishedBrandSelector.innerHTML = '<option value="" disabled selected>Select Brand</option>';
+        modelBoxes.innerHTML = '';
+        if (type) {
+            const vehicleTypeId = vehicleTypes.find(vt => vt.vehicle_type_name === type)?.vehicle_type_id;
+            if (vehicleTypeId) {
+                brands.filter(b => b.vehicle_type_id === vehicleTypeId).forEach(brand => {
+                    publishedBrandSelector.innerHTML += `<option value="${brand.brand_id}">${brand.name}</option>`;
+                });
+                publishedBrandSelector.disabled = false;
+            } else {
+                publishedBrandSelector.disabled = true;
+            }
+        } else {
+            publishedBrandSelector.disabled = true;
+            publishedBrandSelector.value = '';
+        }
+    });
+    publishedBrandSelector.addEventListener('change', () => {
+        const type = publishedVehicleTypeSelector.value;
+        const brandId = publishedBrandSelector.value;
+        modelBoxes.innerHTML = '<div class="text-gray-400">Loading models...</div>';
+        if (type && brandId) {
+            const vehicleTypeId = vehicleTypes.find(vt => vt.vehicle_type_name === type)?.vehicle_type_id;
+            fetch(`/admin/models?vehicleTypeId=${vehicleTypeId}&brandId=${brandId}`)
+                .then(response => response.json())
+                .then(data => {
+                    modelBoxes.innerHTML = '';
+                    if (data && data.length > 0) {
+                        data.forEach(model => {
+                            const div = document.createElement('div');
+                            div.className = 'bg-gray-800 p-4 rounded-lg shadow-lg';
+                            // Proper image display with fallback
+                            const imageSrc = model.model_image ? 
+                                (model.model_image.startsWith('/') ? model.model_image : '/' + model.model_image) : 
+                                '/images/placeholder.png';
+                            
+                            div.innerHTML = `
+                                ${model.model_image ? 
+                                    `<img src="${imageSrc}" alt="${model.model_name}" class="model-box-image">` :
+                                    `<div class="placeholder-image">No Image</div>`
+                                }
+                                <h3 class="text-lg font-semibold text-white mt-4">${model.model_name}</h3>
+                                <p class="text-gray-400">${model.category_name}</p>
+                                <div class="mt-4 flex space-x-2">
+                                    <a href="/admin/model/${model.id}" class="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">Edit</a>
+                                    <form action="/admin/model/delete/${model.id}" method="POST" style="display:inline;">
+                                        <button type="submit" onclick="return confirm('Are you sure you want to delete this model?')" class="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">Delete</button>
+                                    </form>
+                                </div>
+                            `;
+                            modelBoxes.appendChild(div);
+                        });
+                    } else {
+                        modelBoxes.innerHTML = '<div class="text-gray-400 col-span-4 text-center py-8">No models found.</div>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading models:', err);
+                    modelBoxes.innerHTML = '<div class="text-red-600 col-span-4 text-center py-8">Error loading models.</div>';
+                });
+        }
+    });
+
+    // Form Validation
+    const modelForm = document.getElementById('model-form');
+    modelForm.addEventListener('submit', (e) => {
+        const vehicleType = vehicleTypeSelector.value;
+        const category = categorySelector.value;
+        const brand = brandSelector.value;
+        const modelName = document.getElementById('model-name').value;
+        const startingPrice = document.getElementById('starting-price').value;
+        const safetyRating = document.getElementById('safety-rating').value;
+        const engineType = document.getElementById('engine-type').value;
+        const releaseYear = document.getElementById('release-year').value;
+        const seater = document.getElementById('seater').value;
+        if (!vehicleType || !category || !brand || !modelName || !startingPrice || !engineType) {
+            e.preventDefault();
+            alert('Please fill in all required fields: Vehicle Type, Category, Brand, Model Name, Starting Price, and Engine Type.');
+            return;
+        }
+        if (safetyRating && (safetyRating < 0 || safetyRating > 5)) {
+            e.preventDefault();
+            alert('Safety Rating must be between 0 and 5.');
+            return;
+        }
+        if (releaseYear && (releaseYear < 1900 || releaseYear > 2030)) {
+        e.preventDefault();
+        alert('Release Year must be between 1900 and 2030.');
+        return;
+        }
+        const exteriorColors = document.querySelectorAll('.exterior-color-group');
+        for (let i = 0; i < exteriorColors.length; i++) {
+            const colorName = exteriorColors[i].querySelector('.color-name').value;
+            if (!colorName) {
+                e.preventDefault();
+                alert(`Please provide a name for Exterior Color ${i + 1}.`);
+                return;
+            }
+        }
+        const interiorColors = document.querySelectorAll('.interior-color-group');
+        for (let i = 0; i < interiorColors.length; i++) {
+            const colorName = interiorColors[i].querySelector('.color-name').value;
+            if (!colorName) {
+                e.preventDefault();
+                alert(`Please provide a name for Interior Color ${i + 1}.`);
+                return;
+            }
+        }
+        const variants = document.querySelectorAll('.variant-group');
+        for (let i = 0; i < variants.length; i++) {
+            const variantName = variants[i].querySelector('.variant-name').value;
+            const variantPrice = variants[i].querySelector('.variant-price').value;
+            if (!variantName || !variantPrice) {
+                e.preventDefault();
+                alert(`Please provide both name and price for Variant ${i + 1}.`);
+                return;
+            }
+        }
+        const sites = document.querySelectorAll('.site-group');
+        for (let i = 0; i < sites.length; i++) {
+            const siteName = sites[i].querySelector('.site-name').value;
+            const siteLink = sites[i].querySelector('.site-link').value;
+            if (!siteName || !siteLink) {
+                e.preventDefault();
+                alert(`Please provide both name and link/phone for Site ${i + 1}.`);
+                return;
+            }
+        }
+        const specs = document.querySelectorAll('.spec-group');
+        for (let i = 0; i < specs.length; i++) {
+            const specTitle = specs[i].querySelector('.spec-title').value;
+            if (!specTitle) {
+                e.preventDefault();
+                alert(`Please provide a title for Specification ${i + 1}.`);
+                return;
+            }
+            const specLists = specs[i].querySelectorAll('.spec-list-group');
+            for (let j = 0; j < specLists.length; j++) {
+                const listTitle = specLists[j].querySelector('.spec-list-title').value;
+                if (!listTitle) {
+                    e.preventDefault();
+                    alert(`Please provide a title for Specs List ${j + 1} in Specification ${i + 1}.`);
+                    return;
+                }
+            }
+        }
+    });
+
+    // Initialize existing fields
+    <% if (typeof model !== 'undefined' && model) { %>
+        const initialVehicleType = '<%= model.vehicle_type_name %>';
+        if (initialVehicleType) {
+            vehicleTypeSelector.value = initialVehicleType;
+            vehicleTypeSelector.dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                categorySelector.value = '<%= model.category_name %>';
+                brandSelector.value = '<%= model.brand_name %>';
+            }, 0);
+        }
+    <% } %>
+});
+</script>
+</body>
+</html>

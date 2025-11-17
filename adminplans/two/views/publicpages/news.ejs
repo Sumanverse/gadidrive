@@ -1,0 +1,236 @@
+<%- include('../partials/head.ejs', { title: 'USA - news' }) %>
+
+        body {
+            background-color: #000000;
+            font-family: 'Poppins', sans-serif;
+        }
+        .border-bottom-left-to-right {
+            position: relative;
+            border-radius: 0.75rem;
+        }
+        .border-bottom-left-to-right:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #DC2626;
+            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        }
+        @keyframes borderLeftToRight {
+            to { width: 100%; }
+        }
+        #mobile-menu-overlay {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+            width: 16rem;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: auto;
+            will-change: transform, opacity;
+        }
+        .mobile-menu-open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #mobile-menu-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        #mobile-menu-backdrop.active {
+            display: block;
+        }
+        .news-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+        }
+        .filter-button:hover {
+            background-color: #DC2626;
+            color: #FFFFFF;
+        }
+        .breadcrumb a:hover {
+            color: #DC2626;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white">
+    
+<%- include('../partials/navbar') %>
+
+    <!-- Main Section -->
+    <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl">
+        <!-- Breadcrumb and Filter -->
+        <div class="flex flex-row justify-between items-center mb-4">
+            <div class="breadcrumb text-white text-sm sm:text-base flex items-center">
+                <a href="/" class="hover:text-red-600">Gyarage</a> 
+                <span class="mx-2 text-red-600">&gt;&gt;</span> 
+                <a href="/usa" class="hover:text-red-600">USA</a> 
+                <span class="mx-2 text-red-600">&gt;&gt;</span> 
+                <a href="/usa/news" class="text-red-600 font-bold">News</a>
+            </div>
+            <div>
+                <button id="filter-button" class="filter-button bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition">
+                    Filter
+                </button>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero mb-8 text-center">
+            <h1 class="text-4xl font-bold text-white mb-4">Latest News</h1>
+            <p class="text-lg text-gray-300">Stay updated with the latest automotive news across the USA.</p>
+        </section>
+
+        <!-- News Grid -->
+        <section class="news-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 mt-6">
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right news-card">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                            Porsche Launch 911 GT3 in Nepal
+                        </div>
+                        <div class="date font-semibold">Oct 7, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right news-card">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                            Tesla Unveils New Model X
+                        </div>
+                        <div class="date font-semibold">Oct 5, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right news-card">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                            Ford Mustang Gets a Facelift
+                        </div>
+                        <div class="date font-semibold">Oct 3, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right news-card">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                            BMW i8 Goes Electric
+                        </div>
+                        <div class="date font-semibold">Oct 1, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right news-card">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                            Honda Civic 2026 Preview
+                        </div>
+                        <div class="date font-semibold">Sep 30, 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right news-card">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-white rounded-lg flex-shrink-0"></div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                            Toyota Hybrid Lineup Expands
+                        </div>
+                        <div class="date font-semibold">Sep 28, 2025</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <div class="pagination text-center mt-8">
+            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 mr-2">Previous</button>
+            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 mr-2">1</button>
+            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 mr-2">2</button>
+            <button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 mr-2">Next</button>
+        </div>
+    </main>
+
+    
+<%- include('../partials/footer') %>
+
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop.classList.toggle('active');
+        };
+
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        closeMobileMenuButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            mobileMenuOverlay.classList.remove('mobile-menu-open');
+            mobileMenuBackdrop.classList.remove('active');
+        });
+
+        mobileMenuBackdrop.addEventListener('click', (e) => {
+            e.preventDefault();
+            mobileMenuOverlay.classList.remove('mobile-menu-open');
+            mobileMenuBackdrop.classList.remove('active');
+        });
+
+        mobileMenuOverlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Search Functionality (Placeholder)
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            if (query) {
+                alert('Searching for: ' + query);
+            } else {
+                alert('Please enter a search query.');
+            }
+        });
+
+        // Filter Functionality (Placeholder)
+        document.getElementById('filter-button').addEventListener('click', () => {
+            alert('Filter options will be implemented with backend.');
+        });
+
+        // Highlight Active Nav Link
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === '/usa/news') {
+                    link.classList.add('bg-red-600', 'text-white');
+                    link.classList.remove('hover:bg-red-600');
+                }
+            });
+        });
+    </script>

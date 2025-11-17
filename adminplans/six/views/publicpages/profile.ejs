@@ -1,0 +1,567 @@
+<%- include('../partials/head.ejs', { title: '@' + user.username }) %>
+
+<style>
+    body { background-color: #000000; }
+    .border-bottom-left-to-right { position: relative; border-radius: 0.75rem; }
+    .border-bottom-left-to-right:hover::after {
+        content: ""; position: absolute; bottom: 0; left: 0; width: 0; height: 2px;
+        background-color: #DC2626; animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight { to { width: 100%; } }
+    .icon-button { transition: transform 0.2s; }
+    .icon-button:hover { transform: scale(1.1); }
+    .error-message { color: #DC2626; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
+    .social-icon { width: 28px; height: 28px; fill: currentColor; }
+
+    /* SUCCESS POPUP */
+    #successPopup {
+        position: fixed; top: 20px; right: 20px; background-color: #16A34A; color: white;
+        padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        z-index: 9999; display: flex; align-items: center; gap: 0.75rem;
+        transform: translateX(120%); transition: transform 0.4s ease; font-weight: 600;
+    }
+    #successPopup.show { transform: translateX(0); }
+    #successPopup svg { width: 24px; height: 24px; }
+
+    /* MODAL: SCROLLABLE + STICKY SAVE/CANCEL */
+    .modal-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem;
+    }
+    .modal-content {
+        background: #1F2937; border-radius: 0.5rem; width: 100%; max-width: 32rem; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .modal-header {
+        padding: 1.5rem; background: #1F2937; border-bottom: 1px solid #374151; position: sticky; top: 0; z-index: 10;
+    }
+    .modal-body {
+        padding: 1.5rem; flex-grow: 1; overflow-y: auto;
+    }
+    .modal-footer {
+        padding: 1rem 1.5rem; background: #1F2937; border-top: 1px solid #374151; position: sticky; bottom: 0; z-index: 10; display: flex; justify-content: space-between;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+    
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb text-white text-sm sm:text-base flex items-center mb-6">
+        <a href="/" class="hover:text-red-600">Gyarage</a> 
+        <span class="mx-2">></span>
+        <a href="/profile" class="text-red-600 font-bold" id="breadcrumbUsername">@<%= user.username %></a>
+    </div>
+
+    <!-- VIEW TOGGLE -->
+    <div class="flex justify-center mb-6">
+        <button id="privateViewButton" class="bg-red-600 text-white px-4 py-2 rounded-l-lg hover:bg-red-700 transition">Private View</button>
+        <button id="publicViewButton" class="bg-gray-600 text-white px-4 py-2 rounded-r-lg hover:bg-gray-700 transition">Public View</button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- LEFT: PROFILE INFO -->
+        <div class="lg:w-1/3 bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+            <div class="flex flex-col items-center lg:items-start">
+                <!-- AVATAR + NAME -->
+                <div class="flex flex-col lg:flex-row items-center gap-4 w-full">
+                    <div class="relative w-32 h-32 rounded-full border-4 border-red-600 bg-gray-700 flex items-center justify-center text-4xl font-bold text-gray-400 overflow-hidden" id="profilePictureContainer">
+                        <% if (user.profilePicture && user.profilePicture !== '/images/default-avatar.png') { %>
+                            <img id="profilePicture" src="<%= user.profilePicture %>" alt="Profile Picture" class="w-full h-full object-cover">
+                        <% } else { %>
+                            <span id="profileInitial"><%= user.name.charAt(0).toUpperCase() %></span>
+                        <% } %>
+                        <% if (user.position === 'admin') { %>
+                            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold text-black">A</div>
+                        <% } %>
+                    </div>
+                    <div class="text-center lg:text-left">
+                        <h2 class="text-3xl font-bold mb-2" id="profileName"><%= user.name %></h2>
+                        <p class="text-gray-400 mb-4" id="profileUsername">@<%= user.username %></p>
+                    </div>
+                </div>
+
+                <!-- BIO -->
+                <div class="border-t border-gray-700 pt-4 mt-4 w-full">
+                    <h3 class="text-lg font-semibold mb-2">Bio</h3>
+                    <p class="text-gray-300" id="profileBio"><%= user.bio || 'Your bio goes here...' %></p>
+                </div>
+
+                <!-- SOCIALS — 100% LIVE UPDATE -->
+                <div class="border-t border-gray-700 pt-4 mt-4 w-full">
+                    <h3 class="text-lg font-semibold mb-2">Socials</h3>
+                    <div class="flex justify-center lg:justify-start space-x-4" id="socialLinks">
+                        <% 
+                        const socials = Array.isArray(user.socialMedia) ? user.socialMedia : [];
+                        if (socials.length > 0) {
+                            socials.forEach(social => {
+                                let iconSvg = '';
+                                let platform = '';
+                                switch(social.type) {
+                                    case 'facebook': 
+                                        iconSvg = '<path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>'; 
+                                        platform = 'Facebook'; 
+                                        break;
+                                    case 'instagram': 
+                                        iconSvg = '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849c0 3.205-.011 3.584-.069 4.849-.148 3.225-1.664 4.771-4.919 4.919-.266.058-.646.069-4.849.069-3.205 0-3.584-.011-4.849-.069-3.225-.148-4.771-1.664-4.919-4.919-.058-.265-.069-.645-.069-4.849 0-3.204.011-3.584.069-4.849.148-3.225 1.664-4.771 4.919-4.919.265-.058.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.059 1.689.073 4.948.073 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>'; 
+                                        platform = 'Instagram'; 
+                                        break;
+                                    case 'twitter': 
+                                        iconSvg = '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231L18.244 2.25zM17.046 19.5h1.858L7.054 4.5H5.079L17.046 19.5z"/>'; 
+                                        platform = 'Twitter'; 
+                                        break;
+                                    case 'linkedin': 
+                                        iconSvg = '<path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>'; 
+                                        platform = 'LinkedIn'; 
+                                        break;
+                                    case 'youtube': 
+                                        iconSvg = '<path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 4-8 4z"/>'; 
+                                        platform = 'YouTube'; 
+                                        break;
+                                    case 'website': 
+                                        iconSvg = '<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>'; 
+                                        platform = 'Website'; 
+                                        break;
+                                    case 'other': 
+                                        iconSvg = '<path d="M12 0c-6.627 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>'; 
+                                        platform = 'Other'; 
+                                        break;
+                                }
+                                if (iconSvg) {
+                        %>
+                                    <a href="<%= social.link %>" target="_blank" rel="noopener" class="text-gray-400 hover:text-red-500 transition-colors" title="<%= platform %>">
+                                        <svg class="social-icon w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><%- iconSvg %></svg>
+                                    </a>
+                        <% 
+                                }
+                            });
+                        } else { %>
+                            <p class="text-gray-500 text-sm">No social links added</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: PRIVATE VIEW -->
+        <div id="private-profile" class="lg:w-2/3 space-y-8">
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Profile Picture</h3>
+                <button id="editProfilePictureButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Profile Picture</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Name</h3>
+                <button id="editNameButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Name</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Username</h3>
+                <button id="editUsernameButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Username</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Edit Bio</h3>
+                <button id="editBioButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Bio</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Manage Social Media</h3>
+                <button id="editSocialsButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Manage Social Media</button>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <h3 class="text-xl font-semibold mb-6">Change Password</h3>
+                <button id="changePasswordButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Change Password</button>
+            </div>
+            <% if (user && ['admin', 'level1', 'level2', 'level3'].includes(user.position)) { %>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-yellow-500 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6 text-yellow-400">Admin Panel</h3>
+                    <button id="goToAdminButton" class="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-semibold">Go to Admin</button>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- PUBLIC VIEW -->
+        <div id="public-profile" class="lg:w-2/3 hidden space-y-8">
+            <h2 class="text-3xl font-bold text-white mb-4">Public Profile Feed</h2>
+            <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                <div class="flex flex-row items-center p-2 rounded-xl">
+                    <div class="article-image w-32 h-32 bg-gray-600 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-300">Image</div>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="article-title text-lg sm:text-2xl font-semibold mb-2">Hybrid Cars Gaining Popularity Globally</div>
+                        <div class="date font-semibold text-gray-300">Oct 13, 2025</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUCCESS POPUP -->
+    <div id="successPopup">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span id="successMessage">Successfully updated!</span>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Profile Picture Modal -->
+    <div id="profilePictureModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Profile Picture</h3></div>
+            <div class="modal-body">
+                <form id="profile-picture-form" enctype="multipart/form-data">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                        <input type="file" name="profilePicture" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                        <p class="error-message" id="profile-picture-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-profile-picture-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="profile-picture-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Name Modal -->
+    <div id="nameModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Name</h3></div>
+            <div class="modal-body">
+                <form id="name-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                        <input type="text" name="name" value="<%= user.name %>" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="name-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-name-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="name-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div id="usernameModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Username</h3></div>
+            <div class="modal-body">
+                <form id="username-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <input type="text" name="username" value="<%= user.username %>" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="username-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-username-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="username-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bio Modal -->
+    <div id="bioModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Edit Bio</h3></div>
+            <div class="modal-body">
+                <form id="bio-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Bio (max 150 characters)</label>
+                        <textarea name="bio" rows="4" maxlength="150" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white"><%= user.bio || '' %></textarea>
+                        <p class="error-message" id="bio-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-bio-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="bio-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Modal -->
+    <div id="socialMediaModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Manage Social Media</h3></div>
+            <div class="modal-body">
+                <form id="social-media-form">
+                    <div id="socialMediaSection" class="space-y-4">
+                        <div id="socialMediaContainer" class="space-y-4">
+                            <% 
+                            const socialMediaToDisplay = Array.isArray(user.socialMedia) && user.socialMedia.length > 0 ? user.socialMedia : [{ type: '', link: '' }];
+                            socialMediaToDisplay.forEach(social => { 
+                            %>
+                                <div class="flex items-center space-x-2 social-media-row">
+                                    <select name="socialMediaType[]" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-1/3">
+                                        <option value="">Select</option>
+                                        <option value="facebook" <%= social.type === 'facebook' ? 'selected' : '' %>>Facebook</option>
+                                        <option value="instagram" <%= social.type === 'instagram' ? 'selected' : '' %>>Instagram</option>
+                                        <option value="twitter" <%= social.type === 'twitter' ? 'selected' : '' %>>Twitter</option>
+                                        <option value="linkedin" <%= social.type === 'linkedin' ? 'selected' : '' %>>LinkedIn</option>
+                                        <option value="youtube" <%= social.type === 'youtube' ? 'selected' : '' %>>YouTube</option>
+                                        <option value="website" <%= social.type === 'website' ? 'selected' : '' %>>Website</option>
+                                        <option value="other" <%= social.type === 'other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                    <input type="url" name="socialMediaLink[]" value="<%= social.link %>" placeholder="https://example.com" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-2/3">
+                                    <button type="button" class="remove-social-media icon-button text-white" title="Remove">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z" /></svg>
+                                    </button>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <p class="error-message" id="social-media-error"></p>
+                        <button id="addSocialMediaButton" type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
+                            Add another social media
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-socials-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="social-media-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="hidden modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header"><h3 class="text-2xl font-bold text-white">Change Password</h3></div>
+            <div class="modal-body">
+                <form id="password-form">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Current Password</label>
+                        <input type="password" name="currentPassword" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="current-password-error"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">New Password</label>
+                        <input type="password" name="newPassword" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="new-password-error"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="confirm-password-error"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="close-password-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                <button type="submit" form="password-form" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Change</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const showSuccess = (msg = 'Successfully updated!') => {
+        const popup = document.getElementById('successPopup');
+        document.getElementById('successMessage').textContent = msg;
+        popup.classList.add('show');
+        setTimeout(() => popup.classList.remove('show'), 3000);
+    };
+
+    // View Toggle
+    const setActiveView = (view) => {
+        const privateProfile = document.getElementById('private-profile');
+        const publicProfile = document.getElementById('public-profile');
+        const privateBtn = document.getElementById('privateViewButton');
+        const publicBtn = document.getElementById('publicViewButton');
+        if (view === 'private') {
+            privateProfile.classList.remove('hidden'); publicProfile.classList.add('hidden');
+            privateBtn.classList.replace('bg-gray-600', 'bg-red-600');
+            publicBtn.classList.replace('bg-red-600', 'bg-gray-600');
+        } else {
+            publicProfile.classList.remove('hidden'); privateProfile.classList.add('hidden');
+            publicBtn.classList.replace('bg-gray-600', 'bg-red-600');
+            privateBtn.classList.replace('bg-red-600', 'bg-gray-600');
+        }
+    };
+    setActiveView('private');
+    document.getElementById('privateViewButton').onclick = () => setActiveView('private');
+    document.getElementById('publicViewButton').onclick = () => setActiveView('public');
+
+    // Social Media Row
+    const createSocialMediaRow = (type = '', link = '') => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2 social-media-row';
+        row.innerHTML = `
+            <select name="socialMediaType[]" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-1/3">
+                <option value="">Select</option>
+                <option value="facebook" ${type === 'facebook' ? 'selected' : ''}>Facebook</option>
+                <option value="instagram" ${type === 'instagram' ? 'selected' : ''}>Instagram</option>
+                <option value="twitter" ${type === 'twitter' ? 'selected' : ''}>Twitter</option>
+                <option value="linkedin" ${type === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+                <option value="youtube" ${type === 'youtube' ? 'selected' : ''}>YouTube</option>
+                <option value="website" ${type === 'website' ? 'selected' : ''}>Website</option>
+                <option value="other" ${type === 'other' ? 'selected' : ''}>Other</option>
+            </select>
+            <input type="url" name="socialMediaLink[]" value="${link}" placeholder="https://example.com" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-2/3">
+            <button type="button" class="remove-social-media icon-button text-white" title="Remove">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z"/></svg>
+            </button>
+        `;
+        row.querySelector('.remove-social-media').onclick = () => row.remove();
+        return row;
+    };
+
+    document.getElementById('addSocialMediaButton')?.addEventListener('click', () => {
+        const container = document.getElementById('socialMediaContainer');
+        if (container.children.length >= 5) {
+            document.getElementById('social-media-error').textContent = 'Max 5 links allowed.';
+            document.getElementById('social-media-error').style.display = 'block';
+            return;
+        }
+        container.appendChild(createSocialMediaRow());
+    });
+
+    // Form Submission
+    const submitForm = async (formId, action) => {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const submitBtn = form.closest('.modal-content').querySelector('button[type="submit"]');
+        const errorEl = document.getElementById(`${formId.split('-')[0]}-error`);
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+        if (errorEl) errorEl.style.display = 'none';
+
+        try {
+            let body, headers = {};
+            if (formId === 'profile-picture-form') {
+                body = formData;
+            } else if (formId === 'social-media-form') {
+                const types = form.querySelectorAll('select[name="socialMediaType[]"]');
+                const links = form.querySelectorAll('input[name="socialMediaLink[]"]');
+                const socialMedia = Array.from(types).map((t, i) => ({
+                    type: t.value.trim(),
+                    link: links[i].value.trim()
+                })).filter(s => s.type && s.link && s.link.match(/^https?:\/\//));
+                if (socialMedia.length === 0) throw new Error('Add at least one valid link');
+                body = JSON.stringify({ socialMedia });
+                headers = { 'Content-Type': 'application/json' };
+            } else {
+                body = JSON.stringify(Object.fromEntries(formData));
+                headers = { 'Content-Type': 'application/json' };
+            }
+
+            const res = await fetch(`/profile/update-${action}`, { method: 'POST', headers, body });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Server error');
+
+            showSuccess(result.message || 'Updated!');
+
+            // Live Update
+            if (formId === 'name-form') {
+                document.getElementById('profileName').textContent = formData.get('name');
+            } else if (formId === 'username-form') {
+                const newUsername = formData.get('username');
+                document.getElementById('profileUsername').textContent = '@' + newUsername;
+                document.getElementById('breadcrumbUsername').textContent = '@' + newUsername;
+                document.title = '@' + newUsername + ' - Gyarage';
+            } else if (formId === 'bio-form') {
+                document.getElementById('profileBio').textContent = formData.get('bio') || 'Your bio goes here...';
+            } else if (formId === 'profile-picture-form') {
+                location.reload();
+            } else if (formId === 'social-media-form') {
+                location.reload();
+            }
+
+            form.closest('.modal-backdrop').classList.add('hidden');
+        } catch (err) {
+            if (errorEl) { errorEl.textContent = err.message; errorEl.style.display = 'block'; }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = action === 'password' ? 'Change' : 'Save';
+        }
+    };
+
+    ['profile-picture-form', 'name-form', 'username-form', 'bio-form', 'social-media-form'].forEach(id => {
+        const form = document.getElementById(id);
+        if (form) {
+            form.onsubmit = e => {
+                e.preventDefault();
+                const action = id === 'profile-picture-form' ? 'picture' : id.split('-')[0];
+                submitForm(id, action);
+            };
+        }
+    });
+
+    const passwordForm = document.getElementById('password-form');
+    if (passwordForm) {
+        passwordForm.onsubmit = async e => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const errors = {
+                current: document.getElementById('current-password-error'),
+                new: document.getElementById('new-password-error'),
+                confirm: document.getElementById('confirm-password-error')
+            };
+            Object.values(errors).forEach(el => el && (el.style.display = 'none'));
+            if (fd.get('newPassword') !== fd.get('confirmPassword')) {
+                errors.confirm.textContent = 'Passwords do not match'; errors.confirm.style.display = 'block'; return;
+            }
+            try {
+                const res = await fetch('/profile/update-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword: fd.get('currentPassword'), newPassword: fd.get('newPassword') })
+                });
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.message);
+                showSuccess(result.message || 'Password changed!');
+                e.target.reset();
+                document.getElementById('passwordModal').classList.add('hidden');
+            } catch (err) {
+                errors.current.textContent = err.message; errors.current.style.display = 'block';
+            }
+        };
+    }
+
+    // Modal Controls
+    const modals = { 
+        editProfilePictureButton: 'profilePictureModal', 
+        editNameButton: 'nameModal', 
+        editUsernameButton: 'usernameModal', 
+        editBioButton: 'bioModal', 
+        editSocialsButton: 'socialMediaModal', 
+        changePasswordButton: 'passwordModal' 
+    };
+    Object.entries(modals).forEach(([btnId, modalId]) => {
+        const btn = document.getElementById(btnId);
+        if (btn) btn.onclick = () => document.getElementById(modalId).classList.remove('hidden');
+    });
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+        modal.onclick = e => { if (e.target === modal) modal.classList.add('hidden'); };
+        modal.querySelectorAll('button[id^="close-"]').forEach(btn => {
+            btn.onclick = () => {
+                modal.classList.add('hidden');
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            };
+        });
+    });
+
+    // Admin Redirect
+    const goToAdminButton = document.getElementById('goToAdminButton');
+    if (goToAdminButton) {
+        goToAdminButton.onclick = () => {
+            const pos = '<%= user.position %>'.trim();
+            const map = { 
+                admin: '/admin/superaccount', 
+                level1: '/admin/article', 
+                level2: '/admin/category', 
+                level3: '/admin/level3am' 
+            };
+            window.location.href = map[pos] || '/admin/category';
+        };
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,920 @@
+<%- include('../partials/head.ejs', { title: 'USA - Model Admin' }) %>
+
+<style>
+    body {
+        background-color: #000000;
+    }
+    select option {
+        background-color: white;
+        color: black;
+    }
+    select option:hover {
+        background-color: #DC2626;
+        color: white;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to {
+            width: 100%;
+        }
+    }
+    .icon-button {
+        transition: transform 0.2s;
+    }
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+        will-change: transform, opacity;
+    }
+    .mobile-menu-open {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    #mobile-menu-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        pointer-events: auto;
+    }
+    #mobile-menu-backdrop.active {
+        display: block;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<!-- Subnavbar -->
+<nav class="bg-gray-800 py-4">
+    <div class="container mx-auto px-4 flex justify-center space-x-6">
+        <a href="/admin/category" class="text-white text-lg font-semibold hover:text-red-600 transition">Category</a>
+        <a href="/admin/brand" class="text-white text-lg font-semibold hover:text-red-600 transition">Brands</a>
+        <a href="/admin/model" class="text-white text-lg font-semibold hover:text-red-600 transition border-b-2 border-red-600">Model</a>
+        <a href="/admin/article" class="text-white text-lg font-semibold hover:text-red-600 transition">Article</a>
+    </div>
+</nav>
+
+<!-- Main Section -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <!-- Upload Model Section -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-white mb-6">Publish Model</h2>
+
+        <!-- Model Creation Form -->
+        <form id="model-form" enctype="multipart/form-data" class="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div>
+                <label for="vehicle-type" class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type</label>
+                <select id="vehicle-type" name="vehicleType" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <option value="car">Car</option>
+                    <option value="bike">Bike</option>
+                    <option value="truck">Truck</option>
+                </select>
+            </div>
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-300 mb-1">Category</label>
+                <select id="category" name="category" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Category</option>
+                </select>
+            </div>
+            <div>
+                <label for="brand" class="block text-sm font-medium text-gray-300 mb-1">Brand</label>
+                <select id="brand" name="brand" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Brand</option>
+                </select>
+            </div>
+            <div>
+                <label for="model-image" class="block text-sm font-medium text-gray-300 mb-1">Model Image</label>
+                <input type="file" id="model-image" name="modelImage" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+            </div>
+            <div>
+                <label for="model-name" class="block text-sm font-medium text-gray-300 mb-1">Model Name</label>
+                <input type="text" id="model-name" name="modelName" placeholder="Enter model name" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+            </div>
+            <div class="flex space-x-4">
+                <div class="w-1/2">
+                    <label for="safety-rating" class="block text-sm font-medium text-gray-300 mb-1">Safety Rating</label>
+                    <input type="number" id="safety-rating" name="safetyRating" placeholder="Enter safety rating (e.g., 5)" min="0" max="5" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                </div>
+                <div class="w-1/2">
+                    <label for="safety-link" class="block text-sm font-medium text-gray-300 mb-1">Safety Rating Link</label>
+                    <input type="text" id="safety-link" name="safetyLink" placeholder="Enter NCAP link" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                </div>
+            </div>
+            <div>
+                <label for="engine-type" class="block text-sm font-medium text-gray-300 mb-1">Engine Type</label>
+                <select id="engine-type" name="engineType" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Engine Type</option>
+                    <option value="ice">ICE Engine</option>
+                    <option value="electric">Electric</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="hydrogen">Hydrogen</option>
+                </select>
+            </div>
+            <div>
+                <label for="starting-price" class="block text-sm font-medium text-gray-300 mb-1">Starting Price</label>
+                <input type="text" id="starting-price" name="startingPrice" placeholder="Enter starting price (e.g., $25,000)" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+            </div>
+            <!-- Exterior Colors -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Exterior Color</h3>
+                <div id="exterior-colors">
+                    <div class="exterior-color-group mb-4">
+                        <div class="flex space-x-4 mb-2">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                                <input type="file" accept="image/*" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                                <input type="text" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Midnight Black)">
+                            </div>
+                        </div>
+                        <div class="color-images mb-2">
+                            <input type="file" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                            <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                        </div>
+                        <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" id="add-exterior-color" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Color</button>
+            </div>
+            <!-- Interior Colors -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Interior Color</h3>
+                <div id="interior-colors">
+                    <div class="interior-color-group mb-4">
+                        <div class="flex space-x-4 mb-2">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                                <input type="file" accept="image/*" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                                <input type="text" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Ebony Leather)">
+                            </div>
+                        </div>
+                        <div class="color-images mb-2">
+                            <input type="file" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                            <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                        </div>
+                        <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" id="add-interior-color" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Color</button>
+            </div>
+            <!-- Variants -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Variants</h3>
+                <div id="variants">
+                    <div class="variant-group flex space-x-4 mb-4 relative">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Variant Name</label>
+                            <input type="text" class="variant-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant name (e.g., XLE)">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Variant Price</label>
+                            <input type="text" class="variant-price w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant price (e.g., $30,000)">
+                        </div>
+                        <button type="button" class="delete-variant-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Variant">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" id="add-variant" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Variant</button>
+            </div>
+            <!-- About/Bio -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload About or Bio of Model</h3>
+                <div class="flex space-x-4 mb-4">
+                    <button type="button" id="article-icon" class="icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </button>
+                    <button type="button" id="photo-icon" class="icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </button>
+                    <button type="button" id="link-icon" class="icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                    </button>
+                </div>
+                <div id="content-area" class="relative"></div>
+            </div>
+            <!-- Available On -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Available On</h3>
+                <div id="available-sites">
+                    <div class="site-group flex space-x-4 mb-4 relative">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Site Name</label>
+                            <input type="text" class="site-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter site name (e.g., Toyota Official)">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Site Link/Phone</label>
+                            <input type="text" class="site-link w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link or phone number">
+                        </div>
+                        <button type="button" class="delete-site-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Site">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" id="add-site" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Site</button>
+            </div>
+            <!-- Specifications -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Upload Specifications</h3>
+                <div id="specifications">
+                    <div class="spec-group border border-gray-500 p-4 rounded-lg mb-4 relative">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Specification Title</label>
+                        <input type="text" class="spec-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specification title (e.g., Engine and Displacement)">
+                        <div class="spec-lists mt-4">
+                            <div class="spec-list-group mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                                <input type="text" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                                <div class="flex space-x-4 my-4">
+                                    <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </button>
+                                    <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    </button>
+                                    <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                    </button>
+                                </div>
+                                <div class="spec-content-area relative"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="add-spec-list bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Specs List</button>
+                        <button type="button" class="delete-spec-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Specification">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" id="add-spec" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Add Another Specs</button>
+            </div>
+            <button type="submit" id="publish-model-btn" class="w-full bg-red-600 text-white text-lg font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-red-700 transition">Publish Model</button>
+        </form>
+    </section>
+
+    <!-- Already Published Models -->
+    <section>
+        <h2 class="text-3xl font-bold text-white mb-6">Already Published Models</h2>
+        <select id="published-vehicle-type-selector" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-600">
+            <option value="" disabled selected>Select Vehicle Type</option>
+            <option value="car">Car</option>
+            <option value="bike">Bike</option>
+            <option value="truck">Truck</option>
+        </select>
+        <select id="published-brand-selector" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-600">
+            <option value="" disabled selected>Select Brand</option>
+        </select>
+        <div id="published-model-boxes" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dynamically populated model boxes -->
+        </div>
+    </section>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop.classList.toggle('active');
+        };
+
+        mobileMenuButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleMenu();
+        });
+
+        closeMobileMenuButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            mobileMenuOverlay.classList.remove('mobile-menu-open');
+            mobileMenuBackdrop.classList.remove('active');
+        });
+
+        mobileMenuBackdrop.addEventListener('click', (e) => {
+            e.preventDefault();
+            mobileMenuOverlay.classList.remove('mobile-menu-open');
+            mobileMenuBackdrop.classList.remove('active');
+        });
+
+        // Search Functionality
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            if (query) {
+                alert('Search for: ' + query);
+            } else {
+                alert('Please enter a search query.');
+            }
+        });
+
+        // Highlight Active Nav Link
+        const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
+        const currentPath = window.location.pathname;
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('bg-red-600', 'text-white');
+                link.classList.remove('hover:bg-red-600');
+            }
+        });
+
+        // Populate Category and Brand Selectors
+        const vehicleType = document.getElementById('vehicle-type');
+        const categorySelector = document.getElementById('category');
+        const brandSelectorForm = document.getElementById('brand');
+
+        vehicleType.addEventListener('change', () => {
+            const type = vehicleType.value;
+            if (type) {
+                // Mock categories
+                const categories = [
+                    { id: 1, name: 'Sedan', vehicleType: 'car' },
+                    { id: 2, name: 'SUV', vehicleType: 'car' },
+                    { id: 3, name: 'Cruiser', vehicleType: 'bike' }
+                ];
+                categorySelector.innerHTML = '<option value="" disabled selected>Select Category</option>';
+                categories.filter(c => c.vehicleType === type).forEach(cat => {
+                    categorySelector.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
+                });
+                categorySelector.disabled = false;
+
+                // Mock brands
+                const brands = [
+                    { id: 1, name: 'Toyota', vehicleType: 'car' },
+                    { id: 2, name: 'BMW', vehicleType: 'car' },
+                    { id: 3, name: 'Harley-Davidson', vehicleType: 'bike' }
+                ];
+                brandSelectorForm.innerHTML = '<option value="" disabled selected>Select Brand</option>';
+                brands.filter(b => b.vehicleType === type).forEach(brand => {
+                    brandSelectorForm.innerHTML += `<option value="${brand.name}">${brand.name}</option>`;
+                });
+                brandSelectorForm.disabled = false;
+            } else {
+                categorySelector.disabled = true;
+                brandSelectorForm.disabled = true;
+                categorySelector.value = '';
+                brandSelectorForm.value = '';
+            }
+        });
+
+        // Exterior Colors
+        let exteriorColorCount = 1;
+        document.getElementById('add-exterior-color').addEventListener('click', () => {
+            const exteriorColors = document.getElementById('exterior-colors');
+            const div = document.createElement('div');
+            div.className = 'exterior-color-group mb-4 relative';
+            div.innerHTML = `
+                <div class="flex space-x-4 mb-2">
+                    <div class="w-1/2">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                        <input type="file" accept="image/*" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                        <input type="text" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Midnight Black)">
+                    </div>
+                </div>
+                <div class="color-images mb-2">
+                    <input type="file" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                    <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                </div>
+                <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            exteriorColors.appendChild(div);
+            exteriorColorCount++;
+            addColorImageListener(div);
+            addDeleteListener(div, '.delete-color-btn', exteriorColors);
+        });
+
+        function addColorImageListener(group) {
+            const addImageBtn = group.querySelector('.add-color-image');
+            const colorImages = group.querySelector('.color-images');
+            let imageCount = 1;
+            addImageBtn.addEventListener('click', () => {
+                if (imageCount < 8) {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.className = 'w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2';
+                    colorImages.insertBefore(input, addImageBtn);
+                    imageCount++;
+                }
+                if (imageCount >= 8) {
+                    addImageBtn.disabled = true;
+                }
+            });
+        }
+
+        // Interior Colors
+        let interiorColorCount = 1;
+        document.getElementById('add-interior-color').addEventListener('click', () => {
+            const interiorColors = document.getElementById('interior-colors');
+            const div = document.createElement('div');
+            div.className = 'interior-color-group mb-4 relative';
+            div.innerHTML = `
+                <div class="flex space-x-4 mb-2">
+                    <div class="w-1/2">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Image</label>
+                        <input type="file" accept="image/*" class="color-image w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Color Name</label>
+                        <input type="text" class="color-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter color name (e.g., Ebony Leather)">
+                    </div>
+                </div>
+                <div class="color-images mb-2">
+                    <input type="file" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 mb-2">
+                    <button type="button" class="add-color-image bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Image</button>
+                </div>
+                <button type="button" class="delete-color-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Color">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            interiorColors.appendChild(div);
+            interiorColorCount++;
+            addColorImageListener(div);
+            addDeleteListener(div, '.delete-color-btn', interiorColors);
+        });
+
+        document.querySelectorAll('.exterior-color-group').forEach(addColorImageListener);
+        document.querySelectorAll('.interior-color-group').forEach(addColorImageListener);
+
+        // Variants
+        let variantCount = 1;
+        document.getElementById('add-variant').addEventListener('click', () => {
+            const variants = document.getElementById('variants');
+            const div = document.createElement('div');
+            div.className = 'variant-group flex space-x-4 mb-4 relative';
+            div.innerHTML = `
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Variant Name</label>
+                    <input type="text" class="variant-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant name (e.g., XLE)">
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Variant Price</label>
+                    <input type="text" class="variant-price w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter variant price (e.g., $30,000)">
+                </div>
+                <button type="button" class="delete-variant-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Variant">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            variants.appendChild(div);
+            variantCount++;
+            addDeleteListener(div, '.delete-variant-btn', variants);
+        });
+
+        // Content Icons
+        let contentOrder = [], articleCount = 0, photoCount = 0, linkCount = 0;
+        const contentArea = document.getElementById('content-area');
+
+        document.getElementById('article-icon').addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'relative mb-4';
+            div.id = `article-placeholder-${++articleCount}`;
+            div.innerHTML = `
+                <textarea class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" rows="6" placeholder="Write your article or model description here..."></textarea>
+                <button class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            contentArea.appendChild(div);
+            contentOrder.push('article');
+            div.querySelector('.remove-content-btn').addEventListener('click', () => {
+                div.remove();
+                contentOrder = contentOrder.filter((item, index) => item !== 'article' || index !== contentOrder.length - 1);
+            });
+        });
+
+        document.getElementById('photo-icon').addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'relative mb-4';
+            div.id = `photo-placeholder-${++photoCount}`;
+            div.innerHTML = `
+                <input type="file" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                <input type="text" class="w-full px-4 py-2 mt-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Image source (e.g., forbes.com)">
+                <button class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            contentArea.appendChild(div);
+            contentOrder.push('photo');
+            div.querySelector('.remove-content-btn').addEventListener('click', () => {
+                div.remove();
+                contentOrder = contentOrder.filter((item, index) => item !== 'photo' || index !== contentOrder.length - 1);
+            });
+        });
+
+        document.getElementById('link-icon').addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'relative mb-4';
+            div.id = `link-placeholder-${++linkCount}`;
+            div.innerHTML = `
+                <input type="text" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link (e.g., youtube.com, forbes.com)">
+                <button class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            contentArea.appendChild(div);
+            contentOrder.push('link');
+            div.querySelector('.remove-content-btn').addEventListener('click', () => {
+                div.remove();
+                contentOrder = contentOrder.filter((item, index) => item !== 'link' || index !== contentOrder.length - 1);
+            });
+        });
+
+        // Specifications
+        let specCount = 1;
+        document.getElementById('add-spec').addEventListener('click', () => {
+            const specifications = document.getElementById('specifications');
+            const div = document.createElement('div');
+            div.className = 'spec-group border border-gray-500 p-4 rounded-lg mb-4 relative';
+            div.innerHTML = `
+                <label class="block text-sm font-medium text-gray-300 mb-1">Specification Title</label>
+                <input type="text" class="spec-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specification title (e.g., Engine and Displacement)">
+                <div class="spec-lists mt-4">
+                    <div class="spec-list-group mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                        <input type="text" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                        <div class="flex space-x-4 my-4">
+                            <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </button>
+                            <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            </button>
+                            <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            </button>
+                        </div>
+                        <div class="spec-content-area relative"></div>
+                    </div>
+                </div>
+                <button type="button" class="add-spec-list bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Add Another Specs List</button>
+                <button type="button" class="delete-spec-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Specification">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            specifications.appendChild(div);
+            specCount++;
+            addSpecListListeners(div);
+            addDeleteListener(div, '.delete-spec-btn', specifications);
+        });
+
+        function addSpecListListeners(specGroup) {
+            let specListCount = 1;
+            const specLists = specGroup.querySelector('.spec-lists');
+            specGroup.querySelector('.add-spec-list').addEventListener('click', () => {
+                const div = document.createElement('div');
+                div.className = 'spec-list-group mb-4';
+                div.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Specs List Title</label>
+                    <input type="text" class="spec-list-title w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter specs list title (e.g., 3.8L Cylinder)">
+                    <div class="flex space-x-4 my-4">
+                        <button type="button" class="spec-article-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Article">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </button>
+                        <button type="button" class="spec-photo-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Photo">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </button>
+                        <button type="button" class="spec-link-icon icon-button bg-gray-700 p-2 rounded-full hover:bg-red-600 transition" title="Add Link">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        </button>
+                    </div>
+                    <div class="spec-content-area relative"></div>
+                `;
+                specLists.appendChild(div);
+                specListCount++;
+                addSpecContentListeners(div);
+            });
+
+            addSpecContentListeners(specGroup.querySelector('.spec-list-group'));
+        }
+
+        function addSpecContentListeners(specListGroup) {
+            let specArticleCount = 0, specPhotoCount = 0, specLinkCount = 0;
+            const specContentArea = specListGroup.querySelector('.spec-content-area');
+
+            specListGroup.querySelector('.spec-article-icon').addEventListener('click', () => {
+                const div = document.createElement('div');
+                div.className = 'relative mb-4';
+                div.id = `spec-article-placeholder-${++specArticleCount}`;
+                div.innerHTML = `
+                    <textarea class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" rows="6" placeholder="Write specification article..."></textarea>
+                    <button class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+                specContentArea.appendChild(div);
+                div.querySelector('.remove-content-btn').addEventListener('click', () => {
+                    div.remove();
+                });
+            });
+
+            specListGroup.querySelector('.spec-photo-icon').addEventListener('click', () => {
+                const div = document.createElement('div');
+                div.className = 'relative mb-4';
+                div.id = `spec-photo-placeholder-${++specPhotoCount}`;
+                div.innerHTML = `
+                    <input type="file" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                    <input type="text" class="w-full px-4 py-2 mt-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Image source (e.g., forbes.com)">
+                    <button class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+                specContentArea.appendChild(div);
+                div.querySelector('.remove-content-btn').addEventListener('click', () => {
+                    div.remove();
+                });
+            });
+
+            specListGroup.querySelector('.spec-link-icon').addEventListener('click', () => {
+                const div = document.createElement('div');
+                div.className = 'relative mb-4';
+                div.id = `spec-link-placeholder-${++specLinkCount}`;
+                div.innerHTML = `
+                    <input type="text" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link (e.g., youtube.com, forbes.com)">
+                    <button class="remove-content-btn absolute top-2 left-2 text-red-600 hover:text-red-700" title="Remove">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+                specContentArea.appendChild(div);
+                div.querySelector('.remove-content-btn').addEventListener('click', () => {
+                    div.remove();
+                });
+            });
+        }
+
+        document.querySelectorAll('.spec-group').forEach(addSpecListListeners);
+
+        // Available Sites
+        let siteCount = 1;
+        document.getElementById('add-site').addEventListener('click', () => {
+            const availableSites = document.getElementById('available-sites');
+            const div = document.createElement('div');
+            div.className = 'site-group flex space-x-4 mb-4 relative';
+            div.innerHTML = `
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Site Name</label>
+                    <input type="text" class="site-name w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter site name (e.g., Toyota Official)">
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Site Link/Phone</label>
+                    <input type="text" class="site-link w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" placeholder="Enter link or phone number">
+                </div>
+                <button type="button" class="delete-site-btn absolute top-2 right-2 text-red-600 hover:text-red-700" title="Delete Site">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            `;
+            availableSites.appendChild(div);
+            siteCount++;
+            addDeleteListener(div, '.delete-site-btn', availableSites);
+        });
+
+        // Form Submission
+        document.getElementById('model-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const vehicleType = document.getElementById('vehicle-type').value;
+            const category = document.getElementById('category').value;
+            const brand = document.getElementById('brand').value;
+            const modelName = document.getElementById('model-name').value;
+            const safetyRating = document.getElementById('safety-rating').value;
+            const safetyLink = document.getElementById('safety-link').value;
+            const engineType = document.getElementById('engine-type').value;
+            const startingPrice = document.getElementById('starting-price').value;
+
+            // Collect exterior colors
+            const exteriorColors = [];
+            document.querySelectorAll('.exterior-color-group').forEach(group => {
+                const colorName = group.querySelector('.color-name').value;
+                const colorImage = group.querySelector('.color-image').files[0]?.name || '';
+                const images = Array.from(group.querySelectorAll('.color-images input[type="file"]')).map(input => input.files[0]?.name).filter(Boolean);
+                if (colorName || colorImage || images.length) {
+                    exteriorColors.push({ name: colorName, image: colorImage, additionalImages: images });
+                }
+            });
+
+            // Collect interior colors
+            const interiorColors = [];
+            document.querySelectorAll('.interior-color-group').forEach(group => {
+                const colorName = group.querySelector('.color-name').value;
+                const colorImage = group.querySelector('.color-image').files[0]?.name || '';
+                const images = Array.from(group.querySelectorAll('.color-images input[type="file"]')).map(input => input.files[0]?.name).filter(Boolean);
+                if (colorName || colorImage || images.length) {
+                    interiorColors.push({ name: colorName, image: colorImage, additionalImages: images });
+                }
+            });
+
+            // Collect variants
+            const variants = [];
+            document.querySelectorAll('.variant-group').forEach(group => {
+                const name = group.querySelector('.variant-name').value;
+                const price = group.querySelector('.variant-price').value;
+                if (name || price) {
+                    variants.push({ name, price });
+                }
+            });
+
+            // Collect available sites
+            const sites = [];
+            document.querySelectorAll('.site-group').forEach(group => {
+                const name = group.querySelector('.site-name').value;
+                const link = group.querySelector('.site-link').value;
+                if (name || link) {
+                    sites.push({ name, link });
+                }
+            });
+
+            // Collect specifications
+            const specifications = [];
+            document.querySelectorAll('.spec-group').forEach(group => {
+                const title = group.querySelector('.spec-title').value;
+                const lists = [];
+                group.querySelectorAll('.spec-list-group').forEach(listGroup => {
+                    const listTitle = listGroup.querySelector('.spec-list-title').value;
+                    const content = [];
+                    listGroup.querySelectorAll('.spec-content-area > div').forEach(contentDiv => {
+                        if (contentDiv.id.includes('article-placeholder')) {
+                            content.push({ type: 'article', value: contentDiv.querySelector('textarea').value });
+                        } else if (contentDiv.id.includes('photo-placeholder')) {
+                            content.push({
+                                type: 'photo',
+                                image: contentDiv.querySelector('input[type="file"]').files[0]?.name,
+                                source: contentDiv.querySelector('input[type="text"]').value
+                            });
+                        } else if (contentDiv.id.includes('link-placeholder')) {
+                            content.push({ type: 'link', value: contentDiv.querySelector('input[type="text"]').value });
+                        }
+                    });
+                    if (listTitle || content.length) {
+                        lists.push({ title: listTitle, content });
+                    }
+                });
+                if (title || lists.length) {
+                    specifications.push({ title, lists });
+                }
+            });
+
+            // Collect about content
+            const aboutContent = contentOrder.map((type, index) => {
+                const div = contentArea.children[index];
+                if (type === 'article') {
+                    return { type: 'article', value: div.querySelector('textarea').value };
+                } else if (type === 'photo') {
+                    return {
+                        type: 'photo',
+                        image: div.querySelector('input[type="file"]').files[0]?.name,
+                        source: div.querySelector('input[type="text"]').value
+                    };
+                } else if (type === 'link') {
+                    return { type: 'link', value: div.querySelector('input[type="text"]').value };
+                }
+            }).filter(Boolean);
+
+            // Mock form submission
+            alert(`Model Published: ${brand} ${modelName}\nVehicle Type: ${vehicleType}\nCategory: ${category}\nEngine Type: ${engineType}\nStarting Price: ${startingPrice}\nSafety Rating: ${safetyRating}\nExterior Colors: ${exteriorColors.length}\nInterior Colors: ${interiorColors.length}\nVariants: ${variants.length}\nSites: ${sites.length}\nSpecifications: ${specifications.length}\nAbout Content: ${aboutContent.length}`);
+            console.log({
+                vehicleType, category, brand, modelName, safetyRating, safetyLink, engineType, startingPrice,
+                exteriorColors, interiorColors, variants, sites, specifications, aboutContent
+            });
+        });
+
+        // Already Published Models
+        const publishedVehicleTypeSelector = document.getElementById('published-vehicle-type-selector');
+        const publishedBrandSelector = document.getElementById('published-brand-selector');
+        const publishedModelBoxes = document.getElementById('published-model-boxes');
+
+        publishedVehicleTypeSelector.addEventListener('change', () => {
+            const vehicleType = publishedVehicleTypeSelector.value;
+            if (vehicleType) {
+                // Mock brands
+                const brands = [
+                    { id: 1, name: 'Toyota', vehicleType: 'car' },
+                    { id: 2, name: 'BMW', vehicleType: 'car' },
+                    { id: 3, name: 'Harley-Davidson', vehicleType: 'bike' }
+                ];
+                publishedBrandSelector.innerHTML = '<option value="" disabled selected>Select Brand</option>';
+                brands.filter(b => b.vehicleType === vehicleType).forEach(brand => {
+                    publishedBrandSelector.innerHTML += `<option value="${brand.name}">${brand.name}</option>`;
+                });
+                publishedBrandSelector.disabled = false;
+            } else {
+                publishedBrandSelector.disabled = true;
+                publishedBrandSelector.value = '';
+                publishedModelBoxes.innerHTML = '';
+            }
+        });
+
+        publishedBrandSelector.addEventListener('change', () => {
+            const vehicleType = publishedVehicleTypeSelector.value;
+            const brand = publishedBrandSelector.value;
+            if (vehicleType && brand) {
+                // Mock published models
+                const models = [
+                    { id: 1, name: 'Corolla', vehicleType: 'car', brand: 'Toyota', image: 'corolla.jpg' },
+                    { id: 2, name: 'Camry', vehicleType: 'car', brand: 'Toyota', image: 'camry.jpg' },
+                    { id: 3, name: 'X5', vehicleType: 'car', brand: 'BMW', image: 'x5.jpg' }
+                ];
+                publishedModelBoxes.innerHTML = '';
+                models
+                    .filter(model => model.vehicleType === vehicleType && model.brand === brand)
+                    .forEach(model => {
+                        const box = document.createElement('div');
+                        box.className = 'bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-5 flex flex-col items-center text-center border-bottom-left-to-right';
+                        box.innerHTML = `
+                            <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner">
+                                <img src="/Uploads/models/${model.image}" alt="${model.name}" class="w-full h-full object-contain rounded-lg">
+                            </div>
+                            <div class="text-white font-semibold text-lg line-clamp-1">${model.name}</div>
+                            <div class="text-gray-400 text-sm mt-2">Brand: ${model.brand}</div>
+                            <div class="text-gray-400 text-sm">Vehicle Type: ${model.vehicleType}</div>
+                            <div class="flex space-x-2 mt-2">
+                                <button class="edit-btn bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 transition" data-model-id="${model.id}">Edit</button>
+                                <button class="delete-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" data-model-id="${model.id}">Delete</button>
+                            </div>
+                        `;
+                        publishedModelBoxes.appendChild(box);
+                    });
+
+                publishedModelBoxes.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('delete-btn')) {
+                        const modelId = e.target.getAttribute('data-model-id');
+                        const model = models.find(m => m.id == modelId);
+                        const confirmDelete = confirm(`Delete ${model.name} from USA region?`);
+                        if (confirmDelete) {
+                            alert(`${model.name} deleted from USA region.`);
+                            e.target.closest('div').remove();
+                        }
+                    } else if (e.target.classList.contains('edit-btn')) {
+                        const modelId = e.target.getAttribute('data-model-id');
+                        const model = models.find(m => m.id == modelId);
+                        alert(`Edit form for ${model.name} (mocked). Form will be pre-filled with existing data.`);
+                        // Mock edit form: Show same form with pre-filled data and change button to "Update Model"
+                        document.getElementById('publish-model-btn').textContent = 'Update Model';
+                        // Reset form for demo
+                        setTimeout(() => {
+                            document.getElementById('publish-model-btn').textContent = 'Publish Model';
+                            document.getElementById('model-form').reset();
+                        }, 2000);
+                    }
+                });
+            }
+        });
+
+        // Delete Listener Function
+        function addDeleteListener(element, btnClass, parent) {
+            const deleteBtn = element.querySelector(btnClass);
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    element.remove();
+                });
+            }
+        }
+
+        // Initialize delete buttons for existing elements
+        document.querySelectorAll('.exterior-color-group').forEach(group => addDeleteListener(group, '.delete-color-btn', document.getElementById('exterior-colors')));
+        document.querySelectorAll('.interior-color-group').forEach(group => addDeleteListener(group, '.delete-color-btn', document.getElementById('interior-colors')));
+        document.querySelectorAll('.variant-group').forEach(group => addDeleteListener(group, '.delete-variant-btn', document.getElementById('variants')));
+        document.querySelectorAll('.site-group').forEach(group => addDeleteListener(group, '.delete-site-btn', document.getElementById('available-sites')));
+        document.querySelectorAll('.spec-group').forEach(group => addDeleteListener(group, '.delete-spec-btn', document.getElementById('specifications')));
+    });
+</script>
+</body>
+</html>

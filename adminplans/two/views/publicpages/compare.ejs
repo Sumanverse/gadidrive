@@ -1,0 +1,509 @@
+<%- include('../partials/head.ejs', { title: 'USA - compare' }) %>
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        .border-bottom-left-to-right {
+            position: relative;
+            border-radius: 0.75rem;
+        }
+        .border-bottom-left-to-right:hover::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #DC2626;
+            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        }
+        @keyframes borderLeftToRight {
+            to {
+                width: 100%;
+            }
+        }
+        .filter-button:hover {
+            background-color: #DC2626;
+            color: #FFFFFF;
+        }
+        .breadcrumb a:hover {
+            color: #DC2626;
+        }
+        #mobile-menu-overlay {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+            width: 16rem;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: auto;
+            will-change: transform, opacity;
+        }
+        .mobile-menu-open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #mobile-menu-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        #mobile-menu-backdrop.active {
+            display: block;
+        }
+        .vehicle-types-selector ul {
+            direction: rtl;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .vehicle-types-selector ul::-webkit-scrollbar {
+            display: none;
+        }
+        .sub-nav-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .sub-nav-link:hover .icon {
+            background-color: #DC2626;
+        }
+        .sub-nav-link:hover span {
+            color: #DC2626;
+        }
+        .sub-nav-link.active .icon {
+            background-color: #DC2626;
+        }
+        .sub-nav-link.active span {
+            color: #DC2626;
+        }
+        .sub-nav-link span {
+            color: #FFFFFF;
+        }
+        .sub-nav-link .icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.5rem;
+        }
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .color-box:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins']">
+    
+<%- include('../partials/navbar') %>
+
+    <!-- Main Section -->
+    <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb text-white text-sm sm:text-base flex items-center mb-4">
+            <a href="/" class="hover:text-red-600">Gyarage</a> 
+            <span class="mx-2 text-red-600">&gt;&gt;</span> 
+            <a href="/usa" class="hover:text-red-600">USA</a> 
+            <span class="mx-2 text-red-600">&gt;&gt;</span> 
+            <a href="/usa/compare" class="text-red-600 font-bold">Compare</a>
+        </div>
+
+        <!-- Compare Section -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-b from-red-500 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
+                <b>Compare</b>
+            </div>
+            <div class="bg-gradient-to-b from-red-500 to-black text-white rounded-xl shadow-xl p-6 lg:p-10 border-bottom-left-to-right">
+                <div class="howmany flex flex-col md:flex-row items-center justify-center md:justify-start space-y-4 md:space-y-0 md:space-x-8 text-xl sm:text-2xl font-bold mb-8">
+                    <span>How many vehicles you want to compare?</span>
+                    <div class="relative inline-block w-40">
+                        <select id="number" name="number" class="w-full h-12 rounded-lg bg-white text-black font-semibold text-lg border-2 border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="compare-selection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right">
+                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 1</b></div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="cselector flex flex-col items-start space-y-2">
+                                <label for="category1" class="text-sm font-semibold text-gray-300">Choose Category</label>
+                                <select id="category1" name="category1" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="suv">SUV</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                </select>
+                            </div>
+                            <div class="bselector flex flex-col items-start space-y-2">
+                                <label for="brand1" class="text-sm font-semibold text-gray-300">Choose Brand</label>
+                                <select id="brand1" name="brand1" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="bmw">BMW</option>
+                                    <option value="mercedes">Mercedes</option>
+                                    <option value="volvo">Volvo</option>
+                                    <option value="honda">Honda</option>
+                                </select>
+                            </div>
+                            <div class="mselector flex flex-col items-start space-y-2">
+                                <label for="model1" class="text-sm font-semibold text-gray-300">Choose Model</label>
+                                <select id="model1" name="model1" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="gwagon">G Wagon</option>
+                                    <option value="s-class">S-Class</option>
+                                    <option value="gls">GLS</option>
+                                    <option value="eoq">EOQ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right">
+                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 2</b></div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="cselector flex flex-col items-start space-y-2">
+                                <label for="category2" class="text-sm font-semibold text-gray-300">Choose Category</label>
+                                <select id="category2" name="category2" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="suv">SUV</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                </select>
+                            </div>
+                            <div class="bselector flex flex-col items-start space-y-2">
+                                <label for="brand2" class="text-sm font-semibold text-gray-300">Choose Brand</label>
+                                <select id="brand2" name="brand2" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="bmw">BMW</option>
+                                    <option value="mercedes">Mercedes</option>
+                                    <option value="volvo">Volvo</option>
+                                    <option value="honda">Honda</option>
+                                </select>
+                            </div>
+                            <div class="mselector flex flex-col items-start space-y-2">
+                                <label for="model2" class="text-sm font-semibold text-gray-300">Choose Model</label>
+                                <select id="model2" name="model2" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="gwagon">G Wagon</option>
+                                    <option value="s-class">S-Class</option>
+                                    <option value="gls">GLS</option>
+                                    <option value="eoq">EOQ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right hidden" id="vehicle-3">
+                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 3</b></div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="cselector flex flex-col items-start space-y-2">
+                                <label for="category3" class="text-sm font-semibold text-gray-300">Choose Category</label>
+                                <select id="category3" name="category3" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="suv">SUV</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                </select>
+                            </div>
+                            <div class="bselector flex flex-col items-start space-y-2">
+                                <label for="brand3" class="text-sm font-semibold text-gray-300">Choose Brand</label>
+                                <select id="brand3" name="brand3" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="bmw">BMW</option>
+                                    <option value="mercedes">Mercedes</option>
+                                    <option value="volvo">Volvo</option>
+                                    <option value="honda">Honda</option>
+                                </select>
+                            </div>
+                            <div class="mselector flex flex-col items-start space-y-2">
+                                <label for="model3" class="text-sm font-semibold text-gray-300">Choose Model</label>
+                                <select id="model3" name="model3" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="gwagon">G Wagon</option>
+                                    <option value="s-class">S-Class</option>
+                                    <option value="gls">GLS</option>
+                                    <option value="eoq">EOQ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right hidden" id="vehicle-4">
+                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 4</b></div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="cselector flex flex-col items-start space-y-2">
+                                <label for="category4" class="text-sm font-semibold text-gray-300">Choose Category</label>
+                                <select id="category4" name="category4" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="suv">SUV</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                </select>
+                            </div>
+                            <div class="bselector flex flex-col items-start space-y-2">
+                                <label for="brand4" class="text-sm font-semibold text-gray-300">Choose Brand</label>
+                                <select id="brand4" name="brand4" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="bmw">BMW</option>
+                                    <option value="mercedes">Mercedes</option>
+                                    <option value="volvo">Volvo</option>
+                                    <option value="honda">Honda</option>
+                                </select>
+                            </div>
+                            <div class="mselector flex flex-col items-start space-y-2">
+                                <label for="model4" class="text-sm font-semibold text-gray-300">Choose Model</label>
+                                <select id="model4" name="model4" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="gwagon">G Wagon</option>
+                                    <option value="s-class">S-Class</option>
+                                    <option value="gls">GLS</option>
+                                    <option value="eoq">EOQ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right hidden" id="vehicle-5">
+                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 5</b></div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="cselector flex flex-col items-start space-y-2">
+                                <label for="category5" class="text-sm font-semibold text-gray-300">Choose Category</label>
+                                <select id="category5" name="category5" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="suv">SUV</option>
+                                    <option value="sedan">Sedan</option>
+                                    <option value="truck">Truck</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                </select>
+                            </div>
+                            <div class="bselector flex flex-col items-start space-y-2">
+                                <label for="brand5" class="text-sm font-semibold text-gray-300">Choose Brand</label>
+                                <select id="brand5" name="brand5" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="bmw">BMW</option>
+                                    <option value="mercedes">Mercedes</option>
+                                    <option value="volvo">Volvo</option>
+                                    <option value="honda">Honda</option>
+                                </select>
+                            </div>
+                            <div class="mselector flex flex-col items-start space-y-2">
+                                <label for="model5" class="text-sm font-semibold text-gray-300">Choose Model</label>
+                                <select id="model5" name="model5" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                                    <option value="gwagon">G Wagon</option>
+                                    <option value="s-class">S-Class</option>
+                                    <option value="gls">GLS</option>
+                                    <option value="eoq">EOQ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="compare-button" class="mt-6 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">Compare</button>
+            </div>
+        </section>
+
+        <!-- Comparison Table -->
+        <section class="mt-16" id="comparison-table" style="display: none;">
+            <div class="comparingtable rounded-xl p-6 shadow-xl overflow-x-auto bg-gradient-to-b from-red-700 to-black border-bottom-left-to-right mx-4">
+                <table class="w-full min-w-[800px] text-center border-collapse">
+                    <thead>
+                        <tr class="bg-red-600 text-white">
+                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white">On The Basis</th>
+                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-1"></th>
+                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-2"></th>
+                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-3"></th>
+                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-4"></th>
+                            <th class="p-4 font-bold text-xl border-b-2 border-white" id="vehicle-name-5"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-body">
+                        <tr class="hover:bg-red-800 transition-colors">
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white">Price</td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-1"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-2"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-3"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-4"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900" id="price-5"></td>
+                        </tr>
+                        <tr class="hover:bg-red-800 transition-colors">
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white">Color</td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-1"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-2"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-3"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-4"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900" id="color-5"></td>
+                        </tr>
+                        <tr class="hover:bg-red-800 transition-colors bg-red-600">
+                            <td class="p-4 border-b border-gray-500 text-lg bg-red-600 font-bold border-r border-white">Score out of 5</td>
+                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-1" data-score="5"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-2" data-score="4"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-3" data-score="3"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-4" data-score="2"></td>
+                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold" id="score-5" data-score="1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Recommended Products -->
+        <section class="mt-16">
+            <div class="bg-gradient-to-b from-red-500 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
+                <b>Recommended Products</b>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>BMW 7 Series</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$100,000</div>
+                    <a href="/usa/models/bmw-7-series" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Mercedes S-Class</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$150,000</div>
+                    <a href="/usa/models/mercedes-s-class" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Audi A8</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$120,000</div>
+                    <a href="/usa/models/audi-a8" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Honda Civic</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$80,000</div>
+                    <a href="/usa/models/honda-civic" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
+                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
+                    <div class="text-white font-semibold text-base line-clamp-1"><b>Toyota Camry</b></div>
+                    <div class="text-red-400 font-bold mt-2 text-lg">$90,000</div>
+                    <a href="/usa/models/toyota-camry" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    
+<%- include('../partials/footer') %>
+
+
+    <script>
+        // Simulate Sign-In Status
+        const isSignedIn = false;
+        const authLink = document.getElementById('auth-link');
+        if (isSignedIn) {
+            authLink.innerHTML = '<svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 18.364A4 4 0 018 17h8a4 4 0 012.879 1.364M15 10a3 3 0 11-6 0 3 3 0 016 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            authLink.href = '/profile';
+        } else {
+            authLink.textContent = 'Sign In';
+            authLink.href = '/signin';
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop.classList.toggle('active');
+        };
+
+        mobileMenuButton.addEventListener('click', (e) => { e.preventDefault(); toggleMenu(); }, { passive: false });
+        mobileMenuButton.addEventListener('touchstart', (e) => { e.preventDefault(); toggleMenu(); }, { passive: false });
+        closeMobileMenuButton.addEventListener('click', (e) => { e.preventDefault(); mobileMenuOverlay.classList.remove('mobile-menu-open'); mobileMenuBackdrop.classList.remove('active'); }, { passive: false });
+        mobileMenuBackdrop.addEventListener('click', (e) => { e.preventDefault(); mobileMenuOverlay.classList.remove('mobile-menu-open'); mobileMenuBackdrop.classList.remove('active'); }, { passive: false });
+        mobileMenuOverlay.addEventListener('click', (e) => e.stopPropagation(), { passive: false });
+
+        // Search Functionality
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            if (query) alert('Search for: ' + query);
+            else alert('Please enter a search query.');
+        });
+
+        // Highlight Active Nav Links
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
+            const subNavLinks = document.querySelectorAll('.sub-nav-link');
+            const currentPath = window.location.pathname;
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === '/usa/compare') {
+                    link.classList.add('bg-red-700', 'text-white');
+                    link.classList.remove('hover:bg-red-700');
+                }
+            });
+            subNavLinks.forEach(link => {
+                if (link.getAttribute('href') === '/usa/brands/car') link.classList.add('active');
+            });
+        });
+
+        // Dynamic Vehicle Selection
+        const numberSelect = document.getElementById('number');
+        const compareSelection = document.getElementById('compare-selection');
+        const vehicleDivs = [null, document.getElementById('vehicle-3'), document.getElementById('vehicle-4'), document.getElementById('vehicle-5')];
+
+        numberSelect.addEventListener('change', () => {
+            const count = parseInt(numberSelect.value);
+            vehicleDivs.forEach((div, index) => {
+                if (div) div.classList.toggle('hidden', index + 3 > count);
+            });
+        });
+
+        // Compare Button Functionality
+        const compareButton = document.getElementById('compare-button');
+        const comparisonTable = document.getElementById('comparison-table');
+        const comparisonBody = document.getElementById('comparison-body');
+
+        compareButton.addEventListener('click', () => {
+            const count = parseInt(numberSelect.value);
+            const categories = [];
+            const brands = [];
+            const models = [];
+            for (let i = 1; i <= count; i++) {
+                categories.push(document.getElementById(`category${i}`).value);
+                brands.push(document.getElementById(`brand${i}`).value);
+                models.push(document.getElementById(`model${i}`).value);
+                document.getElementById(`vehicle-name-${i}`).textContent = `${brands[i-1]} ${models[i-1]}`;
+            }
+
+            // Placeholder data for comparison
+            const prices = ["$100,000 - $120,000", "$150,000 - $170,000", "$80,000 - $90,000", "$110,000 - $130,000", "$90,000 - $100,000"];
+            const colors = ["Red, Blue, Black, White", "Black, White, Silver", "Blue, Red, Green", "Silver, Black", "White, Gray"];
+            const scores = [5, 4, 3, 2, 1];
+
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`price-${i}`).textContent = i <= count ? prices[i-1] : '';
+                document.getElementById(`color-${i}`).textContent = i <= count ? colors[i-1] : '';
+                document.getElementById(`score-${i}`).textContent = i <= count ? `${scores[i-1]}/5` : '';
+                document.getElementById(`score-${i}`).setAttribute('data-score', i <= count ? scores[i-1] : 0);
+            }
+
+            // Highlight best score
+            const scoreCells = document.querySelectorAll('.score-cell');
+            if (scoreCells.length >= 2) {
+                let maxScore = -1;
+                let maxIndex = -1;
+                scoreCells.forEach((cell, index) => {
+                    const score = parseFloat(cell.getAttribute('data-score'));
+                    if (score > maxScore && score > 0) {
+                        maxScore = score;
+                        maxIndex = index;
+                    }
+                });
+                scoreCells.forEach((cell, index) => {
+                    cell.classList.remove('bg-green-600');
+                    if (index === maxIndex) cell.classList.add('bg-green-600');
+                });
+            }
+
+            comparisonTable.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

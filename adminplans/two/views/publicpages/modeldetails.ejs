@@ -1,0 +1,338 @@
+<%- include('../partials/head.ejs', { title: 'brandname modelname' }) %>
+
+        body {
+            background-color: #000000;
+            font-family: 'Poppins', sans-serif;
+        }
+        .box-hover-effect {
+            transition: transform 0.3s ease-in-out;
+        }
+        .box-hover-effect:hover {
+            transform: scale(1.02);
+        }
+        .filter-button:hover {
+            background-color: #DC2626;
+            color: #FFFFFF;
+        }
+        .breadcrumb a:hover {
+            color: #DC2626;
+        }
+        #mobile-menu-overlay {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+            width: 16rem;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: auto;
+            will-change: transform, opacity;
+        }
+        .mobile-menu-open {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #mobile-menu-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        #mobile-menu-backdrop.active {
+            display: block;
+        }
+        .sub-nav-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .sub-nav-link:hover .icon {
+            background-color: #DC2626;
+        }
+        .sub-nav-link:hover span {
+            color: #DC2626;
+        }
+        .sub-nav-link.active .icon {
+            background-color: #DC2626;
+        }
+        .sub-nav-link.active span {
+            color: #DC2626;
+        }
+        .sub-nav-link span {
+            color: #FFFFFF;
+        }
+        .sub-nav-link .icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.5rem;
+        }
+        .color-circle {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: transform 0.3s;
+        }
+        .color-circle:hover {
+            transform: scale(1.1);
+        }
+        .color-name {
+            display: none;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .color-circle:hover .color-name {
+            display: block;
+        }
+        .specs-group {
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .specs-group:hover {
+            background: #333;
+        }
+        .expandable {
+            transition: max-height 0.5s ease-in-out;
+            overflow: hidden;
+            max-height: 0;
+        }
+        .expanded {
+            max-height: 500px; /* Adjust based on content */
+        }
+        .read-more-btn {
+            color: #DC2626;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white">
+    
+<%- include('../partials/navbar') %>
+
+    <!-- Breadcrumb (Added as per plan, from reference) -->
+    <div class="container mx-auto px-4 py-2 text-sm breadcrumb flex items-center">
+        <a href="/" class="hover:text-red-600">Gyarage</a> 
+        <span class="mx-2 text-red-600">&gt;&gt;</span> 
+        <a href="/usa" class="hover:text-red-600">USA</a> 
+        <span class="mx-2 text-red-600">&gt;&gt;</span> 
+        <a href="/usa/brands" class="hover:text-red-600">Brands</a>
+        <span class="mx-2 text-red-600">&gt;&gt;</span> 
+        <a href="/usa/brands/cars" class="hover:text-red-600">Cars</a>
+        <span class="mx-2 text-red-600">&gt;&gt;</span> 
+        <a href="/usa/brands/cars/mercedes" class="hover:text-red-600">Mercedes</a>
+        <span class="mx-2 text-red-600">&gt;&gt;</span> 
+        <span class="text-white font-bold">G Wagon</span>
+    </div>
+
+    <!-- Filter Button (Added beside breadcrumb if needed, but per plan it's in brands page; here optional) -->
+    <div class="container mx-auto px-4 flex justify-end mb-4">
+        <button id="filter-button" class="filter-button bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition">
+            Filter
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+        <!-- Top Box: Model Details Header -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 lg:flex lg:space-x-8 box-hover-effect mb-8">
+            <div class="lg:w-1/2">
+                <div class="h-80 bg-white rounded-lg shadow-inner overflow-hidden">
+                    <img src="https://placehold.co/800x600/d1d5db/000000?text=G+Wagon" alt="G Wagon" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="lg:w-1/2 flex flex-col justify-center">
+                <p class="text-xl text-gray-300">from <span class="font-semibold">Mercedes</span></p>
+                <h1 class="text-5xl font-extrabold text-white mt-2">G Wagon</h1>
+                <div class="flex items-center mt-4">
+                    <span class="text-2xl font-bold text-yellow-400">4.5/5 ⭐</span>
+                    <span class="ml-4 text-gray-300">Safety Rating</span>
+                </div>
+                <div class="flex items-center mt-4">
+                    <span class="text-xl text-white">Engine Type: 4.0L V8 Biturbo</span>
+                    <span class="ml-auto text-gray-300">Category: SUV</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Price Box -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Price of Mercedes G Wagon in USA</h2>
+            <p class="text-3xl font-extrabold text-white">$150,000 - $200,000</p>
+            <p class="text-sm text-gray-300 mt-1">EMI starts @ $2,500 / month</p>
+        </section>
+
+        <!-- Exterior/Interior Toggle Box -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
+            <div class="flex space-x-4 mb-4">
+                <button id="exterior-btn" class="bg-white text-black font-semibold py-2 px-4 rounded-lg transition hover:bg-red-600 hover:text-white">Exterior</button>
+                <button id="interior-btn" class="bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition hover:bg-red-600">Interior</button>
+            </div>
+            <div id="tab-content">
+                <!-- Color Options -->
+                <div class="mt-4">
+                    <h3 class="text-lg font-semibold text-white mb-2">Color Options:</h3>
+                    <div class="flex space-x-2">
+                        <div class="color-circle bg-black" data-color="black"><span class="color-name">Black</span></div>
+                        <div class="color-circle bg-white" data-color="white"><span class="color-name">White</span></div>
+                        <div class="color-circle bg-red-600" data-color="red"><span class="color-name">Red</span></div>
+                        <div class="color-circle bg-blue-600" data-color="blue"><span class="color-name">Blue</span></div>
+                        <!-- Add more -->
+                    </div>
+                </div>
+                <!-- Images Grid (Update based on color and tab) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                    <img src="https://placehold.co/200x150?text=Exterior+Black+1" alt="Img1" class="w-full h-32 object-cover rounded cursor-pointer">
+                    <img src="https://placehold.co/200x150?text=Exterior+Black+2" alt="Img2" class="w-full h-32 object-cover rounded cursor-pointer">
+                    <!-- More images, up to 8 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Variants Box -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">All Variants Price of Mercedes G Wagon in USA</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between text-white">
+                    <span>Base</span>
+                    <span>$150,000</span>
+                </div>
+                <div class="flex justify-between text-white">
+                    <span>AMG</span>
+                    <span>$200,000</span>
+                </div>
+                <!-- Add more variants -->
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">About Mercedes G Wagon</h2>
+            <p class="text-gray-300 line-clamp-4" id="short-about">The Mercedes G Wagon is a luxury SUV known for its off-road capabilities and iconic design. It combines rugged performance with premium interiors...</p>
+            <p class="text-gray-300 hidden" id="full-about">Full details: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <span class="read-more-btn" onclick="document.getElementById('full-about').classList.toggle('hidden'); document.getElementById('short-about').classList.toggle('hidden');">Read More</span>
+        </section>
+
+        <!-- Available On Button (Expand inline) -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
+            <button id="available-on-btn" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-red-600 hover:text-white transition transform hover:scale-105">
+                Available on
+            </button>
+            <div id="available-details" class="expandable mt-4 text-gray-300">
+                <ul class="space-y-2">
+                    <li><a href="https://mercedes.com" class="hover:text-red-600">Official Mercedes Site</a></li>
+                    <li><a href="tel:+123456789">Dealer: +1 234 567 89</a></li>
+                    <!-- More -->
+                </ul>
+            </div>
+        </section>
+
+        <!-- Specifications Box -->
+        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Specifications and Features of Mercedes G Wagon in USA</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="specs-group p-4 bg-black rounded-xl border-t-4 border-red-600" onclick="window.location.href='/specs/engine'">
+                    <div class="bg-gradient-to-b from-red-500 to-black text-white font-bold text-center py-3 rounded-lg mb-4">Engine & Transmission</div>
+                    <ul class="list-disc list-inside text-gray-300">
+                        <li>Engine Type: 4.0L V8</li>
+                        <li>Power: 416 hp</li>
+                        <!-- More -->
+                    </ul>
+                </div>
+                <!-- More spec groups, clickable -->
+            </div>
+        </section>
+
+        <!-- Recommendations (From reference style) -->
+        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mt-12">
+            <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-4 flex flex-col items-center text-center box-hover-effect">
+                <div class="w-full h-28 bg-white rounded-lg mb-4"></div>
+                <div class="text-white font-semibold"><b>Mercedes AMG GT</b></div>
+                <div class="text-red-400 font-bold mt-2">$200,000</div>
+                <a href="#" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white">Check out</a>
+            </div>
+            <!-- More -->
+        </section>
+    </main>
+
+    
+<%- include('../partials/footer') %>
+
+
+    <script>
+        // Mobile Menu Script (From reference)
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop.classList.toggle('active');
+        };
+
+        mobileMenuButton.addEventListener('click', toggleMenu);
+        closeMobileMenuButton.addEventListener('click', toggleMenu);
+        mobileMenuBackdrop.addEventListener('click', toggleMenu);
+
+        // Exterior/Interior Toggle
+        document.getElementById('exterior-btn').addEventListener('click', () => {
+            // Update content to exterior images, etc.
+            alert('Switch to Exterior');
+        });
+        document.getElementById('interior-btn').addEventListener('click', () => {
+            // Update content
+            alert('Switch to Interior');
+        });
+
+        // Color Selection (Update images)
+        document.querySelectorAll('.color-circle').forEach(circle => {
+            circle.addEventListener('click', () => {
+                // Update selected color and images
+                console.log('Selected color:', circle.dataset.color);
+            });
+        });
+
+        // Available On Expand
+        document.getElementById('available-on-btn').addEventListener('click', () => {
+            const details = document.getElementById('available-details');
+            details.classList.toggle('expanded');
+        });
+
+        // Search, Filter, Auth (From reference)
+        document.getElementById('search-button').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value;
+            alert('Search: ' + query);
+        });
+        document.getElementById('filter-button').addEventListener('click', () => {
+            alert('Filter opened');
+        });
+        // Auth simulate
+        const isSignedIn = false;
+        if (isSignedIn) {
+            document.getElementById('auth-link').innerHTML = 'Profile';
+        }
+
+        // Highlight Nav
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link').forEach(link => {
+                if (link.getAttribute('href') === '/usa/brands') {
+                    link.classList.add('bg-red-700');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

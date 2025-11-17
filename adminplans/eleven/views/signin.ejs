@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head.ejs', { title: 'Gyarage - Sign In' }) %>
+    <link href="/output.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        }
+        .form-container {
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .form-container::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #dc2626, #991b1b);
+            z-index: -1;
+            border-radius: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .form-container:hover::before {
+            opacity: 0.1;
+        }
+        .input-field:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+    <%- include('./partials/navbar') %>
+    <main class="flex-grow container mx-auto px-4 py-12 max-w-md bg-black">
+        <div class="breadcrumb text-gray-400 text-sm flex items-center mb-6">
+            <a href="/" class="hover:text-red-400">Gyarage</a> 
+            <span class="mx-2 text-red-400">&gt;&gt;</span> 
+            <span class="text-red-400 font-bold">Sign In</span>
+        </div>
+        <div class="form-container bg-gray-900 p-8 rounded-lg border border-gray-800">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-extrabold text-red-500 tracking-tight">Gyarage Sign In</h1>
+                <p class="text-gray-500 mt-2">Access your SuperAccount</p>
+            </div>
+            <% if (error) { %>
+                <div class="bg-red-600 text-white p-3 rounded-lg text-sm text-center mb-6 animate-pulse">
+                    <%= error %>
+                </div>
+            <% } %>
+            <form action="/signin" method="POST" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-semibold text-gray-400 mb-1">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username"
+                           class="input-field w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none text-white"
+                           required autocomplete="username">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-gray-400 mb-1">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password"
+                           class="input-field w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none text-white"
+                           required autocomplete="current-password">
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center text-gray-400">
+                        <input type="checkbox" name="remember" class="mr-2 accent-red-500">
+                        Remember me
+                    </label>
+                    <a href="/forgot-password" class="text-red-400 hover:text-red-300">Forgot Password?</a>
+                </div>
+                <div class="flex justify-between">
+                    <a href="/" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Cancel</a>
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="bg-gray-900 p-6 rounded-lg text-center mt-6 border border-gray-800">
+            <p class="text-gray-500">Don't have an account? <a href="/signup" class="text-red-400 font-bold hover:text-red-300">Sign Up</a></p>
+        </div>
+    </main>
+    <%- include('./partials/footer') %>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', (e) => {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Signing In...';
+                submitBtn.disabled = true;
+                setTimeout(() => {
+                    submitBtn.textContent = 'Sign In';
+                    submitBtn.disabled = false;
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>

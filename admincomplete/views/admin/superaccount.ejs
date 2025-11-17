@@ -1,0 +1,613 @@
+<%- include('../partials/head.ejs', { title: 'Super Account' }) %>
+
+<style>
+    body {
+        background-color: #000000;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to { width: 100%; }
+    }
+    .icon-button {
+        transition: transform 0.2s;
+    }
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+    .table-container table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .table-container th {
+        background-color: #1F2937;
+        color: white;
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 2px solid #4B5563;
+    }
+    .table-container td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #4B5563;
+    }
+    .table-container tr:hover {
+        background-color: #374151;
+    }
+    .selector {
+        background-color: #1F2937;
+        color: white;
+        border: none;
+        border-radius: 0.25rem;
+        padding: 0.5rem;
+        width: 200px;
+    }
+    .user-image, .vehicle-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.25rem;
+    }
+    .notification-card {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 300px;
+        max-width: 400px;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        font-family: 'Poppins', sans-serif;
+        backdrop-filter: blur(10px);
+    }
+    .notification-card.show {
+        transform: translateX(0);
+    }
+    .notification-card.success {
+        background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+        border: 1px solid #10B981;
+        color: #10B981;
+    }
+    .notification-card.error {
+        background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+        border: 1px solid #EF4444;
+        color: #EF4444;
+    }
+    .notification-card h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .notification-card p {
+        margin: 0 0 1rem 0;
+        opacity: 0.9;
+        line-height: 1.5;
+    }
+    .notification-card.success h4::before {
+        content: "Success";
+    }
+    .notification-card.error h4::before {
+        content: "Error";
+    }
+    .notification-card .close-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1.2rem;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+    .notification-card .close-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <div class="space-y-8">
+        <div class="flex justify-center space-x-4 mb-6">
+            <button class="toggle-item bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition" onclick="showContent('users')">Users</button>
+            <button class="toggle-item bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition" onclick="showContent('vehicleType')">Vehicle Types</button>
+        </div>
+        <div id="contentArea" class="bg-gray-800 rounded-lg shadow-lg p-6 border-bottom-left-to-right"></div>
+
+        <!-- Create Author Modal -->
+        <div id="createAuthorModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Create Author</h3>
+                <form id="createAuthorFormData" class="space-y-6" enctype="multipart/form-data">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                        <input type="text" name="name" placeholder="Enter Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <input type="text" name="username" placeholder="Enter Username" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <input type="password" name="password" placeholder="Enter Password" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Position</label>
+                        <select name="position" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                            <option value="">Select Position</option>
+                            <option value="level2">Level 2 Author</option>
+                            <option value="level1">Level 1 Author</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-create-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Author Modal -->
+        <div id="editAuthorModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div class="bg-gray-800 rounded-lg w-full max-w-2xl max-h-screen overflow-y-auto">
+                <div class="p-6 sticky top-0 bg-gray-800 z-10 border-b border-gray-700">
+                    <h3 class="text-2xl font-bold text-white">Edit Author</h3>
+                </div>
+                
+                <div class="p-6 space-y-6 flex-1 min-h-0">
+                    <form id="editAuthorFormData" class="space-y-6" enctype="multipart/form-data">
+                        <input type="hidden" name="user_id">
+                        
+                        <div id="currentProfilePic" class="mt-2 hidden">
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Current Picture</label>
+                            <img id="currentPicPreview" src="" class="w-20 h-20 rounded-full object-cover border border-gray-600" alt="Current">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture (Optional)</label>
+                            <input type="file" name="profile_picture" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                            <input type="text" name="name" placeholder="Enter Name" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                            <input type="text" name="username" placeholder="Enter Username" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Password (Leave blank to keep unchanged)</label>
+                            <input type="password" name="password" placeholder="Enter New Password" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Position</label>
+                            <select name="position" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                                <option value="">Select Position</option>
+                                <option value="level2">Level 2 Author</option>
+                                <option value="level1">Level 1 Author</option>
+                            </select>
+                        </div>
+
+                        <!-- STICKY BUTTONS -->
+                        <div class="flex justify-between pt-4 border-t border-gray-700 sticky bottom-0 bg-gray-800 -mx-6 px-6 pb-6">
+                            <button type="button" id="close-edit-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Vehicle Type Modal -->
+        <div id="uploadVehicleTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Upload Vehicle Type</h3>
+                <form id="uploadVehicleTypeFormData" class="space-y-6" enctype="multipart/form-data">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Image</label>
+                        <input type="file" name="vehicle_type_photo" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type Name</label>
+                        <input type="text" name="vehicleTypeName" placeholder="Enter Vehicle Type (e.g. SUV)" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-upload-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Vehicle Type Modal -->
+        <div id="editVehicleTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Vehicle Type</h3>
+                <form id="editVehicleTypeFormData" class="space-y-6" enctype="multipart/form-data">
+                    <input type="hidden" name="vehicle_type_id">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Image (Optional)</label>
+                        <input type="file" name="vehicle_type_photo" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700" accept="image/*">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type Name</label>
+                        <input type="text" name="vehicleTypeName" placeholder="Enter Vehicle Type (e.g. SUV)" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-edit-vehicle-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded');
+
+        // EJS Data with safe fallbacks
+        const USERS_DATA = JSON.parse('<%- JSON.stringify(users || []) %>');
+        const VEHICLE_TYPES_DATA = JSON.parse('<%- JSON.stringify(vehicleTypes || []) %>');
+
+        console.log('Loaded data:', {
+            users: USERS_DATA.length,
+            vehicleTypes: VEHICLE_TYPES_DATA.length
+        });
+
+        // Notification Function
+        const showNotification = (message, type = 'success') => {
+            document.querySelectorAll('.notification-card').forEach(card => card.remove());
+            const card = document.createElement('div');
+            card.className = `notification-card ${type}`;
+            card.innerHTML = `
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+                <h4>${type === 'success' ? 'Success!' : 'Error!'}</h4>
+                <p>${message}</p>
+            `;
+            document.body.appendChild(card);
+            setTimeout(() => card.classList.add('show'), 100);
+            setTimeout(() => {
+                card.style.animation = 'slideOut 0.4s forwards';
+                setTimeout(() => card.remove(), 400);
+            }, 4000);
+        };
+
+        // Confirmation Dialog
+        const showConfirmation = (title, message, onConfirm) => {
+            const dialog = document.createElement('div');
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-10000';
+            dialog.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                    <h3 class="text-xl font-bold text-white mb-4">${title}</h3>
+                    <p class="text-gray-300 mb-6">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button id="confirm-delete" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Delete</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(dialog);
+            document.getElementById('confirm-delete').onclick = async () => {
+                dialog.remove();
+                await onConfirm();
+            };
+        };
+
+        // Main Toggle
+        window.showContent = (type) => {
+            const contentArea = document.getElementById('contentArea');
+            document.querySelectorAll('.toggle-item').forEach(item => {
+                const isActive = item.textContent.includes(type === 'users' ? 'Users' : 'Vehicle Types');
+                item.classList.toggle('bg-red-600', isActive);
+                item.classList.toggle('bg-gray-800', !isActive);
+            });
+
+            contentArea.innerHTML = '';
+
+            if (type === 'users') {
+                const usersRows = USERS_DATA.map(user => `
+                    <tr>
+                        <td>
+                            <img src="${user.profilePicture || '/images/default-avatar.png'}" 
+                                 alt="${user.name}" 
+                                 class="w-12 h-12 object-cover rounded-full border border-gray-600"
+                                 onerror="this.src='/images/default-avatar.png'">
+                        </td>
+                        <td>${user.name}</td>
+                        <td>${user.username}</td>
+                        <td>${user.position === 'level2' ? 'Level 2 Author' : 'Level 1 Author'}</td>
+                        <td>${new Date(user.created_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editUser(${user.user_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteUser(${user.user_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Image</th><th>Name</th><th>Username</th><th>Position</th><th>Creation Date</th><th>Actions</th></tr></thead>
+                            <tbody>${usersRows}</tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-start mt-6">
+                        <button id="createAuthorButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Create Author</button>
+                    </div>
+                `;
+                document.getElementById('createAuthorButton').onclick = () => {
+                    document.getElementById('createAuthorModal').classList.remove('hidden');
+                };
+            } else if (type === 'vehicleType') {
+                const vehicleRows = VEHICLE_TYPES_DATA.map(vehicle => `
+                    <tr>
+                        <td>${vehicle.vehicle_type_name}</td>
+                        <td><img src="${vehicle.vehicle_type_photo_path || 'https://via.placeholder.com/50'}" alt="${vehicle.vehicle_type_name}" class="vehicle-image"></td>
+                        <td>${new Date(vehicle.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                        <td>Admin</td>
+                        <td>N/A</td>
+                        <td>
+                            <button class="icon-button text-blue-500 hover:text-blue-700 mr-2" onclick="editVehicleType(${vehicle.vehicle_type_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                            </button>
+                            <button class="icon-button text-red-500 hover:text-red-700" onclick="deleteVehicleType(${vehicle.vehicle_type_id}); event.stopPropagation();">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Name</th><th>Image</th><th>Published</th><th>By</th><th>Edited</th><th>Actions</th></tr></thead>
+                            <tbody>${vehicleRows}</tbody>
+                        </table>
+                    </div>
+                    <button id="uploadVehicleTypeButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 mt-6">Upload Vehicle Type</button>
+                `;
+                document.getElementById('uploadVehicleTypeButton').onclick = () => {
+                    document.getElementById('uploadVehicleTypeModal').classList.remove('hidden');
+                };
+            }
+        };
+
+        // Delete Functions
+        window.deleteUser = (userId) => {
+            showConfirmation('Delete User', 'This action cannot be undone!', async () => {
+                try {
+                    const response = await fetch(`/admin/superaccount/delete-user/${userId}`, { method: 'DELETE' });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showNotification('User deleted successfully!', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        showNotification(result.message || 'Delete failed', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Network error', 'error');
+                }
+            });
+        };
+
+        window.deleteVehicleType = (vehicleId) => {
+            showConfirmation('Delete Vehicle Type', 'This action cannot be undone!', async () => {
+                try {
+                    const response = await fetch(`/admin/superaccount/delete-vehicle-type/${vehicleId}`, { method: 'DELETE' });
+                    const result = await response.json();
+                    if (response.ok) {
+                        showNotification('Vehicle type deleted successfully!', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        showNotification(result.message || 'Delete failed', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Network error', 'error');
+                }
+            });
+        };
+
+        // Edit Functions
+        window.editUser = async (userId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/edit-user/${userId}`);
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    const user = result.user;
+                    const form = document.getElementById('editAuthorFormData');
+                    form.querySelector('[name="user_id"]').value = user.user_id;
+                    form.querySelector('[name="name"]').value = user.name;
+                    form.querySelector('[name="username"]').value = user.username;
+                    form.querySelector('[name="position"]').value = user.position;
+
+                    const previewDiv = document.getElementById('currentProfilePic');
+                    const previewImg = document.getElementById('currentPicPreview');
+                    if (user.profile_picture) {
+                        previewImg.src = user.profile_picture;
+                        previewDiv.classList.remove('hidden');
+                    } else {
+                        previewDiv.classList.add('hidden');
+                    }
+
+                    document.getElementById('editAuthorModal').classList.remove('hidden');
+                } else {
+                    showNotification('User not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load user', 'error');
+                console.error(error);
+            }
+        };
+
+        window.editVehicleType = async (vehicleId) => {
+            try {
+                const response = await fetch(`/admin/superaccount/edit-vehicle-type/${vehicleId}`);
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    const vehicle = result.vehicleType;
+                    const form = document.getElementById('editVehicleTypeFormData');
+                    form.querySelector('[name="vehicle_type_id"]').value = vehicle.vehicle_type_id;
+                    form.querySelector('[name="vehicleTypeName"]').value = vehicle.vehicle_type_name;
+                    document.getElementById('editVehicleTypeModal').classList.remove('hidden');
+                } else {
+                    showNotification('Vehicle type not found', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to load vehicle type', 'error');
+            }
+        };
+
+        // Form Submissions
+        document.getElementById('createAuthorFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/admin/superaccount/save-user', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Author created!', 'success');
+                    document.getElementById('createAuthorModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Create failed', 'error');
+            }
+        };
+
+        document.getElementById('editAuthorFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userId = formData.get('user_id');
+            try {
+                const response = await fetch(`/admin/superaccount/update-user/${userId}`, { method: 'PUT', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Author updated!', 'success');
+                    document.getElementById('editAuthorModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Update failed', 'error');
+            }
+        };
+
+        document.getElementById('uploadVehicleTypeFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/admin/superaccount/save-vehicle-type', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Vehicle type uploaded!', 'success');
+                    document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Upload failed', 'error');
+            }
+        };
+
+        document.getElementById('editVehicleTypeFormData').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const vehicleId = formData.get('vehicle_type_id');
+            try {
+                const response = await fetch(`/admin/superaccount/update-vehicle-type/${vehicleId}`, { method: 'PUT', body: formData });
+                const result = await response.json();
+                if (response.ok) {
+                    showNotification('Vehicle type updated!', 'success');
+                    document.getElementById('editVehicleTypeModal').classList.add('hidden');
+                    e.target.reset();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showNotification(result.message || 'Update failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Update failed', 'error');
+            }
+        };
+
+        // Modal Close
+        document.getElementById('close-create-modal').onclick = () => {
+            document.getElementById('createAuthorModal').classList.add('hidden');
+            document.getElementById('createAuthorFormData').reset();
+        };
+        document.getElementById('close-edit-modal').onclick = () => {
+            document.getElementById('editAuthorModal').classList.add('hidden');
+            document.getElementById('editAuthorFormData').reset();
+        };
+        document.getElementById('close-upload-modal').onclick = () => {
+            document.getElementById('uploadVehicleTypeModal').classList.add('hidden');
+            document.getElementById('uploadVehicleTypeFormData').reset();
+        };
+        document.getElementById('close-edit-vehicle-modal').onclick = () => {
+            document.getElementById('editVehicleTypeModal').classList.add('hidden');
+            document.getElementById('editVehicleTypeFormData').reset();
+        };
+
+        // Initial load
+        showContent('users');
+    });
+</script>
+
+</body>
+</html>

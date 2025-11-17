@@ -1,0 +1,641 @@
+<%- include('../partials/head.ejs', { title: 'USA - @' + user.username }) %>
+
+<style>
+    body {
+        background-color: #000000;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to { width: 100%; }
+    }
+    .icon-button {
+        transition: transform 0.2s;
+    }
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+    }
+    .mobile-menu-open {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    #mobile-menu-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        pointer-events: auto;
+    }
+    #mobile-menu-backdrop.active {
+        display: block;
+    }
+    .error-message {
+        color: #DC2626;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+    
+<%- include('../partials/navbar') %>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
+        <div class="breadcrumb text-white text-sm sm:text-base flex items-center mb-6">
+            <a href="/" class="hover:text-red-600">Gyarage</a> 
+            <span class="mx-2 text-red-600">&gt;&gt;</span> 
+            <a href="/usa/profile" class="text-red-600 font-bold">@<%= user.username %></a>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <button id="privateViewButton" class="bg-red-600 text-white px-4 py-2 rounded-l-lg hover:bg-red-700 transition">Private View</button>
+            <button id="publicViewButton" class="bg-gray-600 text-white px-4 py-2 rounded-r-lg hover:bg-gray-700 transition">Public View</button>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="lg:w-1/3 bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                <div class="flex flex-col items-center lg:items-start">
+                    <div class="flex flex-col lg:flex-row items-center gap-4 w-full">
+                        <div class="relative w-32 h-32 rounded-full border-4 border-red-600 bg-gray-700 flex items-center justify-center text-4xl font-bold text-gray-400 overflow-hidden" id="profilePictureContainer">
+                            <% if (user.profilePicture) { %>
+                                <img id="profilePicture" src="<%= user.profilePicture %>" alt="Profile Picture" class="w-full h-full object-cover">
+                            <% } else { %>
+                                <span id="profileInitial"><%= user.name.charAt(0).toUpperCase() %></span>
+                            <% } %>
+                            <% if (user.position === 'admin') { %>
+                                <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold text-black">A</div>
+                            <% } %>
+                        </div>
+                        <div class="text-center lg:text-left">
+                            <h2 class="text-3xl font-bold mb-2" id="profileName"><%= user.name %></h2>
+                            <p class="text-gray-400 mb-4" id="profileUsername">@<%= user.username %></p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700 pt-4 mt-4 w-full">
+                        <h3 class="text-lg font-semibold mb-2">Bio</h3>
+                        <p class="text-gray-300" id="profileBio"><%= user.bio || 'Your bio goes here...' %></p>
+                    </div>
+                    <div class="border-t border-gray-700 pt-4 mt-4 w-full">
+                        <h3 class="text-lg font-semibold mb-2">Socials</h3>
+                        <div class="flex justify-center lg:justify-start space-x-4" id="socialLinks">
+                            <% if (user.socialMedia && user.socialMedia.length > 0) { %>
+                                <% user.socialMedia.forEach(social => { %>
+                                    <% let icon = ''; %>
+                                    <% if (social.type === 'facebook') { icon = 'M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z'; } %>
+                                    <% if (social.type === 'instagram') { icon = 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849'; } %>
+                                    <% if (social.type === 'twitter') { icon = 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231'; } %>
+                                    <% if (social.type === 'linkedin') { icon = 'M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z'; } %>
+                                    <% if (social.type === 'youtube') { icon = 'M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 4-8 4z'; } %>
+                                    <% if (social.type === 'website') { icon = 'M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z'; } %>
+                                    <% if (social.type === 'other') { icon = 'M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 22c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm-2-8h4v4h-4v-4zm0-12v4h4v-4h-4z'; } %>
+                                    <a href="<%= social.link %>" target="_blank" class="text-gray-400 hover:text-red-500 transition-colors">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="<%= icon %>"/>
+                                        </svg>
+                                    </a>
+                                <% }) %>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="private-profile" class="lg:w-2/3 space-y-8">
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6">Edit Profile Picture</h3>
+                    <button id="editProfilePictureButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Profile Picture</button>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6">Edit Name</h3>
+                    <button id="editNameButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Name</button>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6">Edit Username</h3>
+                    <button id="editUsernameButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Username</button>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6">Edit Bio</h3>
+                    <button id="editBioButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Edit Bio</button>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6">Manage Social Media</h3>
+                    <button id="editSocialsButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Manage Social Media</button>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right">
+                    <h3 class="text-xl font-semibold mb-6">Change Password</h3>
+                    <button id="changePasswordButton" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Change Password</button>
+                </div>
+                <% if (user && (user.position === 'admin' || user.position === 'level1' || user.position === 'level2' || user.position === 'level3')) { %>
+                    <div class="bg-gray-800 p-8 rounded-lg shadow-lg border border-yellow-500 border-bottom-left-to-right">
+                        <h3 class="text-xl font-semibold mb-6 text-yellow-400">Admin Panel</h3>
+                        <button id="goToAdminButton" class="bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-semibold">Go to Admin</button>
+                    </div>
+                <% } %>
+            </div>
+
+            <div id="public-profile" class="lg:w-2/3 hidden space-y-8">
+                <h2 class="text-3xl font-bold text-white mb-4">Public Profile Feed</h2>
+                <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right">
+                    <div class="flex flex-row items-center p-2 rounded-xl">
+                        <div class="article-image w-32 h-32 bg-gray-600 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-300">Image Placeholder</div>
+                        <div class="content ml-4 flex-grow text-white">
+                            <div class="article-title text-lg sm:text-2xl font-semibold mb-2">
+                                Hybrid Cars Gaining Popularity Globally
+                            </div>
+                            <div class="date font-semibold text-gray-300">Oct 13, 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profilePictureModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Profile Picture</h3>
+                <form id="profile-picture-form" enctype="multipart/form-data" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Profile Picture</label>
+                        <input type="file" name="profilePicture" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                        <p class="error-message" id="profile-picture-error"></p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-profile-picture-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="nameModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Name</h3>
+                <form id="name-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+                        <input type="text" name="name" value="<%= user.name %>" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="name-error"></p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-name-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="usernameModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Username</h3>
+                <form id="username-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <input type="text" name="username" value="<%= user.username %>" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="username-error"></p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-username-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="bioModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Edit Bio</h3>
+                <form id="bio-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Bio (max 150 characters)</label>
+                        <textarea name="bio" rows="4" maxlength="150" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white"><%= user.bio || '' %></textarea>
+                        <p class="error-message" id="bio-error"></p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-bio-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="socialMediaModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Manage Social Media</h3>
+                <form id="social-media-form" class="space-y-6">
+                    <div id="socialMediaSection" class="space-y-4">
+                        <div id="socialMediaContainer" class="space-y-4">
+                            <% 
+                            const socialMediaToDisplay = (user.socialMedia && user.socialMedia.length > 0) ? user.socialMedia : [{ type: '', link: '' }];
+                            socialMediaToDisplay.forEach(social => { 
+                            %>
+                                <div class="flex items-center space-x-2 social-media-row">
+                                    <select name="socialMediaType[]" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-1/3">
+                                        <option value="">Select Social Media</option>
+                                        <option value="facebook" <%= social.type === 'facebook' ? 'selected' : '' %>>Facebook</option>
+                                        <option value="instagram" <%= social.type === 'instagram' ? 'selected' : '' %>>Instagram</option>
+                                        <option value="twitter" <%= social.type === 'twitter' ? 'selected' : '' %>>Twitter</option>
+                                        <option value="linkedin" <%= social.type === 'linkedin' ? 'selected' : '' %>>LinkedIn</option>
+                                        <option value="youtube" <%= social.type === 'youtube' ? 'selected' : '' %>>YouTube</option>
+                                        <option value="website" <%= social.type === 'website' ? 'selected' : '' %>>Website</option>
+                                        <option value="other" <%= social.type === 'other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                    <input type="url" name="socialMediaLink[]" value="<%= social.link %>" placeholder="Social Media URL" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-2/3">
+                                    <button type="button" class="remove-social-media icon-button text-white" title="Remove">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z" /></svg>
+                                    </button>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <p class="error-message" id="social-media-error"></p>
+                        <button id="addSocialMediaButton" type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm">
+                            Add another social media
+                        </button>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-socials-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="passwordModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                <h3 class="text-2xl font-bold text-white mb-4">Change Password</h3>
+                <form id="password-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Current Password</label>
+                        <input type="password" name="currentPassword" placeholder="Enter current password" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="current-password-error"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">New Password</label>
+                        <input type="password" name="newPassword" placeholder="Enter new password" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="new-password-error"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Confirm New Password</label>
+                        <input type="password" name="confirmPassword" placeholder="Confirm new password" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        <p class="error-message" id="confirm-password-error"></p>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" id="close-password-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Change</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+<%- include('../partials/footer') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const region = window.location.pathname.split('/')[1];
+
+    const privateViewButton = document.getElementById('privateViewButton');
+    const publicViewButton = document.getElementById('publicViewButton');
+    const privateProfile = document.getElementById('private-profile');
+    const publicProfile = document.getElementById('public-profile');
+
+    function setActiveView(view) {
+        if (view === 'private') {
+            privateProfile.classList.remove('hidden');
+            publicProfile.classList.add('hidden');
+            privateViewButton.classList.remove('bg-gray-600');
+            privateViewButton.classList.add('bg-red-600');
+            publicViewButton.classList.remove('bg-red-600');
+            publicViewButton.classList.add('bg-gray-600');
+            console.log('✅ Switched to Private View');
+        } else if (view === 'public') {
+            publicProfile.classList.remove('hidden');
+            privateProfile.classList.add('hidden');
+            publicViewButton.classList.remove('bg-gray-600');
+            publicViewButton.classList.add('bg-red-600');
+            privateViewButton.classList.remove('bg-red-600');
+            privateViewButton.classList.add('bg-gray-600');
+            console.log('✅ Switched to Public View');
+        }
+    }
+    
+    setActiveView('private'); 
+
+    privateViewButton.addEventListener('click', () => setActiveView('private'));
+    publicViewButton.addEventListener('click', () => setActiveView('public'));
+
+    function createSocialMediaRow(type = '', link = '') {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2 social-media-row';
+        row.innerHTML = `
+            <select name="socialMediaType[]" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-1/3">
+                <option value="">Select Social Media</option>
+                <option value="facebook" ${type === 'facebook' ? 'selected' : ''}>Facebook</option>
+                <option value="instagram" ${type === 'instagram' ? 'selected' : ''}>Instagram</option>
+                <option value="twitter" ${type === 'twitter' ? 'selected' : ''}>Twitter</option>
+                <option value="linkedin" ${type === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+                <option value="youtube" ${type === 'youtube' ? 'selected' : ''}>YouTube</option>
+                <option value="website" ${type === 'website' ? 'selected' : ''}>Website</option>
+                <option value="other" ${type === 'other' ? 'selected' : ''}>Other</option>
+            </select>
+            <input type="url" name="socialMediaLink[]" value="${link}" placeholder="URL" class="p-3 bg-gray-700 border border-red-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition w-2/3">
+            <button type="button" class="remove-social-media icon-button text-white" title="Remove">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z"/></svg>
+            </button>
+        `;
+        row.querySelector('.remove-social-media').addEventListener('click', () => row.remove());
+        return row;
+    }
+
+    const addSocialMediaButton = document.getElementById('addSocialMediaButton');
+    if (addSocialMediaButton) {
+        addSocialMediaButton.addEventListener('click', () => {
+            const container = document.getElementById('socialMediaContainer');
+            if (container.querySelectorAll('.social-media-row').length >= 5) {
+                document.getElementById('social-media-error').textContent = 'Cannot add more than 5 social media links.';
+                document.getElementById('social-media-error').style.display = 'block';
+                return;
+            }
+            container.appendChild(createSocialMediaRow());
+        });
+    }
+
+    document.querySelectorAll('#socialMediaContainer').forEach(container => {
+        container.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-social-media')) {
+                e.target.closest('.social-media-row').remove();
+                document.getElementById('social-media-error').style.display = 'none';
+            }
+        });
+    });
+
+    async function submitForm(formId, url) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            console.error(`Form not found: ${formId}`);
+            alert('❌ Form not found. Please try again.');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const errorElement = document.getElementById(`${formId.split('-')[0]}-error`);
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = formId === 'password-form' ? 'Changing...' : 'Saving...';
+        }
+        if (errorElement) errorElement.style.display = 'none';
+
+        try {
+            let body;
+            if (formId === 'profile-picture-form') {
+                body = formData;
+            } else if (formId === 'social-media-form') {
+                const types = form.querySelectorAll('select[name="socialMediaType[]"]');
+                const links = form.querySelectorAll('input[name="socialMediaLink[]"]');
+                const socialMedia = Array.from(types).map((type, index) => {
+                    const link = links[index].value.trim();
+                    return {
+                        type: type.value.trim(),
+                        link: link || ''
+                    };
+                }).filter(s => s.type && s.link && (s.link.startsWith('http://') || s.link.startsWith('https://')));
+                console.log('Social Media Data being sent:', socialMedia); // Debug log
+                if (socialMedia.length === 0) {
+                    throw new Error('At least one valid social media link is required.');
+                }
+                body = JSON.stringify({ socialMedia });
+            } else {
+                body = JSON.stringify(Object.fromEntries(formData));
+            }
+
+            const response = await fetch(`/${url}`, {
+                method: 'POST',
+                headers: formId === 'profile-picture-form' ? {} : { 'Content-Type': 'application/json' },
+                body: body
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) throw new Error(result.message || `Server error: ${response.status}`);
+
+            if (result.success) {
+                alert('✅ ' + result.message);
+
+                if (formId === 'profile-picture-form') {
+                    location.reload();
+                } else if (formId === 'name-form') {
+                    const newName = formData.get('name');
+                    document.getElementById('profileName').textContent = newName;
+                    const initialEl = document.getElementById('profileInitial');
+                    if (initialEl) initialEl.textContent = newName.charAt(0).toUpperCase();
+                } else if (formId === 'username-form') {
+                    const newUsername = formData.get('username');
+                    document.getElementById('profileUsername').textContent = '@' + newUsername;
+                } else if (formId === 'bio-form') {
+                    const newBio = formData.get('bio') || 'Your bio goes here...';
+                    document.getElementById('profileBio').textContent = newBio;
+                } else if (formId === 'social-media-form') {
+                    location.reload();
+                }
+
+                form.closest('.fixed').classList.add('hidden');
+            } else {
+                if (errorElement) {
+                    errorElement.textContent = result.message || 'Update failed.';
+                    errorElement.style.display = 'block';
+                } else {
+                    alert('❌ ' + (result.message || 'Update failed.'));
+                }
+            }
+        } catch (error) {
+            console.error(`Submission Error (${formId}):`, error);
+            if (errorElement) {
+                errorElement.textContent = error.message;
+                errorElement.style.display = 'block';
+            } else {
+                alert('❌ Error: ' + error.message);
+            }
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = formId === 'password-form' ? 'Change' : 'Save';
+            }
+        }
+    }
+
+    const forms = {
+        'profile-picture-form': 'update-picture',
+        'name-form': 'update-name',
+        'username-form': 'update-username',
+        'bio-form': 'update-bio',
+        'social-media-form': 'update-socials'
+    };
+
+    Object.entries(forms).forEach(([formId, url]) => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitForm(formId, url);
+            });
+        }
+    });
+
+    const passwordForm = document.getElementById('password-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const errorElements = {
+                current: document.getElementById('current-password-error'),
+                new: document.getElementById('new-password-error'),
+                confirm: document.getElementById('confirm-password-error')
+            };
+
+            Object.values(errorElements).forEach(el => el.style.display = 'none');
+
+            if (formData.get('newPassword') !== formData.get('confirmPassword')) {
+                errorElements.confirm.textContent = 'Passwords do not match!';
+                errorElements.confirm.style.display = 'block';
+                return;
+            }
+
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Changing...';
+            }
+
+            try {
+                const jsonBody = {};
+                formData.forEach((value, key) => {
+                    if (key !== 'confirmPassword') {
+                        jsonBody[key] = value;
+                    }
+                });
+
+                const response = await fetch(`/${region}/profile/update-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(jsonBody)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.message || `Server error: ${response.status}`);
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    e.target.reset();
+                    document.getElementById('passwordModal').classList.add('hidden');
+                } else {
+                    errorElements.current.textContent = result.message || 'Password change failed.';
+                    errorElements.current.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Password Submission Error:', error);
+                errorElements.current.textContent = error.message;
+                errorElements.current.style.display = 'block';
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Change';
+                }
+            }
+        });
+    }
+
+    const modalMap = {
+        'editProfilePictureButton': 'profilePictureModal',
+        'editNameButton': 'nameModal',
+        'editUsernameButton': 'usernameModal',
+        'editBioButton': 'bioModal',
+        'editSocialsButton': 'socialMediaModal',
+        'changePasswordButton': 'passwordModal'
+    };
+
+    Object.entries(modalMap).forEach(([buttonId, modalId]) => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.addEventListener('click', () => {
+                document.getElementById(modalId).classList.remove('hidden');
+            });
+        }
+    });
+
+    document.querySelectorAll('.fixed').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+        modal.querySelectorAll('button[id^="close-"]').forEach(closeButton => {
+            closeButton.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+            });
+        });
+    });
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', () => {
+            document.getElementById('mobile-menu-overlay').classList.toggle('mobile-menu-open');
+            document.getElementById('mobile-menu-backdrop').classList.toggle('active');
+        });
+    }
+
+    const goToAdminButton = document.getElementById('goToAdminButton');
+if (goToAdminButton) {
+    goToAdminButton.addEventListener('click', () => {
+        const userPosition = '<%= user.position %>';
+        let redirectPath = '/admin/category'; // Default to /admin/category
+        switch (userPosition) {
+            case 'level1':
+                redirectPath = '/admin/article';
+                break;
+            case 'level2':
+                redirectPath = '/admin/category';
+                break;
+            case 'level3':
+                redirectPath = '/admin/level3am';
+                break;
+            case 'admin':
+                redirectPath = '/admin/superaccount';
+                break;
+            default:
+                alert('❌ Invalid user position. Please contact support.');
+                return;
+        }
+        window.location.href = redirectPath; // Remove ${region} from the path
+    });
+}
+
+    console.log('🎉 Profile page initialization complete.');
+});
+</script>
+</body>
+</html>
