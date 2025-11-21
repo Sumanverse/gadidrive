@@ -575,6 +575,120 @@ class Model {
       await this._release(connObj);
     }
   }
+  // ---------- BRAND DETAILS METHODS ----------
+  static async getModelsByBrandId(brandId, conn) {
+    const connObj = await this._getConn(conn);
+    try {
+      const [rows] = await connObj.conn.execute(`
+        SELECT m.*, v.vehicle_type_name, c.name AS category_name,
+               b.name AS brand_name, u.name AS author_name
+        FROM models m
+        JOIN vehicletype v ON m.vehicle_type_id = v.vehicle_type_id
+        JOIN categories c ON m.category_id = c.category_id
+        JOIN brands b ON m.brand_id = b.brand_id
+        JOIN usertable u ON m.author_id = u.user_id
+        WHERE m.brand_id = ? AND (m.status = 'published' OR m.status = 'import')
+        ORDER BY 
+          CASE 
+            WHEN m.engine_type LIKE '%electric%' THEN 1
+            ELSE 2 
+          END,
+          m.starting_price ASC
+      `, [brandId]);
+      return rows;
+    } finally {
+      await this._release(connObj);
+    }
+  }
+
+  static async getCategoriesByVehicleType(vehicleTypeId, conn) {
+    const connObj = await this._getConn(conn);
+    try {
+      const [rows] = await connObj.conn.execute(`
+        SELECT DISTINCT c.category_id, c.name, c.image_path
+        FROM categories c
+        JOIN models m ON c.category_id = m.category_id
+        WHERE m.vehicle_type_id = ?
+        GROUP BY c.category_id, c.name, c.image_path
+        ORDER BY COUNT(m.id) DESC
+        LIMIT 8
+      `, [vehicleTypeId]);
+      return rows;
+    } finally {
+      await this._release(connObj);
+    }
+  }
+
+  static async getPopularModels(limit = 4, conn) {
+    const connObj = await this._getConn(conn);
+    try {
+      const [rows] = await connObj.conn.execute(`
+        SELECT m.*, b.name AS brand_name, v.vehicle_type_name
+        FROM models m
+        JOIN brands b ON m.brand_id = b.brand_id
+        JOIN vehicletype v ON m.vehicle_type_id = v.vehicle_type_id
+        WHERE m.status = 'published'
+        ORDER BY m.created_at DESC
+        LIMIT ?
+      `, [limit]);
+      return rows;
+    } finally {
+      await this._release(connObj);
+    }
+  }
+
+// Get models by category ID
+static async getModelsByCategoryId(categoryId, conn) {
+    const connObj = await this._getConn(conn);
+    try {
+        const [rows] = await connObj.conn.execute(`
+            SELECT m.*, v.vehicle_type_name, c.name AS category_name,
+                   b.name AS brand_name, u.name AS author_name
+            FROM models m
+            JOIN vehicletype v ON m.vehicle_type_id = v.vehicle_type_id
+            JOIN categories c ON m.category_id = c.category_id
+            JOIN brands b ON m.brand_id = b.brand_id
+            JOIN usertable u ON m.author_id = u.user_id
+            WHERE m.category_id = ?
+            ORDER BY 
+                CASE 
+                    WHEN m.engine_type LIKE '%electric%' THEN 1
+                    ELSE 2 
+                END,
+                m.starting_price ASC
+        `, [categoryId]);
+        return rows;
+    } finally {
+        await this._release(connObj);
+    }
+}
+
+// Replace the existing getPopularModels method with this fixed version:
+static async getPopularModels(limit = 4, conn) {
+    const connObj = await this._getConn(conn);
+    try {
+        // Use template literal for limit to avoid parameter issues
+        const limitNum = parseInt(limit);
+        const query = `
+            SELECT m.*, b.name AS brand_name, v.vehicle_type_name
+            FROM models m
+            JOIN brands b ON m.brand_id = b.brand_id
+            JOIN vehicletype v ON m.vehicle_type_id = v.vehicle_type_id
+            WHERE m.status = 'published' OR m.status = 'import'
+            ORDER BY m.created_at DESC
+            LIMIT ${limitNum}
+        `;
+        
+        const [rows] = await connObj.conn.execute(query);
+        return rows;
+    } catch (error) {
+        console.error('Error in getPopularModels:', error);
+        return [];
+    } finally {
+        await this._release(connObj);
+    }
+}
+
 }
 
 module.exports = Model;

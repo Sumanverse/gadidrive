@@ -1,0 +1,304 @@
+<%- include('../partials/head.ejs', { title: 'USA - Brand Admin' }) %>
+
+<style>
+    body { background-color: #000000; }
+    #vehicle-type option,
+    #published-vehicle-type-selector option {
+        background-color: white;
+        color: black;
+    }
+    #vehicle-type option:hover,
+    #published-vehicle-type-selector option:hover {
+        background-color: #DC2626;
+        color: white;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to { width: 100%; }
+    }
+    .icon-button { transition: transform 0.2s; }
+    .icon-button:hover { transform: scale(1.1); }
+    .filter-button:hover { background-color: #DC2626; color: #FFFFFF; }
+    #mobile-menu-overlay {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        opacity: 0;
+        width: 16rem;
+        height: 100%;
+        z-index: 1000;
+        pointer-events: auto;
+        will-change: transform, opacity;
+    }
+    .mobile-menu-open {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    #mobile-menu-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        pointer-events: auto;
+    }
+    #mobile-menu-backdrop.active { display: block; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+
+<%- include('../partials/navbar') %>
+
+<!-- Subnavbar -->
+<nav class="bg-gray-800 py-4">
+    <div class="container mx-auto px-4 flex justify-center space-x-6">
+        <a href="/admin/category" class="text-white text-lg font-semibold hover:text-red-600 transition">Category</a>
+        <a href="/admin/brand" class="text-white text-lg font-semibold hover:text-red-600 transition border-b-2 border-red-600">Brands</a>
+        <a href="/admin/model" class="text-white text-lg font-semibold hover:text-red-600 transition">Model</a>
+        <a href="/admin/article" class="text-white text-lg font-semibold hover:text-red-600 transition">Article</a>
+    </div>
+</nav>
+
+<!-- Main Section -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl bg-black">
+    <!-- Upload Brand Section -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-white mb-6">Upload Your Brand</h2>
+
+        <!-- Brand Creation Form -->
+        <form id="brand-form" action="/admin/brand" method="POST" enctype="multipart/form-data" class="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div>
+                <label for="brand-image" class="block text-sm font-medium text-gray-300 mb-1">Brand Logo</label>
+                <input type="file" id="brand-image" name="brandImage" accept="image/*" required class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+            </div>
+            <div>
+                <label for="brand-name" class="block text-sm font-medium text-gray-300 mb-1">Brand Name</label>
+                <input type="text" id="brand-name" name="brandName" placeholder="Enter brand name" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+            </div>
+            <div>
+                <label for="vehicle-type" class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type</label>
+                <select id="vehicle-type" name="vehicleType" required class="w-full bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <option value="" disabled selected>Select Vehicle Type</option>
+                    <% if (vehicleTypes && vehicleTypes.length > 0) { %>
+                        <% vehicleTypes.forEach(type => { %>
+                            <option value="<%= type.vehicle_type_id %>"><%= type.vehicle_type_name %></option>
+                        <% }) %>
+                    <% } else { %>
+                        <option value="" disabled>No vehicle types available</option>
+                    <% } %>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-red-600 text-white text-lg font-semibold px-6 py-2 rounded-lg shadow-lg hover:bg-red-700 transition">Create or Publish Brand</button>
+        </form>
+    </section>
+
+    <!-- Already Published Brands -->
+    <section>
+        <h2 class="text-3xl font-bold text-white mb-6">Already Published Brand</h2>
+        <select id="published-vehicle-type-selector" class="w-full max-w-xs bg-gray-700 text-white text-lg font-semibold px-4 py-2 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-red-600">
+            <option value="" selected>All Vehicle Types</option>
+            <% if (vehicleTypes && vehicleTypes.length > 0) { %>
+                <% vehicleTypes.forEach(type => { %>
+                    <option value="<%= type.vehicle_type_id %>"><%= type.vehicle_type_name %></option>
+                <% }) %>
+            <% } %>
+        </select>
+        <div id="published-brand-boxes" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% if (brands && brands.length > 0) { %>
+                <% brands.forEach(brand => { %>
+                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center border-bottom-left-to-right shadow-md" 
+                         data-vehicle-type="<%= brand.vehicle_type_id %>">
+                        <div class="w-full h-32 bg-white rounded-lg mb-4 shadow-inner border-transparent">
+                            <img src="<%= brand.image_path %>" alt="<%= brand.name %>" class="w-full h-full object-cover rounded-lg">
+                        </div>
+                        <div class="text-white font-semibold text-lg line-clamp-1"><b><%= brand.name %></b></div>
+                        <div class="text-gray-300 text-sm">By <%= brand.author_name %></div>
+                        <div class="flex justify-center space-x-2 mt-2">
+                            <button class="edit-brand-btn bg-blue-600 text-white px-4 py-1 rounded-lg hover:bg-blue-700 transition" data-brand-id="<%= brand.brand_id %>">Edit</button>
+                            <button class="delete-brand-btn bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700 transition" data-brand-id="<%= brand.brand_id %>">Delete</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-gray-400 col-span-full text-center">No brands published yet.</p>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<%- include('../partials/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded - Brand Admin');
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        const toggleMenu = () => {
+            mobileMenuOverlay?.classList.toggle('mobile-menu-open');
+            mobileMenuBackdrop?.classList.toggle('active');
+        };
+
+        mobileMenuButton?.addEventListener('click', toggleMenu);
+        closeMobileMenuButton?.addEventListener('click', toggleMenu);
+        mobileMenuBackdrop?.addEventListener('click', toggleMenu);
+
+        // Brand Form Submission (AJAX)
+        const brandForm = document.getElementById('brand-form');
+        brandForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(brandForm);
+
+            try {
+                const response = await fetch('/admin/brand', { method: 'POST', body: formData });
+                const result = await response.json();
+                alert(result.message);
+                if (result.success) {
+                    brandForm.reset();
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed.');
+            }
+        });
+
+        // Filter Published Brands
+        const publishedVehicleTypeSelector = document.getElementById('published-vehicle-type-selector');
+        const publishedBrandBoxes = document.querySelectorAll('#published-brand-boxes > div');
+
+        publishedVehicleTypeSelector?.addEventListener('change', (e) => {
+            const selected = e.target.value;
+            publishedBrandBoxes.forEach(box => {
+                const boxType = box.getAttribute('data-vehicle-type');
+                if (selected === '' || selected === boxType) {
+                    box.classList.remove('hidden');
+                } else {
+                    box.classList.add('hidden');
+                }
+            });
+        });
+
+        // Show all on load
+        publishedBrandBoxes.forEach(box => box.classList.remove('hidden'));
+
+        // Event Delegation for Edit/Delete
+        document.getElementById('published-brand-boxes')?.addEventListener('click', async (e) => {
+            const target = e.target;
+
+            // === EDIT ===
+            if (target.classList.contains('edit-brand-btn')) {
+                const brandId = target.getAttribute('data-brand-id');
+                try {
+                    const res = await fetch(`/admin/brand/${brandId}`);
+                    const data = await res.json();
+                    if (!data.success) throw new Error(data.message);
+
+                    const brand = data.brand;
+                    const editForm = document.createElement('div');
+                    editForm.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                    editForm.innerHTML = `
+                        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-2xl">
+                            <h3 class="text-2xl font-bold text-white mb-4">Edit Brand</h3>
+                            <form id="edit-brand-form" enctype="multipart/form-data" class="space-y-6">
+                                <input type="hidden" name="brandId" value="${brand.brand_id}">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Current Logo</label>
+                                    <img src="${brand.image_path}" class="w-48 h-32 object-contain rounded-md mb-2">
+                                    <input type="file" name="brandImage" accept="image/*" class="w-full text-white bg-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Brand Name</label>
+                                    <input type="text" name="brandName" value="${brand.name}" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Vehicle Type</label>
+                                    <select name="vehicleType" required class="w-full bg-gray-700 text-white px-4 py-2 rounded-lg">
+                                        <option value="" disabled>Select Vehicle Type</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-end space-x-2">
+                                    <button type="button" class="close-edit-form bg-gray-600 text-white px-4 py-2 rounded-lg">Cancel</button>
+                                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+
+                    document.body.appendChild(editForm);
+
+                    // Populate vehicle types
+                    const select = editForm.querySelector('select[name="vehicleType"]');
+                    <% if (vehicleTypes && vehicleTypes.length > 0) { %>
+                        <% vehicleTypes.forEach(type => { %>
+                            select.innerHTML += `<option value="<%= type.vehicle_type_id %>" ${brand.vehicle_type_id == <%= type.vehicle_type_id %> ? 'selected' : ''}><%= type.vehicle_type_name %></option>`;
+                        <% }) %>
+                    <% } %>
+
+                    // Close
+                    editForm.querySelector('.close-edit-form').onclick = () => editForm.remove();
+
+                    // Submit Edit
+                    editForm.querySelector('#edit-brand-form').onsubmit = async (ev) => {
+                        ev.preventDefault();
+                        const formData = new FormData(ev.target);
+                        try {
+                            const editRes = await fetch('/admin/brand/update', { method: 'POST', body: formData });
+                            const result = await editRes.json();
+                            alert(result.message);
+                            if (result.success) {
+                                editForm.remove();
+                                window.location.reload();
+                            }
+                        } catch (err) {
+                            alert('Update failed.');
+                        }
+                    };
+                } catch (err) {
+                    alert('Failed to load brand.');
+                }
+            }
+
+            // === DELETE ===
+            if (target.classList.contains('delete-brand-btn')) {
+                const brandId = target.getAttribute('data-brand-id');
+                if (confirm('Delete this brand? This cannot be undone.')) {
+                    try {
+                        const res = await fetch('/admin/brand/delete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ brandId: brandId })
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            target.closest('div[data-vehicle-type]').remove();
+                            alert(result.message);
+                        } else {
+                            alert(result.message);
+                        }
+                    } catch (err) {
+                        alert('Delete failed.');
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
