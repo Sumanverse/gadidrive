@@ -90,6 +90,9 @@
         color: #9CA3AF;
         font-size: 0.875rem;
     }
+    .engine-based-field {
+        transition: all 0.3s ease;
+    }
 </style>
 </head>
 <body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
@@ -172,6 +175,87 @@
                     <option value="hydrogen" <%= typeof model !== 'undefined' && model && model.engine_type === 'hydrogen' ? 'selected' : '' %>>Hydrogen</option>
                 </select>
             </div>
+
+            <!-- NEW TECHNICAL SPECIFICATIONS SECTION -->
+            <div class="border border-gray-600 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-4">Technical Specifications</h3>
+                
+                <!-- Row 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="power" class="block text-sm font-medium text-gray-300 mb-1">Power</label>
+                        <input type="text" id="power" name="power" value="<%= typeof model !== 'undefined' && model && model.power ? model.power : '' %>" placeholder="e.g., 81.8 bhp" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div>
+                        <label for="torque" class="block text-sm font-medium text-gray-300 mb-1">Torque</label>
+                        <input type="text" id="torque" name="torque" value="<%= typeof model !== 'undefined' && model && model.torque ? model.torque : '' %>" placeholder="e.g., 115 Nm" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="ground-clearance" class="block text-sm font-medium text-gray-300 mb-1">Ground Clearance</label>
+                        <input type="text" id="groundClearance" name="groundClearance" value="<%= typeof model !== 'undefined' && model && model.ground_clearance ? model.ground_clearance : '' %>" placeholder="e.g., 5 m" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div>
+                        <label for="dimensions" class="block text-sm font-medium text-gray-300 mb-1">Dimensions</label>
+                        <input type="text" id="dimensions" name="dimensions" value="<%= typeof model !== 'undefined' && model && model.dimensions ? model.dimensions : '' %>" placeholder="e.g., 3995mm" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="drive-type" class="block text-sm font-medium text-gray-300 mb-1">Drive Type</label>
+                        <input type="text" id="driveType" name="driveType" value="<%= typeof model !== 'undefined' && model && model.drive_type ? model.drive_type : '' %>" placeholder="e.g., FWD" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div>
+                        <label for="total-airbags" class="block text-sm font-medium text-gray-300 mb-1">Total Airbags</label>
+                        <input type="text" id="totalAirbags" name="totalAirbags" value="<%= typeof model !== 'undefined' && model && model.total_airbags ? model.total_airbags : '' %>" placeholder="e.g., 6 airbags" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                </div>
+
+                <!-- Row 4 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="boot-space" class="block text-sm font-medium text-gray-300 mb-1">Boot Space</label>
+                        <input type="text" id="bootSpace" name="bootSpace" value="<%= typeof model !== 'undefined' && model && model.boot_space ? model.boot_space : '' %>" placeholder="e.g., 385 litres" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                    <div>
+                        <label for="range-mileage" class="block text-sm font-medium text-gray-300 mb-1">Range/Mileage</label>
+                        <input type="text" id="rangeMileage" name="rangeMileage" value="<%= typeof model !== 'undefined' && model && model.range_mileage ? model.range_mileage : '' %>" placeholder="e.g., 18.4 km/l" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                    </div>
+                </div>
+
+                <!-- Engine Type Based Fields -->
+                <div id="engine-based-fields">
+                    <!-- Battery Capacity Field -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 engine-based-field" id="battery-capacity-field">
+                        <div>
+                            <label for="battery-capacity" class="block text-sm font-medium text-gray-300 mb-1">Battery Capacity</label>
+                            <input type="text" id="batteryCapacity" name="batteryCapacity" value="<%= typeof model !== 'undefined' && model && model.battery_capacity ? model.battery_capacity : '' %>" placeholder="e.g., 49.92 kWh" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                    </div>
+
+                    <!-- ICE Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 engine-based-field" id="ice-fields">
+                        <div>
+                            <label for="engine" class="block text-sm font-medium text-gray-300 mb-1">Engine</label>
+                            <input type="text" id="engine" name="engine" value="<%= typeof model !== 'undefined' && model && model.engine ? model.engine : '' %>" placeholder="e.g., 998cc" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        <div>
+                            <label for="cylinders" class="block text-sm font-medium text-gray-300 mb-1">Cylinders</label>
+                            <input type="text" id="cylinders" name="cylinders" value="<%= typeof model !== 'undefined' && model && model.cylinders ? model.cylinders : '' %>" placeholder="e.g., 4" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                        <div>
+                            <label for="fuel-tank" class="block text-sm font-medium text-gray-300 mb-1">Fuel Tank</label>
+                            <input type="text" id="fuelTank" name="fuelTank" value="<%= typeof model !== 'undefined' && model && model.fuel_tank ? model.fuel_tank : '' %>" placeholder="e.g., 45 litres" class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <label for="starting-price" class="block text-sm font-medium text-gray-300 mb-1">Starting Price</label>
                 <input type="text" id="starting-price" name="startingPrice" value="<%= typeof model !== 'undefined' && model && model.starting_price ? model.starting_price : '' %>" placeholder="Enter starting price (e.g., $25,000)" required class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white">
@@ -583,6 +667,27 @@
 <%- include('../partials/footer') %>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Engine Type Based Field Visibility
+    function updateEngineBasedFields() {
+        const engineType = document.getElementById('engine-type').value;
+        const batteryField = document.getElementById('battery-capacity-field');
+        const iceFields = document.getElementById('ice-fields');
+        
+        // Show battery capacity for electric, hybrid, hydrogen
+        if (engineType === 'electric' || engineType === 'hybrid' || engineType === 'hydrogen') {
+            batteryField.style.display = 'block';
+        } else {
+            batteryField.style.display = 'none';
+        }
+        
+        // Show ICE fields for ice and hybrid
+        if (engineType === 'ice' || engineType === 'hybrid') {
+            iceFields.style.display = 'grid';
+        } else {
+            iceFields.style.display = 'none';
+        }
+    }
+
     // Mobile Menu Toggle
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
@@ -657,6 +762,14 @@ document.addEventListener('DOMContentLoaded', () => {
             brandSelector.value = '';
         }
     });
+
+    // Add engine type change listener
+    const engineTypeSelector = document.getElementById('engine-type');
+    if (engineTypeSelector) {
+        engineTypeSelector.addEventListener('change', updateEngineBasedFields);
+        // Initialize on page load
+        updateEngineBasedFields();
+    }
 
     // FIXED: Color Image Management Functions
     function addColorImageListener(group) {

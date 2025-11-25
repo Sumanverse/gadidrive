@@ -20,7 +20,9 @@ class Model {
     const {
       name, vehicle_type_id, category_id, brand_id,
       safety_rating, safety_link, sources, engine_type, starting_price, 
-      release_year, seater, status = 'import'
+      release_year, seater, status = 'import',
+      power, torque, ground_clearance, dimensions, drive_type, total_airbags,
+      boot_space, range_mileage, battery_capacity, engine, cylinders, fuel_tank
     } = data;
 
     const connObj = await this._getConn(conn);
@@ -38,12 +40,16 @@ class Model {
         `INSERT INTO models
          (model_name, vehicle_type_id, category_id, brand_id, model_image,
           safety_rating, safety_link, sources, engine_type, starting_price, release_year, seater, author_id,
-          published_date, created_at, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?)`,
+          published_date, created_at, status, power, torque, ground_clearance, dimensions, drive_type, 
+          total_airbags, boot_space, range_mileage, battery_capacity, engine, cylinders, fuel_tank)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           name, vehicle_type_id, category_id, brand_id, img,
           safety_rating ?? null, safety_link ?? null, sources ?? null, engine_type,
-          starting_price, release_year || null, seater || null, authorId, status
+          starting_price, release_year || null, seater || null, authorId, status,
+          power || null, torque || null, ground_clearance || null, dimensions || null, 
+          drive_type || null, total_airbags || null, boot_space || null, range_mileage || null,
+          battery_capacity || null, engine || null, cylinders || null, fuel_tank || null
         ]
       );
       return res.insertId;
@@ -295,24 +301,24 @@ class Model {
 
       // about contents
       const [aboutContents] = await connObj.conn.execute(
-        `SELECT * FROM about_contents WHERE model_id = ? ORDER BY content_order`,
-        [modelId]
-      );
+            `SELECT * FROM about_contents WHERE model_id = ? ORDER BY content_order ASC`,
+            [modelId]
+        );
 
       return {
-        exteriorColors,
-        exteriorColorImages,
-        interiorColors,
-        interiorColorImages,
-        variants,
-        availableSites,
-        specifications,
-        specificationLists,
-        specContents,
-        aboutContents
-      };
+            exteriorColors,
+            exteriorColorImages,
+            interiorColors,
+            interiorColorImages,
+            variants,
+            availableSites,
+            specifications,
+            specificationLists,
+            specContents,
+            aboutContents // Yo ab properly sorted huncha
+        };
     } finally {
-      await this._release(connObj);
+        await this._release(connObj);
     }
   }
 
@@ -321,7 +327,9 @@ class Model {
     const {
       name, vehicle_type_id, category_id, brand_id,
       safety_rating, safety_link, sources, engine_type, starting_price, 
-      release_year, seater, status
+      release_year, seater, status,
+      power, torque, ground_clearance, dimensions, drive_type, total_airbags,
+      boot_space, range_mileage, battery_capacity, engine, cylinders, fuel_tank
     } = data;
 
     const connObj = await this._getConn(conn);
@@ -345,12 +353,18 @@ class Model {
              model_name = ?, vehicle_type_id = ?, category_id = ?, brand_id = ?,
              model_image = ?,
              safety_rating = ?, safety_link = ?, sources = ?, engine_type = ?, starting_price = ?,
-             release_year = ?, seater = ?, author_id = ?, status = ?, updated_at = NOW()
+             release_year = ?, seater = ?, author_id = ?, status = ?, updated_at = NOW(),
+             power = ?, torque = ?, ground_clearance = ?, dimensions = ?, drive_type = ?,
+             total_airbags = ?, boot_space = ?, range_mileage = ?, battery_capacity = ?, 
+             engine = ?, cylinders = ?, fuel_tank = ?
            WHERE id = ?`,
           [
             name, vehicle_type_id, category_id, brand_id, img,
             safety_rating ?? null, safety_link ?? null, sources ?? null, engine_type,
-            starting_price, release_year || null, seater || null, authorId, status || 'import', id
+            starting_price, release_year || null, seater || null, authorId, status || 'import',
+            power || null, torque || null, ground_clearance || null, dimensions || null,
+            drive_type || null, total_airbags || null, boot_space || null, range_mileage || null,
+            battery_capacity || null, engine || null, cylinders || null, fuel_tank || null, id
           ]
         );
       } else {
@@ -359,12 +373,18 @@ class Model {
           `UPDATE models SET
              model_name = ?, vehicle_type_id = ?, category_id = ?, brand_id = ?,
              safety_rating = ?, safety_link = ?, sources = ?, engine_type = ?, starting_price = ?,
-             release_year = ?, seater = ?, author_id = ?, status = ?, updated_at = NOW()
+             release_year = ?, seater = ?, author_id = ?, status = ?, updated_at = NOW(),
+             power = ?, torque = ?, ground_clearance = ?, dimensions = ?, drive_type = ?,
+             total_airbags = ?, boot_space = ?, range_mileage = ?, battery_capacity = ?, 
+             engine = ?, cylinders = ?, fuel_tank = ?
            WHERE id = ?`,
           [
             name, vehicle_type_id, category_id, brand_id,
             safety_rating ?? null, safety_link ?? null, sources ?? null, engine_type,
-            starting_price, release_year || null, seater || null, authorId, status || 'import', id
+            starting_price, release_year || null, seater || null, authorId, status || 'import',
+            power || null, torque || null, ground_clearance || null, dimensions || null,
+            drive_type || null, total_airbags || null, boot_space || null, range_mileage || null,
+            battery_capacity || null, engine || null, cylinders || null, fuel_tank || null, id
           ]
         );
       }
@@ -684,6 +704,26 @@ static async getPopularModels(limit = 4, conn) {
     } catch (error) {
         console.error('Error in getPopularModels:', error);
         return [];
+    } finally {
+        await this._release(connObj);
+    }
+}
+
+// ---------- GET ALL MODELS FOR COMPARISON ----------
+static async getAllModelsForComparison(conn) {
+    const connObj = await this._getConn(conn);
+    try {
+        const [rows] = await connObj.conn.execute(`
+            SELECT m.id, m.model_name, m.brand_id, m.model_image, m.starting_price,
+                   b.name AS brand_name, v.vehicle_type_name, c.name AS category_name
+            FROM models m
+            JOIN brands b ON m.brand_id = b.brand_id
+            JOIN vehicletype v ON m.vehicle_type_id = v.vehicle_type_id
+            JOIN categories c ON m.category_id = c.category_id
+            WHERE m.status = 'published' OR m.status = 'import'
+            ORDER BY b.name, m.model_name
+        `);
+        return rows;
     } finally {
         await this._release(connObj);
     }

@@ -10,6 +10,9 @@ const publicpagesRouter = require('./routes/publicpagesrouter'); // PUBLIC PAGES
 const auth = require('./middleware/auth');
 const rootDir = require('./utils/pathutil');
 
+// 404 Controller import
+const notFoundController = require('./controller/publicpages/404');
+
 const app = express();
 
 // Set view engine
@@ -53,13 +56,15 @@ app.use('/', fullpageRouter);
 // 2. PUBLIC PAGES (Brands, Category, News, Compare) → root level
 app.use('/', publicpagesRouter);  // NOT /profile !!
 
-// 3. Admin → /admin
+// 3. 404 Page Route (DIRECT controller use garne)
+app.get('/notfound', notFoundController.getNotFound);
+
+// 4. Admin → /admin
 app.use('/admin', auth, adminRouter);
 
-// 4. 404 Handler (LAST)
+// 5. 404 Handler (LAST) - catch all other routes
 app.use((req, res) => {
-    console.log('404 Route:', req.path);
-    res.status(404).render('404', { title: 'Page Not Found', path: req.path });
+    res.redirect('/notfound');
 });
 
 const port = 3000;

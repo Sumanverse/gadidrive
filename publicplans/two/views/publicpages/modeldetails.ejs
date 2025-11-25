@@ -1,338 +1,2370 @@
-<%- include('../partials/head.ejs', { title: 'brandname modelname' }) %>
-
-        body {
-            background-color: #000000;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head', {
+        title: model?.model_name ? `${model.model_name} - ${model.brand_name} | Full Specifications & Details` : 'Model Details',
+        description: model?.engine_type ? `Explore ${model.model_name} by ${model.brand_name}. ${model.engine_type} engine, ${model.starting_price ? 'starting at ' + model.starting_price : ''}. Full specifications, colors, variants and features.` : 'Complete model specifications and details',
+        keywords: `${model?.model_name || ''},${model?.brand_name || ''},${model?.vehicle_type_name || ''},${model?.category_name || ''},${model?.engine_type || ''},car specifications,bike details,vehicle features`,
+        canonical: `/modeldetails/${model?.id || ''}`
+    }) %>
+    
+    <!-- Add Font Awesome for better icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-red: #dc2626;
+            --dark-red: #b91c1c;
+            --primary-blue: #3b82f6;
+            --dark-blue: #1d4ed8;
+            --dark-bg: #000000;
+            --card-bg: #111111;
+            --text-light: #ffffff;
+            --text-muted: #9ca3af;
+        }
+        
+        * {
             font-family: 'Poppins', sans-serif;
         }
-        .box-hover-effect {
-            transition: transform 0.3s ease-in-out;
+        
+        body {
+            background: var(--dark-bg);
+            color: white;
         }
-        .box-hover-effect:hover {
-            transform: scale(1.02);
+        
+        /* Combined Model Header and Specs Box */
+        .model-main-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #374151;
         }
-        .filter-button:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+        
+        /* UPDATED: Model Header Styles from one.ejs */
+        .model-header-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
-        .breadcrumb a:hover {
-            color: #DC2626;
+        
+        .model-image {
+            width: 300px; /* Increased width from one.ejs */
+            height: 200px; /* Increased height proportionally from one.ejs */
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #374151;
+            flex-shrink: 0;
         }
-        #mobile-menu-overlay {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
-            width: 16rem;
-            height: 100%;
-            z-index: 1000;
-            pointer-events: auto;
-            will-change: transform, opacity;
+        
+        .model-info {
+            flex: 1;
         }
-        .mobile-menu-open {
-            transform: translateX(0);
-            opacity: 1;
+        
+        .model-brand {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
         }
-        #mobile-menu-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            pointer-events: auto;
+        
+        .model-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #ffffff, #e5e5e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        #mobile-menu-backdrop.active {
-            display: block;
+        
+        .model-meta {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
         }
-        .sub-nav-link {
+        
+        .safety-rating {
             display: inline-flex;
             align-items: center;
+            gap: 0.5rem;
             padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.3s ease;
+            background: var(--primary-red);
+            color: white;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid var(--primary-red);
         }
-        .sub-nav-link:hover .icon {
-            background-color: #DC2626;
+        
+        .safety-rating:hover {
+            background: #dc2626;
+            color: var(--primary-red);
+            border-color: #dc2626;
         }
-        .sub-nav-link:hover span {
-            color: #DC2626;
+        
+        .release-date {
+            color: var(--text-muted);
+            font-weight: 500;
         }
-        .sub-nav-link.active .icon {
-            background-color: #DC2626;
+
+        /* Specifications Grid - REMOVED HOVER EFFECTS */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            padding-top: 2rem;
+            border-top: 1px solid #374151;
         }
-        .sub-nav-link.active span {
-            color: #DC2626;
+        
+        .spec-item {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 12px;
+            border: 1px solid #374151;
         }
-        .sub-nav-link span {
-            color: #FFFFFF;
-        }
-        .sub-nav-link .icon {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 0.5rem;
-        }
-        .color-circle {
-            position: relative;
+        
+        .spec-icon {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            transition: transform 0.3s;
+            margin: 0 auto 0.75rem;
+            color: var(--primary-red);
+            font-size: 1.75rem;
         }
-        .color-circle:hover {
+        
+        .spec-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+        
+        .spec-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: normal;
+        }
+        
+        .spec-unit {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+        
+        /* Price Box with EMI - UPDATED: EMI button removed */
+        .price-box {
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .price-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .emi-info {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            margin-bottom: 0; /* Removed margin since EMI button is removed */
+        }
+        
+        /* Centered Options Buttons */
+        .options-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .option-btn {
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 2px solid white;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .option-btn.active {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+            color: white;
+        }
+        
+        .option-btn:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: black;
+        }
+        
+        /* UPDATED: Modal Overlay - FULL PAGE WIDTH */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        /* UPDATED: Modal Content - FULL PAGE WIDTH */
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            max-width: 95vw; /* FULL PAGE WIDTH */
+            width: 95vw; /* FULL PAGE WIDTH */
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #374151;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+            margin-top: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            padding: 2rem 3rem;
+            border-bottom: 2px solid var(--primary-red);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            margin: 0;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .modal-close {
+            background: var(--primary-red);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .modal-close:hover {
+            background: var(--dark-red);
             transform: scale(1.1);
         }
-        .color-name {
-            display: none;
+        
+        /* UPDATED: Modal Body - FULL WIDTH CONTENT */
+        .modal-body {
+            padding: 3rem 4rem;
+            background: var(--card-bg);
+            border-radius: 0 0 16px 16px;
+            min-height: 400px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .external-close {
             position: absolute;
-            top: -30px;
+            top: -50px;
+            right: 0;
+            background: var(--primary-red);
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .external-close:hover {
+            background: #dc2626;
+            color: var(--primary-red);
+            transform: scale(1.1);
+        }
+        
+        /* UPDATED: Variants Table - FULL WIDTH */
+        .variant-table {
+            width: 100%;
+            background: rgba(55, 65, 81, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #374151;
+        }
+        
+        .variant-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #374151;
+            align-items: center;
+        }
+        
+        .variant-row:last-child {
+            border-bottom: none;
+        }
+        
+        .variant-row:nth-child(even) {
+            background: rgba(55, 65, 81, 0.7);
+        }
+        
+        .variant-name {
+            font-weight: 700;
+            color: white;
+            font-size: 1.3rem;
+        }
+        
+        .variant-price {
+            font-weight: 700;
+            color: var(--primary-red);
+            font-size: 1.1rem;
+            text-align: right;
+        }
+        
+        /* UPDATED: News-style About Content - FULL WIDTH */
+        .about-content {
+            line-height: 1.8;
+            color: var(--text-light);
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 12px;
+            border: 2px solid #374151;
+            width: 100%;
+            font-size: 1.2rem;
+            box-sizing: border-box;
+        }
+        
+        .about-text {
+            margin-bottom: 2rem;
+            text-align: justify;
+            font-size: 1.2rem;
+        }
+        
+        .article-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border-radius: 12px;
+            background: rgba(55, 65, 81, 0.5);
+            border-left: 6px solid var(--primary-red);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .article-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .article-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .article-title i {
+            color: var(--primary-red);
+            font-size: 2rem;
+        }
+        
+        .article-content {
+            padding: 0;
+            width: 100%;
+        }
+        
+        .article-image {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border: 3px solid #374151;
+            cursor: pointer;
+        }
+        
+        .article-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            background: var(--primary-red);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+            border: 3px solid var(--primary-red);
+            font-size: 1.1rem;
+        }
+        
+        .article-link:hover {
+            background: #dc2626;
+            color: var(--primary-red);
+            transform: translateY(-3px);
+        }
+        
+        /* UPDATED: Action Buttons - Sources and Share - CENTERED AND BETTER POSITIONED from one.ejs */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 3rem auto 2rem auto;
+            padding: 2rem;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid #374151;
+        }
+        
+        /* UPDATED: Enhanced Sources Button - Newsdetails style from one.ejs */
+        .sources-btn {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+            color: white;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            min-width: 180px;
+            justify-content: center;
+        }
+        
+        .sources-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .sources-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sources-btn:hover::before {
+            left: 100%;
+        }
+        
+        /* UPDATED: Enhanced Share Button - Newsdetails style from one.ejs */
+        .share-btn {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: white;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            min-width: 180px;
+            justify-content: center;
+        }
+        
+        .share-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .share-btn:hover::before {
+            left: 100%;
+        }
+        
+        /* UPDATED: Available Sites - FULL WIDTH GRID */
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+        }
+        
+        .site-card {
+            background: rgba(55, 65, 81, 0.5);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #374151;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: block;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .site-card:hover {
+            border-color: var(--primary-red);
+            background: rgba(55, 65, 81, 0.8);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .site-card .font-semibold {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .site-card .text-sm {
+            font-size: 1rem;
+        }
+        
+        /* Centered Colors Section - UPDATED WITH SEO TITLES */
+        .colors-section {
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid #374151;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .color-header {
+            padding: 0 0 2rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--primary-red);
+        }
+        
+        .color-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        /* UPDATED: Exterior/Interior Button Styles */
+        .color-btn {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 2px solid white;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-btn.active {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: black;
+        }
+        
+        .color-btn:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: black;
+        }
+        
+        .color-content-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .color-content {
+            display: none;
+        }
+        
+        .color-content.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* SEO Title for Colors */
+        .seo-color-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 1.5rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            border: 2px solid var(--primary-red);
+        }
+        
+        /* Horizontal Color Palette */
+        .color-palette {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+        
+        .color-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .color-circle.active {
+            border-color: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .color-circle:hover {
+            border-color: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        .color-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block; /* Ensure image displays properly */
+        }
+        
+        .color-name-display {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .color-gallery-container {
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid #374151;
+        }
+        
+        .color-gallery-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .color-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-item {
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            background: #374151; /* Fallback background */
+        }
+        
+        .gallery-item.active {
+            border-color: #dc2626;
+        }
+        
+        .gallery-item:hover {
+            border-color: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block; /* Ensure image displays properly */
+        }
+        
+        .more-images {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(55, 65, 81, 0.5);
+            border: 2px dashed #4b5563;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .more-images:hover {
+            border-color: #dc2626;
+            background: rgba(55, 65, 81, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        .more-text {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        
+        /* Improved Image Modal with External Navigation */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .image-modal.active {
+            display: flex;
+        }
+        
+        .modal-top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1003;
+        }
+        
+        .modal-title-bar {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close-btn:hover {
+            background: var(--primary-red);
+        }
+        
+        .modal-container {
+            position: relative;
+            max-width: 95%;
+            max-height: 85vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 80px;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .modal-nav {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-red);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1002;
+        }
+        
+        .modal-nav:hover {
+            background: #dc2626;
+            color: var(--primary-red);
+        }
+        
+        .modal-prev {
+            left: 30px;
+        }
+        
+        .modal-next {
+            right: 30px;
+        }
+        
+        .modal-counter-top {
+            position: absolute;
+            top: -60px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 10;
+            color: white;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 1004;
         }
-        .color-circle:hover .color-name {
+        
+        /* Redesigned Specifications Section */
+        .specs-section {
+            background: var(--dark-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid rgba(55, 65, 81, 0.7);
+        }
+
+        .specs-section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .specs-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: #dc2626;
+        }
+
+        .specs-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .spec-category-box {
+            background: #111111;
+            border-radius: 12px;
+            padding: 0;
+            border: 2px solid #374151;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
             display: block;
-        }
-        .specs-group {
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .specs-group:hover {
-            background: #333;
-        }
-        .expandable {
-            transition: max-height 0.5s ease-in-out;
             overflow: hidden;
-            max-height: 0;
+            position: relative;
+            transition: all 0.3s ease;
         }
-        .expanded {
-            max-height: 500px; /* Adjust based on content */
+
+        .spec-category-box:hover {
+            border-color: #dc2626;
+            background: #111111;
         }
-        .read-more-btn {
-            color: #DC2626;
+
+        .spec-category-box:hover .spec-category-title {
+            background: #dc2626;
+            color: white;
+        }
+
+        .spec-category-box:hover .spec-list {
+            background: #111111;
+        }
+
+        .spec-category-box:hover .spec-list-title {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .spec-category-box:hover .spec-list-content {
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .spec-category-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            background: #000000;
+            border-bottom: 2px solid #dc2626;
+            transition: all 0.3s ease;
+        }
+
+        .spec-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 1.5rem;
+            background: #111111;
+            transition: all 0.3s ease;
+            counter-reset: list-item;
+        }
+
+        .spec-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .spec-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .spec-list-item:hover {
+            background: transparent;
+        }
+
+        .spec-list-title {
+            font-weight: 500;
+            color: #ffffff;
+            text-align: left;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .spec-list-title::before {
+            content: counter(list-item) ".";
+            counter-increment: list-item;
+            position: absolute;
+            left: 0;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .spec-list-content {
+            font-weight: 500;
+            color: #9ca3af;
+            text-align: right;
+        }
+        
+        .loading {
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 0.4; }
+            100% { opacity: 0.7; }
+        }
+        
+        /* Share and Sources Modals - UPDATED: Better padding and content placement */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .share-icons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding: 0 1rem;
+        }
+        
+        .share-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: #374151;
+            border-radius: 10px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #374151;
+        }
+        
+        .share-icon:hover {
+            background: #dc2626;
+            color: black;
+            border-color: #dc2626;
+        }
+        
+        .share-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .copy-link {
+            width: calc(100% - 2rem);
+            margin: 0 1rem 1.5rem 1rem; /* Added bottom margin for better spacing */
+            padding: 1rem;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .copy-link:hover {
+            background: white;
+            color: black;
+            border-color: white;
+        }
+        
+        /* Sources content styling */
+        .sources-content {
+            padding: 1rem 2rem 2rem;
+            color: white;
+            line-height: 1.6;
+        }
+        
+        /* Modal content styling */
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #374151;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid var(--primary-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-btn {
+            background: var(--primary-red);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: var(--dark-red);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .model-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .model-image {
+                width: 250px; /* Adjusted for mobile */
+                height: 180px; /* Adjusted for mobile */
+            }
+            
+            .model-name {
+                font-size: 2rem;
+            }
+            
+            .specs-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .options-buttons, .color-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .option-btn, .color-btn {
+                width: 100%;
+                max-width: 300px;
+                text-align: center;
+            }
+            
+            .price-amount {
+                font-size: 2rem;
+            }
+            
+            .color-palette {
+                justify-content: flex-start;
+                padding-bottom: 1rem;
+            }
+            
+            .color-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .modal-prev {
+                left: 10px;
+            }
+            
+            .modal-next {
+                right: 10px;
+            }
+            
+            .modal-container {
+                margin-top: 60px;
+            }
+            
+            .external-close {
+                top: -40px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+            
+            .specs-grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .sources-btn, .share-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Mobile modal width adjustment */
+            .modal-content {
+                max-width: 95%;
+                width: 95%;
+                margin-top: 20px;
+            }
+            
+            .modal-header {
+                padding: 1.5rem;
+            }
+            
+            .modal-title {
+                font-size: 1.5rem;
+            }
+            
+            .modal-body {
+                padding: 1.5rem;
+            }
+            
+            .variant-row {
+                padding: 1rem;
+                grid-template-columns: 2fr 1fr;
+            }
+            
+            .variant-name {
+                font-size: 1.1rem;
+            }
+            
+            .variant-price {
+                font-size: 1.2rem;
+            }
+            
+            .sites-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* News-style Content Styling */
+        .news-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .news-content p {
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-family: 'Poppins', sans-serif;
+            text-align: justify;
+        }
+
+        .news-content h2 {
+            color: #ffffff;
+            margin: 2rem 0 1rem 0;
+            font-weight: 600;
+            font-size: 1.75rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .news-content h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            border-radius: 2px;
+        }
+
+        .content-photo {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-source-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .image-source-badge:hover {
+            background: rgba(220, 38, 38, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .content-block {
+            margin-bottom: 2rem;
+        }
+
+        .content-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 2px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .content-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #60a5fa;
+            transition: width 0.3s ease;
+        }
+
+        .content-link:hover {
+            color: #3b82f6;
+        }
+
+        .content-link:hover::after {
+            width: 100%;
+        }
+
+        .justified-text {
+            text-align: justify;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col text-white">
-    
+<body class="min-h-screen flex flex-col bg-black text-white">
+
 <%- include('../partials/navbar') %>
 
-    <!-- Breadcrumb (Added as per plan, from reference) -->
-    <div class="container mx-auto px-4 py-2 text-sm breadcrumb flex items-center">
-        <a href="/" class="hover:text-red-600">Gyarage</a> 
-        <span class="mx-2 text-red-600">&gt;&gt;</span> 
-        <a href="/usa" class="hover:text-red-600">USA</a> 
-        <span class="mx-2 text-red-600">&gt;&gt;</span> 
-        <a href="/usa/brands" class="hover:text-red-600">Brands</a>
-        <span class="mx-2 text-red-600">&gt;&gt;</span> 
-        <a href="/usa/brands/cars" class="hover:text-red-600">Cars</a>
-        <span class="mx-2 text-red-600">&gt;&gt;</span> 
-        <a href="/usa/brands/cars/mercedes" class="hover:text-red-600">Mercedes</a>
-        <span class="mx-2 text-red-600">&gt;&gt;</span> 
-        <span class="text-white font-bold">G Wagon</span>
-    </div>
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm text-gray-400">
+            <li><a href="/" class="hover:text-red-500 transition">Home</a></li>
+            <li>></li>
+            <li><a href="/brands" class="hover:text-red-500 transition">Brands</a></li>
+            <li>></li>
+            <li><a href="/brandsdetails/<%= model?.brand_id %>" class="hover:text-red-500 transition"><%= model?.brand_name %></a></li>
+            <li>></li>
+            <li class="text-white truncate max-w-xs"><%= model?.model_name %></li>
+        </ol>
+    </nav>
 
-    <!-- Filter Button (Added beside breadcrumb if needed, but per plan it's in brands page; here optional) -->
-    <div class="container mx-auto px-4 flex justify-end mb-4">
-        <button id="filter-button" class="filter-button bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition">
-            Filter
-        </button>
-    </div>
+    <% if (error) { %>
+        <div class="bg-red-900 border border-red-700 text-white px-4 py-3 rounded-lg mb-6">
+            <p><%= error %></p>
+        </div>
+    <% } %>
 
-    <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
-        <!-- Top Box: Model Details Header -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 lg:flex lg:space-x-8 box-hover-effect mb-8">
-            <div class="lg:w-1/2">
-                <div class="h-80 bg-white rounded-lg shadow-inner overflow-hidden">
-                    <img src="https://placehold.co/800x600/d1d5db/000000?text=G+Wagon" alt="G Wagon" class="w-full h-full object-cover">
-                </div>
-            </div>
-            <div class="lg:w-1/2 flex flex-col justify-center">
-                <p class="text-xl text-gray-300">from <span class="font-semibold">Mercedes</span></p>
-                <h1 class="text-5xl font-extrabold text-white mt-2">G Wagon</h1>
-                <div class="flex items-center mt-4">
-                    <span class="text-2xl font-bold text-yellow-400">4.5/5 ⭐</span>
-                    <span class="ml-4 text-gray-300">Safety Rating</span>
-                </div>
-                <div class="flex items-center mt-4">
-                    <span class="text-xl text-white">Engine Type: 4.0L V8 Biturbo</span>
-                    <span class="ml-auto text-gray-300">Category: SUV</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Price Box -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
-            <h2 class="text-2xl font-bold text-white mb-4">Price of Mercedes G Wagon in USA</h2>
-            <p class="text-3xl font-extrabold text-white">$150,000 - $200,000</p>
-            <p class="text-sm text-gray-300 mt-1">EMI starts @ $2,500 / month</p>
-        </section>
-
-        <!-- Exterior/Interior Toggle Box -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
-            <div class="flex space-x-4 mb-4">
-                <button id="exterior-btn" class="bg-white text-black font-semibold py-2 px-4 rounded-lg transition hover:bg-red-600 hover:text-white">Exterior</button>
-                <button id="interior-btn" class="bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition hover:bg-red-600">Interior</button>
-            </div>
-            <div id="tab-content">
-                <!-- Color Options -->
-                <div class="mt-4">
-                    <h3 class="text-lg font-semibold text-white mb-2">Color Options:</h3>
-                    <div class="flex space-x-2">
-                        <div class="color-circle bg-black" data-color="black"><span class="color-name">Black</span></div>
-                        <div class="color-circle bg-white" data-color="white"><span class="color-name">White</span></div>
-                        <div class="color-circle bg-red-600" data-color="red"><span class="color-name">Red</span></div>
-                        <div class="color-circle bg-blue-600" data-color="blue"><span class="color-name">Blue</span></div>
-                        <!-- Add more -->
+    <% if (model) { %>
+        <!-- 1. Combined Model Header and Specifications Box -->
+        <div class="model-main-box">
+            <!-- Model Header -->
+            <div class="model-header-content">
+                <% if (model.model_image) { %>
+                    <img src="<%= model.model_image %>" 
+                         alt="<%= model.model_name %>" 
+                         class="model-image"
+                         onload="this.classList.remove('loading')"
+                         onerror="this.style.display='none';">
+                <% } else { %>
+                    <div class="model-image bg-gray-700 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                <% } %>
+                
+                <div class="model-info">
+                    <div class="model-brand"><%= model.brand_name %></div>
+                    <h1 class="model-name"><%= model.model_name %></h1>
+                    <div class="model-meta">
+                        <% if (model.safety_rating) { %>
+                            <% if (model.safety_link) { %>
+                                <a href="<%= model.safety_link.startsWith('http') ? model.safety_link : 'https://' + model.safety_link %>" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="safety-rating">
+                            <% } else { %>
+                                <div class="safety-rating">
+                            <% } %>
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <%= model.safety_rating %> Safety Rating
+                            <% if (model.safety_link) { %>
+                                </a>
+                            <% } else { %>
+                                </div>
+                            <% } %>
+                        <% } %>
+                        <% if (model.release_year) { %>
+                            <div class="release-date">Launch: <%= model.release_year %></div>
+                        <% } %>
                     </div>
                 </div>
-                <!-- Images Grid (Update based on color and tab) -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                    <img src="https://placehold.co/200x150?text=Exterior+Black+1" alt="Img1" class="w-full h-32 object-cover rounded cursor-pointer">
-                    <img src="https://placehold.co/200x150?text=Exterior+Black+2" alt="Img2" class="w-full h-32 object-cover rounded cursor-pointer">
-                    <!-- More images, up to 8 -->
+            </div>
+
+            <!-- Specifications Grid with Better Icons -->
+            <div class="specs-grid">
+                <% if (model.engine_type) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-cogs"></i>
+                        <div class="spec-value"><%= model.engine_type %></div>
+                        <div class="spec-label">Engine Type</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.power) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-bolt"></i>
+                        <div class="spec-value">
+                            <%= model.power %><span class="spec-unit">HP</span>
+                        </div>
+                        <div class="spec-label">Power</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.torque) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-tachometer-alt"></i>
+                        <div class="spec-value">
+                            <%= model.torque %><span class="spec-unit">Nm</span>
+                        </div>
+                        <div class="spec-label">Torque</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.ground_clearance) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-arrow-up"></i>
+                        <div class="spec-value">
+                            <%= model.ground_clearance %><span class="spec-unit">mm</span>
+                        </div>
+                        <div class="spec-label">Ground Clearance</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.dimensions) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-arrows-alt"></i>
+                        <div class="spec-value"><%= model.dimensions %></div>
+                        <div class="spec-label">Dimensions</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.drive_type) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-car-side"></i>
+                        <div class="spec-value"><%= model.drive_type %></div>
+                        <div class="spec-label">Drive Type</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.seater) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-users"></i>
+                        <div class="spec-value"><%= model.seater %><span class="spec-unit">Seater</span></div>
+                        <div class="spec-label">Seating Capacity</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.total_airbags) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-user-shield"></i>
+                        <div class="spec-value"><%= model.total_airbags %><span class="spec-unit">Airbags</span></div>
+                        <div class="spec-label">Total Airbags</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.boot_space) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-suitcase"></i>
+                        <div class="spec-value">
+                            <%= model.boot_space %><span class="spec-unit">L</span>
+                        </div>
+                        <div class="spec-label">Boot Space</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.range_mileage) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-gas-pump"></i>
+                        <div class="spec-value">
+                            <%= model.range_mileage %><span class="spec-unit"><%= model.engine_type && model.engine_type.toLowerCase().includes('electric') ? 'km' : 'kmpl' %></span>
+                        </div>
+                        <div class="spec-label"><%= model.engine_type && model.engine_type.toLowerCase().includes('electric') ? 'Range' : 'Mileage' %></div>
+                    </div>
+                <% } %>
+                
+                <% if (model.battery_capacity) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-battery-full"></i>
+                        <div class="spec-value">
+                            <%= model.battery_capacity %><span class="spec-unit">kWh</span>
+                        </div>
+                        <div class="spec-label">Battery Capacity</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.cylinders) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-filter"></i>
+                        <div class="spec-value"><%= model.cylinders %><span class="spec-unit">Cyl</span></div>
+                        <div class="spec-label">Cylinders</div>
+                    </div>
+                <% } %>
+                
+                <% if (model.fuel_tank) { %>
+                    <div class="spec-item">
+                        <i class="spec-icon fas fa-oil-can"></i>
+                        <div class="spec-value">
+                            <%= model.fuel_tank %><span class="spec-unit">L</span>
+                        </div>
+                        <div class="spec-label">Fuel Tank</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- 2. Price Box with EMI - UPDATED: EMI button removed -->
+        <div class="price-box">
+            <div class="price-title"><%= model.brand_name %> <%= model.model_name %> Price in Nepal</div>
+            <% if (model.starting_price) { %>
+                <div class="price-amount">₹<%= new Intl.NumberFormat('en-IN').format(model.starting_price) %></div>
+                <div class="emi-info">EMI starts from ₹<%= new Intl.NumberFormat('en-IN').format(Math.round(model.starting_price / 60)) %> per month</div>
+                <!-- EMI Calculate Button REMOVED -->
+            <% } else { %>
+                <div class="price-amount">Price Coming Soon</div>
+            <% } %>
+        </div>
+
+        <!-- 3. Centered Options Buttons (Variants, About, Available) -->
+        <div class="options-buttons">
+            <button class="option-btn" data-option="variants">Variants</button>
+            <button class="option-btn" data-option="about">About <%= model.model_name %></button>
+            <button class="option-btn" data-option="available">Available On</button>
+        </div>
+
+        <!-- 4. Centered Colors Section - UPDATED WITH SEO TITLES -->
+        <div class="colors-section">
+            <div class="color-header">
+                <h2 class="text-2xl font-bold text-white mb-4">Color Options</h2>
+                <div class="color-buttons">
+                    <button class="color-btn active" data-color-type="exterior">Exterior Colors</button>
+                    <button class="color-btn" data-color-type="interior">Interior Colors</button>
                 </div>
             </div>
-        </section>
 
-        <!-- Variants Box -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
-            <h2 class="text-2xl font-bold text-white mb-4">All Variants Price of Mercedes G Wagon in USA</h2>
-            <div class="space-y-4">
-                <div class="flex justify-between text-white">
-                    <span>Base</span>
-                    <span>$150,000</span>
+            <div class="color-content-container">
+                <!-- Exterior Colors Content -->
+                <div class="color-content active" id="exterior-content">
+                    <% if (modelDetails && modelDetails.exteriorColors && modelDetails.exteriorColors.length > 0) { %>
+                        <!-- SEO Title for Exterior Colors -->
+                        <div class="seo-color-title">
+                            All Exterior Colors of <%= model.brand_name %> <%= model.model_name %> in Nepal
+                        </div>
+                        
+                        <div class="color-palette">
+                            <% modelDetails.exteriorColors.forEach((color, index) => { %>
+                                <div class="color-item">
+                                    <div class="color-circle <%= index === 0 ? 'active' : '' %>" 
+                                         data-color-id="<%= color.id %>"
+                                         data-color-type="exterior"
+                                         data-color-name="<%= color.color_name %>">
+                                        <% if (color.color_image) { %>
+                                            <img src="<%= color.color_image %>" alt="<%= color.color_name %>" 
+                                                 onload="this.style.display='block'"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                            <div class="w-full h-full bg-gray-600 rounded-full" style="display: none;"></div>
+                                        <% } else { %>
+                                            <div class="w-full h-full bg-gray-600 rounded-full"></div>
+                                        <% } %>
+                                    </div>
+                                    <div class="color-name-display"><%= color.color_name %></div>
+                                </div>
+                            <% }); %>
+                        </div>
+                        
+                        <!-- SEO Title for Exterior Images -->
+                        <div class="seo-color-title">
+                            All Exterior Images of <%= model.brand_name %> <%= model.model_name %> in Nepal
+                        </div>
+                        
+                        <!-- Color Images Gallery - Show by default -->
+                        <div class="color-gallery-container" id="exterior-gallery-container">
+                            <div class="color-gallery-title" id="exterior-gallery-title"><%= modelDetails.exteriorColors[0].color_name %> - Images</div>
+                            <div class="color-gallery" id="exterior-gallery">
+                                <!-- Images will be loaded here via JavaScript -->
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p class="text-gray-400 text-center py-8">No exterior colors available.</p>
+                    <% } %>
                 </div>
-                <div class="flex justify-between text-white">
-                    <span>AMG</span>
-                    <span>$200,000</span>
+
+                <!-- Interior Colors Content -->
+                <div class="color-content" id="interior-content">
+                    <% if (modelDetails && modelDetails.interiorColors && modelDetails.interiorColors.length > 0) { %>
+                        <!-- SEO Title for Interior Colors -->
+                        <div class="seo-color-title">
+                            All Interior Colors of <%= model.brand_name %> <%= model.model_name %> in Nepal
+                        </div>
+                        
+                        <div class="color-palette">
+                            <% modelDetails.interiorColors.forEach((color, index) => { %>
+                                <div class="color-item">
+                                    <div class="color-circle <%= index === 0 ? 'active' : '' %>" 
+                                         data-color-id="<%= color.id %>"
+                                         data-color-type="interior"
+                                         data-color-name="<%= color.color_name %>">
+                                        <% if (color.color_image) { %>
+                                            <img src="<%= color.color_image %>" alt="<%= color.color_name %>"
+                                                 onload="this.style.display='block'"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                            <div class="w-full h-full bg-gray-600 rounded-full" style="display: none;"></div>
+                                        <% } else { %>
+                                            <div class="w-full h-full bg-gray-600 rounded-full"></div>
+                                        <% } %>
+                                    </div>
+                                    <div class="color-name-display"><%= color.color_name %></div>
+                                </div>
+                            <% }); %>
+                        </div>
+                        
+                        <!-- SEO Title for Interior Images -->
+                        <div class="seo-color-title">
+                            All Interior Images of <%= model.brand_name %> <%= model.model_name %> in Nepal
+                        </div>
+                        
+                        <!-- Color Images Gallery - Show by default -->
+                        <div class="color-gallery-container" id="interior-gallery-container">
+                            <div class="color-gallery-title" id="interior-gallery-title"><%= modelDetails.interiorColors[0].color_name %> - Images</div>
+                            <div class="color-gallery" id="interior-gallery">
+                                <!-- Images will be loaded here via JavaScript -->
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p class="text-gray-400 text-center py-8">No interior colors available.</p>
+                    <% } %>
                 </div>
-                <!-- Add more variants -->
             </div>
-        </section>
+        </div>
 
-        <!-- About Section -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
-            <h2 class="text-2xl font-bold text-white mb-4">About Mercedes G Wagon</h2>
-            <p class="text-gray-300 line-clamp-4" id="short-about">The Mercedes G Wagon is a luxury SUV known for its off-road capabilities and iconic design. It combines rugged performance with premium interiors...</p>
-            <p class="text-gray-300 hidden" id="full-about">Full details: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <span class="read-more-btn" onclick="document.getElementById('full-about').classList.toggle('hidden'); document.getElementById('short-about').classList.toggle('hidden');">Read More</span>
-        </section>
+        <!-- 5. Redesigned Specifications Section -->
+        <div class="specs-section">
+            <h2 class="specs-section-title"><%= model.brand_name %> <%= model.model_name %> Specifications</h2>
+            
+            <% if (modelDetails && modelDetails.specifications && modelDetails.specifications.length > 0) { %>
+                <div class="specs-grid-container">
+                    <% modelDetails.specifications.forEach(spec => { %>
+                        <a href="/model/<%= model.model_name %>/<%= spec.title %>" class="spec-category-box">
+                            <h3 class="spec-category-title"><%= spec.title %></h3>
+                            <div class="spec-list">
+                                <% 
+                                const specLists = modelDetails.specificationLists.filter(list => list.specification_id === spec.id); 
+                                let counter = 0;
+                                specLists.forEach(list => { 
+                                %>
+                                    <div class="spec-list-item">
+                                        <span class="spec-list-title" style="counter-increment: list-item <%= counter %>;"><%= list.title %></span>
+                                        <span class="spec-list-content"><%= list.content %></span>
+                                    </div>
+                                <% 
+                                counter++;
+                                }); 
+                                %>
+                            </div>
+                        </a>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="text-gray-400 text-center py-8">No detailed specifications available.</p>
+            <% } %>
+        </div>
 
-        <!-- Available On Button (Expand inline) -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
-            <button id="available-on-btn" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-red-600 hover:text-white transition transform hover:scale-105">
-                Available on
+    <% } else { %>
+        <!-- No Model Found -->
+        <div class="text-center py-16">
+            <svg class="w-24 h-24 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h2 class="text-2xl font-bold text-white mb-2">Model Not Found</h2>
+            <p class="text-gray-400 mb-6">The model you're looking for doesn't exist or has been removed.</p>
+            <a href="/brands" class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors">
+                Browse Brands
+            </a>
+        </div>
+    <% } %>
+
+    <!-- UPDATED: Share and Sources Buttons - CENTERED AND BETTER POSITIONED from one.ejs -->
+    <div class="action-buttons">
+        <button class="sources-btn" onclick="openSourcesModal()" aria-label="View model sources">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Sources
+        </button>
+
+        <button class="share-btn" onclick="openShareModal()" aria-label="Share this model">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+            </svg>
+            Share
+        </button>
+    </div>
+</main>
+
+<!-- About Modal - FULL PAGE WIDTH -->
+<div class="modal-overlay" id="about-modal">
+    <div class="modal-content">
+        <button class="external-close" onclick="closeModal('about-modal')">&times;</button>
+        <div class="modal-header" style="padding: 0; border-bottom: none;">
+            <!-- Title Box that spans full width -->
+            <div class="title-box" style="background: #ffffff; padding: 2rem; width: 100%; border-radius: 16px 0 0 0;">
+                <h2 class="modal-title" style="color: #000000; margin: 0; text-align: center; font-weight: 800; font-size: 2rem;">
+                    About <%= model?.brand_name %> <%= model?.model_name %> in Nepal
+                </h2>
+            </div>
+            <button class="modal-close" onclick="closeModal('about-modal')" style="position: absolute; top: 2rem; right: 2rem; background: #dc2626; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; z-index: 10;">&times;</button>
+        </div>
+        <div class="modal-body" style="background: #000000; padding: 3rem 4rem; border-radius: 0 0 16px 16px; min-height: 400px; width: 100%;">
+            <div style="background: #000000; color: #ffffff; line-height: 1.7; width: 100%;">
+                <% 
+                let hasVisibleContent = false;
+                
+                // FIX: About contents lai content_order ko basis ma sort garne
+                let sortedAboutContents = [];
+                if (modelDetails && modelDetails.aboutContents) {
+                    sortedAboutContents = modelDetails.aboutContents.slice().sort((a, b) => a.content_order - b.content_order);
+                }
+                %>
+                
+                <% if (sortedAboutContents && sortedAboutContents.length > 0) { %>
+                    <section class="news-content mb-8" itemprop="articleBody" style="background: #000000; width: 100%;">
+                        <% sortedAboutContents.forEach((content, index) => { 
+                            // FIX: content_order 0 bhayepani display garne
+                            if ((content.type === 'article' || content.type === 'text') && content.value && content.value.trim() !== '') {
+                                hasVisibleContent = true;
+                        %>
+                            <div class="content-block" style="background: #000000; padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                                <p class="justified-text" style="color: #ffffff; font-size: 1.1rem; margin: 0.5rem 0; width: 100%;">
+                                    <%= content.value %>
+                                </p>
+                            </div>
+                        <% } else if (content.type === 'photo' && content.image_path) { %>
+                            <% hasVisibleContent = true; %>
+                            <div class="content-block" style="background: #000000; padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                                <div class="content-photo" style="position: relative; width: 100%;">
+                                    <img src="<%= content.image_path %>" 
+                                         alt="About <%= model.model_name %>" 
+                                         class="w-full h-auto rounded-lg"
+                                         loading="lazy"
+                                         style="border: 2px solid #374151; margin: 0.5rem 0; max-width: 100%; width: 100%;">
+                                    <% if (content.source) { %>
+                                    <a href="<%= content.source.includes('http') ? content.source : 'https://' + content.source %>" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer"
+                                       class="image-source-badge"
+                                       style="position: absolute; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 500;">
+                                        Source
+                                    </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } else if (content.type === 'link' && content.value) { %>
+                            <% hasVisibleContent = true; %>
+                            <div class="content-block" style="background: #000000; padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                                <a href="<%= content.value.startsWith('http') ? content.value : 'https://' + content.value %>" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="content-link"
+                                   style="color: #60a5fa; text-decoration: none; font-weight: 500; margin: 0.5rem 0; display: inline-block;">
+                                    <%= content.value %>
+                                </a>
+                            </div>
+                        <% } 
+                        }); %>
+                        
+                        <% if (!hasVisibleContent) { %>
+                            <p class="text-gray-400 text-center py-8 no-content-message" style="background: #000000; color: #9ca3af; margin: 0.5rem 0; width: 100%;">
+                                No about content available for this model.
+                            </p>
+                        <% } %>
+                    </section>
+                <% } else { %>
+                    <p class="text-gray-400 text-center py-8 no-content-message" style="background: #000000; color: #9ca3af; margin: 0.5rem 0; width: 100%;">
+                        No about content available for this model.
+                    </p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Variants Modal - FULL PAGE WIDTH -->
+<div class="modal-overlay" id="variants-modal">
+    <div class="modal-content">
+        <button class="external-close" onclick="closeModal('variants-modal')">&times;</button>
+        <div class="modal-header">
+            <h2 class="modal-title">All Variants of <%= model?.brand_name %> <%= model?.model_name %> in Nepal</h2>
+            <button class="modal-close" onclick="closeModal('variants-modal')">&times;</button>
+        </div>
+        <div class="modal-body" style="background: #000000; padding: 3rem 4rem; border-radius: 0 0 16px 16px; width: 100%;">
+            <% if (modelDetails && modelDetails.variants && modelDetails.variants.length > 0) { %>
+                <div class="variant-table" style="background: #000000; width: 100%;">
+                    <% modelDetails.variants.forEach(variant => { %>
+                        <div class="variant-row" style="background: #000000; border-bottom: 1px solid #374151; width: 100%;">
+                            <div class="variant-name font-semibold" style="color: #ffffff; width: 100%;"><%= variant.name %></div>
+                            <div class="variant-price" style="color: #dc2626; width: 100%;">₹<%= new Intl.NumberFormat('en-IN').format(variant.price) %></div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="text-gray-400 text-center py-8" style="background: #000000; color: #9ca3af; width: 100%;">No variants available for this model.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Available Modal - FULL PAGE WIDTH -->
+<div class="modal-overlay" id="available-modal">
+    <div class="modal-content">
+        <button class="external-close" onclick="closeModal('available-modal')">&times;</button>
+        <div class="modal-header">
+            <h2 class="modal-title">Where to Buy <%= model?.brand_name %> <%= model?.model_name %> in Nepal</h2>
+            <button class="modal-close" onclick="closeModal('available-modal')">&times;</button>
+        </div>
+        <div class="modal-body" style="background: #000000; padding: 3rem 4rem; border-radius: 0 0 16px 16px; width: 100%;">
+            <% if (modelDetails && modelDetails.availableSites && modelDetails.availableSites.length > 0) { %>
+                <div class="sites-grid" style="width: 100%;">
+                    <% modelDetails.availableSites.forEach(site => { %>
+                        <a href="<%= site.link_phone.startsWith('http') ? site.link_phone : 'https://' + site.link_phone %>" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="site-card"
+                           style="background: #111111; border: 1px solid #374151; width: 100%;">
+                            <div class="font-semibold text-white mb-2"><%= site.name %></div>
+                            <div class="text-sm text-gray-300">Visit Site</div>
+                        </a>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="text-gray-400 text-center py-8" style="background: #000000; color: #9ca3af; width: 100%;">No available sites information.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Improved Image Modal with External Navigation -->
+<div id="imageModal" class="image-modal">
+    <div class="modal-top-bar">
+        <div class="modal-title-bar" id="imageModalTitle">Image Viewer</div>
+        <button class="modal-close-btn" onclick="closeImageModal()">&times;</button>
+    </div>
+    <div class="modal-container">
+        <button class="modal-nav modal-prev" onclick="changeSlide(-1)">❮</button>
+        <img id="modalImage" class="modal-image" src="" alt="">
+        <button class="modal-nav modal-next" onclick="changeSlide(1)">❯</button>
+        <div class="modal-counter-top" id="modalCounterTop">1 / 1</div>
+    </div>
+</div>
+
+<!-- Share and Sources Modals -->
+<div id="sourcesModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Sources</h3>
+            <button class="close-btn" onclick="closeSourcesModal()" aria-label="Close sources modal">&times;</button>
+        </div>
+        <div class="sources-content">
+            <% if (model?.sources) { %>
+                <p class="justified-text"><%= model.sources %></p>
+            <% } else { %>
+                <p class="justified-text">No sources available for this model.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Share This Model</h3>
+            <button class="close-btn" onclick="closeShareModal()" aria-label="Close share modal">&times;</button>
+        </div>
+        
+        <div class="share-icons">
+            <button class="share-icon" onclick="shareOnTwitter()" aria-label="Share on Twitter">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                </svg>
             </button>
-            <div id="available-details" class="expandable mt-4 text-gray-300">
-                <ul class="space-y-2">
-                    <li><a href="https://mercedes.com" class="hover:text-red-600">Official Mercedes Site</a></li>
-                    <li><a href="tel:+123456789">Dealer: +1 234 567 89</a></li>
-                    <!-- More -->
-                </ul>
-            </div>
-        </section>
+            
+            <button class="share-icon" onclick="shareOnFacebook()" aria-label="Share on Facebook">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+            </button>
+            
+            <button class="share-icon" onclick="shareOnLinkedIn()" aria-label="Share on LinkedIn">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+            </button>
+            
+            <button class="share-icon" onclick="shareOnWhatsApp()" aria-label="Share on WhatsApp">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893 0-3.176-1.24-6.165-3.495-8.411z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <button class="copy-link" onclick="copyToClipboard()" aria-label="Copy model link to clipboard">
+            <span>Copy Model Link</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+        </button>
+    </div>
+</div>
 
-        <!-- Specifications Box -->
-        <section class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-6 box-hover-effect mb-8">
-            <h2 class="text-2xl font-bold text-white mb-4">Specifications and Features of Mercedes G Wagon in USA</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="specs-group p-4 bg-black rounded-xl border-t-4 border-red-600" onclick="window.location.href='/specs/engine'">
-                    <div class="bg-gradient-to-b from-red-500 to-black text-white font-bold text-center py-3 rounded-lg mb-4">Engine & Transmission</div>
-                    <ul class="list-disc list-inside text-gray-300">
-                        <li>Engine Type: 4.0L V8</li>
-                        <li>Power: 416 hp</li>
-                        <!-- More -->
-                    </ul>
-                </div>
-                <!-- More spec groups, clickable -->
-            </div>
-        </section>
-
-        <!-- Recommendations (From reference style) -->
-        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mt-12">
-            <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl p-4 flex flex-col items-center text-center box-hover-effect">
-                <div class="w-full h-28 bg-white rounded-lg mb-4"></div>
-                <div class="text-white font-semibold"><b>Mercedes AMG GT</b></div>
-                <div class="text-red-400 font-bold mt-2">$200,000</div>
-                <a href="#" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white">Check out</a>
-            </div>
-            <!-- More -->
-        </section>
-    </main>
-
-    
 <%- include('../partials/footer') %>
 
+<script>
+    // Make modelDetails available globally for JavaScript - with null check
+    const modelDetails = <%- JSON.stringify(modelDetails || {}) %>;
+    
+    // Global variables for slideshow
+    let currentSlideIndex = 0;
+    let currentSlides = [];
 
-    <script>
-        // Mobile Menu Script (From reference)
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
-        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set first color button as active by default
+        const firstColorBtn = document.querySelector('.color-btn[data-color-type="exterior"]');
+        if (firstColorBtn) {
+            firstColorBtn.classList.add('active');
+            document.getElementById('exterior-content').classList.add('active');
+            
+            // Load first color images by default - with null check
+            const firstColorCircle = document.querySelector('#exterior-content .color-circle.active');
+            if (firstColorCircle && modelDetails) {
+                loadColorImages(firstColorCircle);
+            }
+        }
 
-        const toggleMenu = () => {
-            mobileMenuOverlay.classList.toggle('mobile-menu-open');
-            mobileMenuBackdrop.classList.toggle('active');
-        };
-
-        mobileMenuButton.addEventListener('click', toggleMenu);
-        closeMobileMenuButton.addEventListener('click', toggleMenu);
-        mobileMenuBackdrop.addEventListener('click', toggleMenu);
-
-        // Exterior/Interior Toggle
-        document.getElementById('exterior-btn').addEventListener('click', () => {
-            // Update content to exterior images, etc.
-            alert('Switch to Exterior');
-        });
-        document.getElementById('interior-btn').addEventListener('click', () => {
-            // Update content
-            alert('Switch to Interior');
-        });
-
-        // Color Selection (Update images)
-        document.querySelectorAll('.color-circle').forEach(circle => {
-            circle.addEventListener('click', () => {
-                // Update selected color and images
-                console.log('Selected color:', circle.dataset.color);
+        // Options Buttons - Open Modals
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const option = this.getAttribute('data-option');
+                openModal(option + '-modal');
             });
         });
 
-        // Available On Expand
-        document.getElementById('available-on-btn').addEventListener('click', () => {
-            const details = document.getElementById('available-details');
-            details.classList.toggle('expanded');
-        });
-
-        // Search, Filter, Auth (From reference)
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-input').value;
-            alert('Search: ' + query);
-        });
-        document.getElementById('filter-button').addEventListener('click', () => {
-            alert('Filter opened');
-        });
-        // Auth simulate
-        const isSignedIn = false;
-        if (isSignedIn) {
-            document.getElementById('auth-link').innerHTML = 'Profile';
-        }
-
-        // Highlight Nav
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link').forEach(link => {
-                if (link.getAttribute('href') === '/usa/brands') {
-                    link.classList.add('bg-red-700');
+        // Color Buttons
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and contents
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.color-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                this.classList.add('active');
+                const colorType = this.getAttribute('data-color-type');
+                document.getElementById(colorType + '-content').classList.add('active');
+                
+                // Load first color images for the newly selected type - with null check
+                const firstColorCircle = document.querySelector('#' + colorType + '-content .color-circle.active');
+                if (firstColorCircle && modelDetails) {
+                    loadColorImages(firstColorCircle);
                 }
             });
         });
-    </script>
+
+        // Color Circle Selection
+        document.querySelectorAll('.color-circle').forEach(circle => {
+            circle.addEventListener('click', function() {
+                const colorType = this.getAttribute('data-color-type');
+                
+                // Remove active class from all circles of same type
+                document.querySelectorAll('#' + colorType + '-content .color-circle').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked circle
+                this.classList.add('active');
+                
+                // Load color images - with null check
+                if (modelDetails) {
+                    loadColorImages(this);
+                }
+            });
+        });
+
+        // Image loading handling - FIXED: Better image loading
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            if (!img.complete) {
+                img.classList.add('loading');
+            }
+            
+            img.addEventListener('load', function() {
+                this.classList.remove('loading');
+                this.style.display = 'block';
+            });
+            
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                // Show fallback if available
+                const fallback = this.nextElementSibling;
+                if (fallback && fallback.classList.contains('bg-gray-600')) {
+                    fallback.style.display = 'block';
+                }
+            });
+        });
+
+        console.log('JavaScript loaded successfully');
+    });
+
+    // Load Color Images - FIXED: Better image loading and display
+    function loadColorImages(colorCircle) {
+        if (!modelDetails) return;
+        
+        const colorId = colorCircle.getAttribute('data-color-id');
+        const colorType = colorCircle.getAttribute('data-color-type');
+        const colorName = colorCircle.getAttribute('data-color-name');
+        const gallery = document.getElementById(colorType + '-gallery');
+        const galleryContainer = document.getElementById(colorType + '-gallery-container');
+        const title = document.getElementById(colorType + '-gallery-title');
+        
+        // Update title
+        title.textContent = colorName + ' - Images';
+        
+        // Clear existing gallery
+        gallery.innerHTML = '';
+        
+        // Get color images from modelDetails
+        let colorImages = [];
+        if (colorType === 'exterior') {
+            colorImages = modelDetails.exteriorColorImages ? modelDetails.exteriorColorImages.filter(img => img.exterior_color_id == colorId) : [];
+        } else {
+            colorImages = modelDetails.interiorColorImages ? modelDetails.interiorColorImages.filter(img => img.interior_color_id == colorId) : [];
+        }
+        
+        // Add images to gallery (show only first 6, then "More")
+        if (colorImages.length > 0) {
+            const imagesToShow = colorImages.slice(0, 6);
+            const remainingImages = colorImages.slice(6);
+            
+            imagesToShow.forEach((image, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                if (index === 0) {
+                    galleryItem.classList.add('active');
+                }
+                
+                galleryItem.innerHTML = `
+                    <img src="${image.image_path}" 
+                         alt="${colorType} color image" 
+                         onload="this.style.display='block'; this.classList.remove('loading')"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+                         onclick="openImageModalWithSlideshow('${image.image_path}', ${index}, '${colorType}', ${colorId})"
+                         style="display: none;">
+                    <div class="w-full h-full bg-gray-600 flex items-center justify-center" style="display: none;">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                `;
+                
+                gallery.appendChild(galleryItem);
+                
+                // Force load the image
+                const imgElement = galleryItem.querySelector('img');
+                imgElement.src = image.image_path;
+            });
+            
+            // Add "More" box if there are more images
+            if (remainingImages.length > 0) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'gallery-item more-images';
+                moreItem.innerHTML = `
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <div class="more-text">+${remainingImages.length} More</div>
+                `;
+                moreItem.addEventListener('click', function() {
+                    openImageModalWithSlideshow(remainingImages[0].image_path, 6, colorType, colorId);
+                });
+                gallery.appendChild(moreItem);
+            }
+        } else {
+            gallery.innerHTML = '<p class="text-gray-400 text-center py-4 col-span-full">No images available for this color.</p>';
+        }
+    }
+
+    // Modal Functions
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modals when clicking outside
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal(this.id);
+            }
+        });
+    });
+
+    // Image Modal with Slideshow
+    function openImageModalWithSlideshow(imageSrc, index, colorType, colorId) {
+        // Get all images for this color
+        let colorImages = [];
+        if (colorType === 'exterior') {
+            colorImages = modelDetails.exteriorColorImages ? modelDetails.exteriorColorImages.filter(img => img.exterior_color_id == colorId) : [];
+        } else {
+            colorImages = modelDetails.interiorColorImages ? modelDetails.interiorColorImages.filter(img => img.interior_color_id == colorId) : [];
+        }
+        
+        currentSlides = colorImages.map(img => img.image_path);
+        currentSlideIndex = index;
+        
+        openImageModal(currentSlides[currentSlideIndex]);
+        updateModalCounter();
+    }
+
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = imageSrc;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        updateModalCounter();
+    }
+
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        modal.classList.remove('active');
+        currentSlides = [];
+        currentSlideIndex = 0;
+        document.body.style.overflow = 'auto';
+    }
+
+    function changeSlide(direction) {
+        if (currentSlides.length === 0) return;
+        
+        currentSlideIndex += direction;
+        
+        // Loop around
+        if (currentSlideIndex >= currentSlides.length) {
+            currentSlideIndex = 0;
+        } else if (currentSlideIndex < 0) {
+            currentSlideIndex = currentSlides.length - 1;
+        }
+        
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = currentSlides[currentSlideIndex];
+        updateModalCounter();
+    }
+
+    function updateModalCounter() {
+        const counter = document.getElementById('modalCounterTop');
+        counter.textContent = (currentSlideIndex + 1) + ' / ' + currentSlides.length;
+    }
+
+    // Sources and Share Modal Functions
+    function openSourcesModal() {
+        document.getElementById('sourcesModal').style.display = 'flex';
+    }
+
+    function closeSourcesModal() {
+        document.getElementById('sourcesModal').style.display = 'none';
+    }
+
+    function openShareModal() {
+        document.getElementById('shareModal').style.display = 'flex';
+    }
+
+    function closeShareModal() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    // Social Share Functions
+    function shareOnTwitter() {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent('<%= model.brand_name %> <%= model.model_name %> - Check out this amazing vehicle!');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnFacebook() {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnLinkedIn() {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function shareOnWhatsApp() {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent('<%= model.brand_name %> <%= model.model_name %> - Check out this amazing vehicle!');
+        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+        closeShareModal();
+    }
+
+    function copyToClipboard() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = event.target;
+            const originalText = btn.querySelector('span').textContent;
+            btn.querySelector('span').textContent = 'Copied!';
+            
+            setTimeout(() => {
+                btn.querySelector('span').textContent = originalText;
+            }, 2000);
+        });
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const sourcesModal = document.getElementById('sourcesModal');
+        const shareModal = document.getElementById('shareModal');
+        
+        if (event.target === sourcesModal) {
+            closeSourcesModal();
+        }
+        if (event.target === shareModal) {
+            closeShareModal();
+        }
+    }
+
+    // Keyboard navigation for slideshow
+    document.addEventListener('keydown', function(e) {
+        const imageModal = document.getElementById('imageModal');
+        if (imageModal.classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeSlide(1);
+            } else if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        }
+    });
+</script>
 </body>
 </html>

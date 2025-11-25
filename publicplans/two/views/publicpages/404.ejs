@@ -1,0 +1,142 @@
+<!-- views/publicpages/404.ejs -->
+<%- include('../partials/head.ejs', { title: '404 - Page Not Found | Gyarage' }) %>
+
+<style>
+    .error-glow { 
+        text-shadow: 0 0 30px #DC2626, 0 0 60px #DC2626; 
+    }
+
+    /* Wheel */
+    .wheel { 
+        animation: spin 12s linear infinite; 
+        transition: all 0.4s ease;
+        filter: drop-shadow(0 0 20px rgba(220,38,38,0.5));
+    }
+    .wheel:hover { 
+        animation: spin 0.5s linear infinite; 
+        filter: drop-shadow(0 0 50px rgba(220,38,38,1));
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Smoke */
+    .smoke {
+        position: absolute;
+        bottom: -120px;
+        left: 50%;
+        width: 560px;
+        height: 220px;
+        background: linear-gradient(to top, rgba(255,255,255,0.4), transparent);
+        filter: blur(40px);
+        border-radius: 50%;
+        opacity: 0;
+        transform: translateX(-50%);
+        pointer-events: none;
+        transition: opacity 1.8s ease-out, bottom 1.8s ease-out;
+        z-index: 1;
+    }
+    .smoke.active { opacity: 0.9; bottom: -40px; }
+
+    /* Night city background */
+    .night-city {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+    .city-bg {
+        position: absolute;
+        inset: 0;
+        background: url('https://images.unsplash.com/photo-1514924013411-2c3c3c6e7b6b?w=1920&q=80') center/cover no-repeat;
+        filter: blur(8px) brightness(0.4);
+        transform: scale(1.1);
+    }
+    .taillights {
+        position: absolute;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #DC2626, transparent);
+        filter: blur(6px);
+        opacity: 0.7;
+        animation: taillight linear infinite;
+    }
+    .taillights:nth-child(1) { width: 300px; top: 65%; left: -300px; animation-duration: 14s; }
+    .taillights:nth-child(2) { width: 250px; top: 72%; right: -250px; animation-duration: 18s; animation-direction: reverse; animation-delay: 3s; }
+    .taillights:nth-child(3) { width: 400px; top: 58%; left: -400px; animation-duration: 22s; animation-delay: 7s; }
+
+    @keyframes taillight {
+        from { transform: translateX(0); }
+        to   { transform: translateX(calc(100vw + 400px)); }
+    }
+
+    .red-fog {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 55%, rgba(220,38,38,0.18), transparent 70%);
+        pointer-events: none;
+        z-index: 1;
+    }
+</style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-black text-white font-['Poppins'] relative overflow-x-hidden">
+
+    <!-- Night city background -->
+    <div class="night-city">
+        <div class="city-bg"></div>
+        <div class="taillights"></div>
+        <div class="taillights"></div>
+        <div class="taillights"></div>
+    </div>
+    <div class="red-fog"></div>
+
+    <%- include('../partials/navbar') %>
+
+    <main class="flex-grow flex flex-col items-center justify-center px-6 relative z-10 mt-10">
+ 
+        <!-- 4  Wheel  4 -->
+        <div class="relative flex items-center justify-center mb-16 cursor-pointer group">
+            <span class="text-9xl md:text-[180px] lg:text-[200px] font-extrabold error-glow select-none -mr-8 md:-mr-12">4</span>
+
+            <div class="relative">
+                <svg id="wheel" width="180" height="180" viewBox="0 0 24 24" class="wheel z-10" 
+                     fill="none" stroke="#DC2626" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10" stroke="#666" stroke-width="2.8"/>
+                    <circle cx="12" cy="12" r="7" stroke="#222" stroke-width="2.2" fill="#111"/>
+                    <circle cx="12" cy="12" r="3.2" fill="#DC2626"/>
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" 
+                          stroke="#DC2626" stroke-width="2.4"/>
+                </svg>
+                <div id="smoke" class="smoke"></div>
+            </div>
+
+            <span class="text-9xl md:text-[180px] lg:text-[200px] font-extrabold error-glow select-none -ml-8 md:-ml-12">4</span>
+        </div>
+
+        <p class="text-gray-500 text-sm sm:text-base tracking-wider mb-10">
+            The page you are looking for doesn’t exist.
+        </p>
+
+        <a href="/" 
+           class="px-12 py-4 bg-red-600 text-white font-bold text-lg rounded-full hover:bg-red-700 hover:scale-110 transition shadow-2xl mb-20">
+            Go to Home
+        </a>
+
+    </main>
+
+    <!-- Footer gets proper space at bottom -->
+    <div class="mt-20"></div>
+    <%- include('../partials/footer') %>
+
+    <script>
+        const wheel = document.getElementById('wheel');
+        const smoke = document.getElementById('smoke');
+        let timer;
+        wheel.addEventListener('mouseenter', () => {
+            timer = setTimeout(() => smoke.classList.add('active'), 3000);
+        });
+        wheel.addEventListener('mouseleave', () => {
+            clearTimeout(timer);
+            smoke.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

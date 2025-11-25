@@ -1,8 +1,8 @@
 <%- include('../partials/head.ejs', { 
-    title: title || 'News Details',
+    title: title || 'Specification Details',
     description: seoDescription,
     url: currentUrl,
-    image: article.Article_main_image,
+    image: model.model_image,
     author: authorName,
     publishedTime: publishedDateISO,
     type: 'article'
@@ -30,14 +30,14 @@
         color: white;
     }
     
-    .news-content img {
+    .specs-content img {
         max-width: 100%;
         height: auto;
         border-radius: 8px;
         margin: 1rem 0;
     }
     
-    .news-content p {
+    .specs-content p {
         margin-bottom: 1.5rem;
         line-height: 1.7;
         color: var(--text-light);
@@ -46,7 +46,7 @@
         text-align: justify;
     }
     
-    .news-content h2 {
+    .specs-content h2 {
         color: #ffffff;
         margin: 2rem 0 1rem 0;
         font-weight: 600;
@@ -54,9 +54,17 @@
         position: relative;
         padding-bottom: 0.5rem;
         font-family: 'Poppins', sans-serif;
+        counter-increment: spec-list;
     }
     
-    .news-content h2::after {
+    .specs-content h2::before {
+        content: counter(spec-list) ". ";
+        color: var(--primary-red);
+        font-weight: bold;
+        margin-right: 0.5rem;
+    }
+    
+    .specs-content h2::after {
         content: "";
         position: absolute;
         bottom: 0;
@@ -67,15 +75,7 @@
         border-radius: 2px;
     }
     
-    .article-image {
-        position: relative;
-        border-radius: 12px;
-        overflow: hidden;
-        margin-bottom: 1rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-    
-    .content-photo {
+    .spec-image {
         position: relative;
         border-radius: 8px;
         overflow: hidden;
@@ -119,45 +119,7 @@
         border-top: 1px solid #374151;
     }
     
-    /* Enhanced Sources Button - Shadow removed */
-    .sources-btn {
-        padding: 0.85rem 1.75rem;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
-        color: white;
-        position: relative;
-        overflow: hidden;
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .sources-btn::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .sources-btn:hover {
-        transform: translateY(-3px);
-    }
-    
-    .sources-btn:hover::before {
-        left: 100%;
-    }
-    
-    /* Enhanced Share Button - Shadow removed */
+    /* Enhanced Share Button */
     .share-btn {
         padding: 0.85rem 1.75rem;
         border-radius: 8px;
@@ -193,6 +155,27 @@
     
     .share-btn:hover::before {
         left: 100%;
+    }
+    
+    .back-to-model {
+        padding: 0.85rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+        color: white;
+        text-decoration: none;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .back-to-model:hover {
+        transform: translateY(-3px);
     }
     
     .modal {
@@ -349,7 +332,6 @@
         font-family: 'Poppins', sans-serif;
     }
     
-    /* Fixed Author Name Hover - Now turns red completely */
     .author-name {
         color: var(--text-light);
         font-weight: 600;
@@ -367,7 +349,7 @@
         color: #6b7280;
     }
     
-    .article-title {
+    .spec-title {
         font-size: 2.75rem;
         font-weight: 800;
         color: white;
@@ -408,35 +390,27 @@
         width: 100%;
     }
     
-    .sources-content {
-        background: #374151;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-top: 1rem;
-        border-left: 4px solid var(--primary-red);
-    }
-    
-    .sources-content p {
-        color: var(--text-light);
-        line-height: 1.6;
-        margin: 0;
-        font-size: 1rem;
-        font-family: 'Poppins', sans-serif;
-        text-align: justify;
-    }
-    
-    /* Removed content box hover effects */
-    .article-content {
-        /* No hover effects on content box */
-    }
-    
-    /* Recommended Articles Box Styles - No hover effects */
-    .recommended-article-box {
+    /* Recommended Models Box Styles */
+    .recommended-model-box {
         border-radius: 12px;
         background: linear-gradient(to bottom, var(--primary-red), var(--dark-bg));
         padding: 12px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .spec-recommendation-box {
+        border-radius: 8px;
+        background: #1f2937;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-red);
+        transition: all 0.3s ease;
+    }
+    
+    .spec-recommendation-box:hover {
+        background: #374151;
+        transform: translateX(5px);
     }
     
     /* Desktop Layout */
@@ -448,7 +422,7 @@
             align-items: start;
         }
         
-        .article-content {
+        .specs-content {
             grid-column: 1;
         }
         
@@ -471,11 +445,11 @@
             margin-top: 3rem;
         }
         
-        .article-content {
+        .specs-content {
             order: 1;
         }
         
-        .article-title {
+        .spec-title {
             font-size: 2rem;
         }
         
@@ -484,45 +458,10 @@
             gap: 1rem;
         }
         
-        .sources-btn, .share-btn {
+        .back-to-model, .share-btn {
             width: 100%;
             justify-content: center;
         }
-    }
-    
-    /* Loading animation for images */
-    .article-image img, .content-photo img {
-        transition: opacity 0.3s ease;
-    }
-    
-    .article-image img.loading, .content-photo img.loading {
-        opacity: 0.7;
-    }
-    
-    /* Pulse animation for loading state */
-    @keyframes pulse {
-        0% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.5;
-        }
-        100% {
-            opacity: 1;
-        }
-    }
-    
-    .loading-pulse {
-        animation: pulse 2s infinite;
-    }
-    
-    /* Text elements with Poppins font */
-    .article-title-text {
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .date-text {
-        font-family: 'Poppins', sans-serif;
     }
     
     .line-clamp-3 {
@@ -532,9 +471,13 @@
         overflow: hidden;
     }
     
-    /* Justify content for all text paragraphs */
     .justified-text {
         text-align: justify;
+    }
+    
+    /* Counter for specification lists */
+    .specs-content {
+        counter-reset: spec-list;
     }
 </style>
 </head>
@@ -544,10 +487,10 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "NewsArticle",
-  "headline": "<%= article.Article_title %>",
+  "@type": "TechArticle",
+  "headline": "<%= specification.title %> of <%= model.brand_name %> <%= model.model_name %> in Nepal",
   "description": "<%= seoDescription %>",
-  "image": "<%= article.Article_main_image %>",
+  "image": "<%= model.model_image %>",
   "datePublished": "<%= publishedDateISO %>",
   "dateModified": "<%= publishedDateISO %>",
   "author": {
@@ -556,7 +499,7 @@
   },
   "publisher": {
     "@type": "Organization",
-    "name": "News Platform",
+    "name": "Auto Specifications",
     "logo": {
       "@type": "ImageObject",
       "url": "https://yourwebsite.com/logo.png"
@@ -584,14 +527,14 @@
             </li>
             <li>></li>
             <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a href="/news" class="hover:text-red-500 transition" itemprop="item">
-                    <span itemprop="name">News</span>
+                <a href="/modeldetails/<%= model.id %>" class="hover:text-red-500 transition" itemprop="item">
+                    <span itemprop="name"><%= model.brand_name %> <%= model.model_name %></span>
                 </a>
                 <meta itemprop="position" content="2" />
             </li>
             <li>></li>
             <li class="text-white truncate max-w-xs" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name"><%= article.Article_title %></span>
+                <span itemprop="name"><%= specification.title %></span>
                 <meta itemprop="position" content="3" />
             </li>
         </ol>
@@ -599,19 +542,19 @@
 
     <!-- Main Grid Layout -->
     <div class="main-grid">
-        <!-- Left Side - Article Content -->
-        <div class="article-content">
-            <!-- Article Header -->
+        <!-- Left Side - Specification Content -->
+        <div class="specs-content">
+            <!-- Specification Header -->
             <article class="mb-8">
-                <!-- Article Title -->
-                <h1 class="article-title" itemprop="headline">
-                    <%= article.Article_title %>
+                <!-- Specification Title -->
+                <h1 class="spec-title" itemprop="headline">
+                    <%= specification.title %> of <%= model.brand_name %> <%= model.model_name %> in Nepal
                 </h1>
 
-                <!-- Author and Date - Fixed with clickable author name that turns red on hover -->
+                <!-- Author and Date -->
                 <div class="author-date">
-                    <% if (authorUserId) { %>
-                    <a href="/@<%= article.author_id %>" class="author-name" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                    <% if (model.author_id) { %>
+                    <a href="/profile/<%= model.author_id %>" class="author-name" itemprop="author" itemscope itemtype="https://schema.org/Person">
                         <span itemprop="name"><%= authorName %></span>
                     </a>
                     <% } else { %>
@@ -624,83 +567,76 @@
                         <%= publishedDate %>
                     </time>
                 </div>
-
-                <!-- Main Image - Source badge removed -->
-                <% if (article.Article_main_image) { %>
-                <div class="article-image">
-                    <img src="<%= article.Article_main_image %>" 
-                         alt="<%= article.Article_title %>" 
-                         class="w-full h-64 lg:h-96 object-cover"
-                         itemprop="image"
-                         onload="this.classList.remove('loading')"
-                         onerror="this.style.display='none'">
-                </div>
-                <% } %>
             </article>
 
-            <!-- Article Content -->
-            <section class="news-content mb-8" itemprop="articleBody">
-                <% if (article.contents && article.contents.length > 0) { %>
-                    <% article.contents.forEach((content, index) => { %>
-                        <div class="content-block">
-                            <% if (content.type === 'subtitle') { %>
-                                <h2>
-                                    <%= content.value %>
-                                </h2>
-                            <% } else if (content.type === 'article') { %>
-                                <p class="justified-text">
-                                    <%= content.value %>
-                                </p>
-                            <% } else if (content.type === 'photo') { %>
-                                <div class="content-photo">
-                                    <img src="<%= content.image_path %>" 
-                                         alt="Article content image for <%= article.Article_title %>" 
-                                         class="w-full h-auto rounded-lg"
-                                         loading="lazy"
-                                         onload="this.classList.remove('loading')"
-                                         onerror="this.style.display='none'">
-                                    <!-- Source for content image only - Shows "Source" and goes to image source link -->
-                                    <% if (content.image_source) { %>
-                                    <a href="<%= content.image_source.includes('http') ? content.image_source : 'https://' + content.image_source %>" 
-                                       target="_blank" 
-                                       rel="noopener noreferrer"
-                                       class="image-source-badge"
-                                       title="View source: <%= content.image_source %>">
-                                        Source
-                                    </a>
+            <!-- Specification Content -->
+            <section class="specs-content mb-8" itemprop="articleBody">
+                <% if (specificationLists && specificationLists.length > 0) { %>
+                    <% specificationLists.forEach((list, listIndex) => { %>
+                        <!-- Specification List Title as H2 with numbering -->
+                        <h2>
+                            <%= list.title %> of <%= model.brand_name %> <%= model.model_name %> in Nepal
+                        </h2>
+                        
+                        <!-- Specification List Contents -->
+                        <% const listContents = specContents.filter(content => content.list_id === list.id); %>
+                        <% if (listContents.length > 0) { %>
+                            <% listContents.forEach((content, contentIndex) => { %>
+                                <div class="content-block">
+                                    <% if (content.type === 'article') { %>
+                                        <p class="justified-text">
+                                            <%= content.value %>
+                                        </p>
+                                    <% } else if (content.type === 'photo') { %>
+                                        <div class="spec-image">
+                                            <img src="<%= content.image_path %>" 
+                                                 alt="<%= list.title %> of <%= model.brand_name %> <%= model.model_name %>" 
+                                                 class="w-full h-auto rounded-lg"
+                                                 loading="lazy"
+                                                 onload="this.classList.remove('loading')"
+                                                 onerror="this.style.display='none'">
+                                            <!-- Source for content image -->
+                                            <% if (content.source) { %>
+                                            <a href="<%= content.source.includes('http') ? content.source : 'https://' + content.source %>" 
+                                               target="_blank" 
+                                               rel="noopener noreferrer"
+                                               class="image-source-badge"
+                                               title="View source: <%= content.source %>">
+                                                Source
+                                            </a>
+                                            <% } %>
+                                        </div>
+                                    <% } else if (content.type === 'link') { %>
+                                        <a href="<%= content.value.startsWith('http') ? content.value : 'https://' + content.value %>" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="content-link">
+                                            <%= content.value %>
+                                        </a>
                                     <% } %>
                                 </div>
-                            <% } else if (content.type === 'link') { %>
-                                <a href="<%= content.value.startsWith('http') ? content.value : 'https://' + content.value %>" 
-                                   target="_blank" 
-                                   rel="noopener noreferrer"
-                                   class="content-link">
-                                    <%= content.value %>
-                                </a>
-                            <% } %>
-                        </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-gray-400 text-center py-4">No content available for this specification.</p>
+                        <% } %>
                     <% }); %>
                 <% } else { %>
-                    <p class="text-gray-400 text-center py-8">No content available for this article.</p>
+                    <p class="text-gray-400 text-center py-8">No specification lists available.</p>
                 <% } %>
             </section>
 
-            <!-- Action Buttons - Sources (Left) and Share (Right) -->
+            <!-- Action Buttons - Back to Model (Left) and Share (Right) -->
             <div class="action-buttons">
-                <!-- Enhanced Sources Button - Left Side -->
-                <% if (article.sources) { %>
-                <button class="sources-btn" onclick="openSourcesModal()" aria-label="View article sources">
+                <!-- Back to Model Button - Left Side -->
+                <a href="/modeldetails/<%= model.id %>" class="back-to-model" aria-label="Back to model details">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
-                    Sources
-                </button>
-                <% } else { %>
-                <div></div>
-                <% } %>
+                    Back to Model
+                </a>
 
                 <!-- Enhanced Share Button - Right Side -->
-                <button class="share-btn" onclick="openShareModal()" aria-label="Share this article">
+                <button class="share-btn" onclick="openShareModal()" aria-label="Share this specification">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                     </svg>
@@ -711,39 +647,64 @@
 
         <!-- Right Side - Recommendations Sidebar -->
         <div class="recommendations-sidebar">
-            <!-- Recommended Articles -->
-            <% if (recommendedArticles && recommendedArticles.length > 0) { %>
+            
+    <!-- Current Model Info -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6 relative pb-2">
+            <%= model.brand_name %> <%= model.model_name %>
+            <span class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
+        </h2>
+        <!-- MADE THE ENTIRE MODEL BOX CLICKABLE -->
+        <a href="/modeldetails/<%= model.id %>" class="block">
+            <div class="recommended-model-box mb-6 cursor-pointer transition-transform hover:scale-105">
+                <div class="flex flex-row items-start p-2 rounded-xl">
+                    <% if (model.model_image) { %>
+                        <img src="<%= model.model_image %>" 
+                             alt="<%= model.brand_name %> <%= model.model_name %>" 
+                             class="w-24 h-24 bg-white rounded-lg flex-shrink-0 object-cover"
+                             onload="this.classList.remove('loading')"
+                             onerror="this.style.display='none'">
+                    <% } else { %>
+                        <div class="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex-shrink-0 flex items-center justify-center">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                        </div>
+                    <% } %>
+                    <div class="content ml-4 flex-grow text-white">
+                        <div class="font-semibold text-lg mb-2 line-clamp-2">
+                            <%= model.brand_name %> <%= model.model_name %>
+                        </div>
+                        <div class="text-sm text-gray-300 font-semibold">
+                            <%= model.vehicle_type_name %>
+                        </div>
+                        <% if (model.starting_price) { %>
+                        <div class="text-sm text-red-400 font-bold mt-1">
+                            $<%= model.starting_price.toLocaleString() %>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+            <!-- Other Specifications for Same Model -->
+            <% if (otherSpecifications && otherSpecifications.length > 0) { %>
             <div class="mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6 relative pb-2">
-                    Recommended Articles
+                    Other Specifications
                     <span class="absolute bottom-0 left-0 w-12 h-1 bg-gradient-to-r from-red-600 to-red-800 rounded-full"></span>
                 </h2>
-                <div class="space-y-6">
-                    <% recommendedArticles.forEach(recArticle => { %>
-                    <a href="/news/<%= recArticle.Article_id %>-<%= recArticle.Article_title.toLowerCase().replace(/[^a-z0-9]+/g, '-') %>" class="block">
-                        <div class="recommended-article-box">
-                            <div class="flex flex-row items-start p-2 rounded-xl">
-                                <% if (recArticle.Article_main_image) { %>
-                                    <img src="<%= recArticle.Article_main_image %>" 
-                                         alt="<%= recArticle.Article_title %>" 
-                                         class="w-24 h-24 bg-white rounded-lg flex-shrink-0 object-cover"
-                                         onload="this.classList.remove('loading')"
-                                         onerror="this.style.display='none'">
-                                <% } else { %>
-                                    <div class="w-24 h-24 bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg flex-shrink-0 flex items-center justify-center">
-                                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                    </div>
-                                <% } %>
-                                <div class="content ml-4 flex-grow text-white">
-                                    <div class="article-title-text text-lg font-semibold mb-2 line-clamp-3">
-                                        <%= recArticle.Article_title %>
-                                    </div>
-                                    <div class="date-text text-sm text-gray-300 font-semibold">
-                                        <%= new Date(recArticle.published_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
-                                    </div>
-                                </div>
+                <div class="space-y-4">
+                    <% otherSpecifications.forEach(otherSpec => { %>
+                    <a href="/model/<%= encodeURIComponent(model.model_name) %>/<%= encodeURIComponent(otherSpec.title) %>" class="block">
+                        <div class="spec-recommendation-box">
+                            <div class="font-semibold text-white text-lg mb-1 line-clamp-2">
+                                <%= otherSpec.title %>
+                            </div>
+                            <div class="text-sm text-gray-300">
+                                <%= model.brand_name %> <%= model.model_name %>
                             </div>
                         </div>
                     </a>
@@ -755,28 +716,11 @@
     </div>
 </main>
 
-<!-- Sources Modal -->
-<div id="sourcesModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Sources</h3>
-            <button class="close-btn" onclick="closeSourcesModal()" aria-label="Close sources modal">&times;</button>
-        </div>
-        <div class="sources-content">
-            <% if (article.sources) { %>
-                <p class="justified-text"><%= article.sources %></p>
-            <% } else { %>
-                <p class="justified-text">No sources available for this article.</p>
-            <% } %>
-        </div>
-    </div>
-</div>
-
 <!-- Share Modal -->
 <div id="shareModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Share This Article</h3>
+            <h3 class="modal-title">Share This Specification</h3>
             <button class="close-btn" onclick="closeShareModal()" aria-label="Close share modal">&times;</button>
         </div>
         
@@ -806,8 +750,8 @@
             </button>
         </div>
         
-        <button class="copy-link" onclick="copyToClipboard()" aria-label="Copy article link to clipboard">
-            <span>Copy Article Link</span>
+        <button class="copy-link" onclick="copyToClipboard()" aria-label="Copy specification link to clipboard">
+            <span>Copy Specification Link</span>
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
             </svg>
@@ -819,14 +763,6 @@
 
 <script>
     // Modal Functions
-    function openSourcesModal() {
-        document.getElementById('sourcesModal').style.display = 'flex';
-    }
-
-    function closeSourcesModal() {
-        document.getElementById('sourcesModal').style.display = 'none';
-    }
-
     function openShareModal() {
         document.getElementById('shareModal').style.display = 'flex';
     }
@@ -837,12 +773,7 @@
 
     // Close modals when clicking outside
     window.onclick = function(event) {
-        const sourcesModal = document.getElementById('sourcesModal');
         const shareModal = document.getElementById('shareModal');
-        
-        if (event.target === sourcesModal) {
-            closeSourcesModal();
-        }
         if (event.target === shareModal) {
             closeShareModal();
         }
@@ -851,7 +782,7 @@
     // Social Share Functions
     function shareOnTwitter() {
         const url = encodeURIComponent('<%= currentUrl %>');
-        const text = encodeURIComponent('<%= article.Article_title %>');
+        const text = encodeURIComponent('<%= specification.title %> of <%= model.brand_name %> <%= model.model_name %> in Nepal');
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
         closeShareModal();
     }
@@ -864,14 +795,13 @@
 
     function shareOnLinkedIn() {
         const url = encodeURIComponent('<%= currentUrl %>');
-        const title = encodeURIComponent('<%= article.Article_title %>');
         window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
         closeShareModal();
     }
 
     function shareOnWhatsApp() {
         const url = encodeURIComponent('<%= currentUrl %>');
-        const text = encodeURIComponent('<%= article.Article_title %>');
+        const text = encodeURIComponent('<%= specification.title %> of <%= model.brand_name %> <%= model.model_name %> in Nepal');
         window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
         closeShareModal();
     }
@@ -908,7 +838,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const links = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
         links.forEach(link => {
-            if (link.getAttribute('href') === '/news') {
+            if (link.getAttribute('href') === '/modeldetails') {
                 link.classList.add('bg-red-700');
             }
         });

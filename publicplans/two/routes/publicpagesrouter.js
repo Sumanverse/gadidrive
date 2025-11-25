@@ -1,4 +1,4 @@
-// routes/publicpagesrouter.js
+// routes/publicpagesrouter.js - UPDATE GAREKO
 const express = require('express');
 const router = express.Router();
 
@@ -9,9 +9,11 @@ const category = require('../controller/publicpages/category');
 const categorydetails = require('../controller/publicpages/categorydetails');
 const compare = require('../controller/publicpages/compare');
 const modeldetails = require('../controller/publicpages/modeldetails');
+const modelspecsdetails = require('../controller/publicpages/modelspecsdetails'); 
 const news = require('../controller/publicpages/news');
 const newsdetails = require('../controller/publicpages/newsdetails');
 const profile = require('../controller/publicpages/profile');
+const authorprofile = require('../controller/publicpages/authorprofile');
 
 // === PUBLIC ROUTES (ROOT LEVEL) ===
 router.get('/brands', brands.getbrands);
@@ -19,9 +21,15 @@ router.get('/brandsdetails/:brandId', brandsdetails.getbrandsdetails);
 router.get('/category', category.getcategory);
 router.get('/categorydetails/:categoryId', categorydetails.getcategorydetails);
 router.get('/compare', compare.getcompare);
+router.post('/compare', compare.postCompare);
+router.get('/compare/brands/:vehicleTypeId', compare.getBrandsByVehicleType);
+router.get('/compare/models/:vehicleTypeId/:brandId', compare.getModelsByBrand);
+router.get('/compare/model/:modelId', compare.getModelDetails);
 router.get('/modeldetails/:modelId', modeldetails.getmodeldetails);
+router.get('/model/:modelName/:specTitle', modelspecsdetails.getmodelspecsdetails); 
 router.get('/news', news.getnews);
-router.get('/newsdetails', newsdetails.getnewsdetails);
+router.get('/news/:articleId-:articleTitle', newsdetails.getnewsdetails); 
+router.get('/@:userid', authorprofile.getAuthorProfile);
 
 // === PROFILE ROUTES (NOW UNDER /profile) ===
 router.get('/profile', profile.getprofile);

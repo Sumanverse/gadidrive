@@ -1,4 +1,4 @@
-// controllers/admin/Amodel.js → COMPLETE FIX (All issues 1, 3, 4 resolved) WITH SOURCES FIELD
+// controllers/admin/Amodel.js → COMPLETE FIX (All issues 1, 3, 4 resolved) WITH NEW PLACEHOLDERS
 
 const db = require('../../utils/dbutils');
 const path = require('path');
@@ -717,7 +717,9 @@ const postAdminModel = async (req, res) => {
 
     const {
       vehicleType, category, brand, modelName, safetyRating, safetyLink,
-      sources, engineType, startingPrice, releaseYear, seater, status = 'import'
+      sources, engineType, startingPrice, releaseYear, seater, status = 'import',
+      power, torque, groundClearance, dimensions, driveType, totalAirbags,
+      bootSpace, rangeMileage, batteryCapacity, engine, cylinders, fuelTank
     } = req.body;
 
     const authorId = req.user.user_id;
@@ -747,7 +749,19 @@ const postAdminModel = async (req, res) => {
       starting_price: parseFloat(startingPrice.replace(/[^0-9.-]+/g, '')),
       release_year: releaseYear || null,
       seater: seater || null,
-      status
+      status,
+      power: power || null,
+      torque: torque || null,
+      ground_clearance: groundClearance || null,
+      dimensions: dimensions || null,
+      drive_type: driveType || null,
+      total_airbags: totalAirbags || null,
+      boot_space: bootSpace || null,
+      range_mileage: rangeMileage || null,
+      battery_capacity: batteryCapacity || null,
+      engine: engine || null,
+      cylinders: cylinders || null,
+      fuel_tank: fuelTank || null
     }, modelImagePath, authorId, conn);
 
     await insertAllRelatedData(req, modelId, conn);
@@ -777,7 +791,9 @@ const updateAdminModel = async (req, res) => {
 
     const {
       vehicleType, category, brand, modelName, safetyRating, safetyLink,
-      sources, engineType, startingPrice, releaseYear, seater, status = 'import'
+      sources, engineType, startingPrice, releaseYear, seater, status = 'import',
+      power, torque, groundClearance, dimensions, driveType, totalAirbags,
+      bootSpace, rangeMileage, batteryCapacity, engine, cylinders, fuelTank
     } = req.body;
 
     const [[vt]] = await conn.execute(`SELECT vehicle_type_id FROM vehicletype WHERE vehicle_type_name = ?`, [vehicleType]);
@@ -814,7 +830,19 @@ const updateAdminModel = async (req, res) => {
       starting_price: parseFloat(startingPrice.replace(/[^0-9.-]+/g, '')),
       release_year: releaseYear || null,
       seater: seater || null,
-      status
+      status,
+      power: power || null,
+      torque: torque || null,
+      ground_clearance: groundClearance || null,
+      dimensions: dimensions || null,
+      drive_type: driveType || null,
+      total_airbags: totalAirbags || null,
+      boot_space: bootSpace || null,
+      range_mileage: rangeMileage || null,
+      battery_capacity: batteryCapacity || null,
+      engine: engine || null,
+      cylinders: cylinders || null,
+      fuel_tank: fuelTank || null
     }, newImagePath, req.user.user_id, conn);
 
     await ultimatePreservationUpdate(req, modelId, conn, existingDetails);

@@ -126,7 +126,7 @@
         <section class="news-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 mt-6">
             <% if (articles && articles.length > 0) { %>
                 <% articles.forEach(article => { %>
-                <a href="/newsdetails?articleId=<%= article.Article_id %>" class="block">
+                <a href="/news/<%= article.Article_id %>-<%= article.Article_title.toLowerCase().replace(/[^a-z0-9]+/g, '-') %>" class="block">
                     <div class="p-2 rounded-xl bg-gradient-to-b from-red-600 to-black shadow-lg border-bottom-left-to-right hover:transform cursor-pointer">
                         <div class="flex flex-row items-start p-2 rounded-xl h-40">
                             <% if (article.Article_main_image) { %>

@@ -1,509 +1,873 @@
-<%- include('../partials/head.ejs', { title: 'USA - compare' }) %>
+<%- include('../partials/head.ejs', { 
+    title: 'Compare Vehicles - Side-by-Side Comparison | Gyarage',
+    description: 'Compare multiple vehicles side-by-side. View detailed specifications, features, prices and make informed decisions.',
+    keywords: 'vehicle comparison, car compare, bike compare, specifications comparison, feature comparison',
+    canonical: '/compare'
+}) %>
 
-        body {
-            background-color: #000000;
-            color: #FFFFFF;
+<style>
+    body {
+        background-color: #000000;
+        color: #FFFFFF;
+    }
+    .border-bottom-left-to-right {
+        position: relative;
+        border-radius: 0.75rem;
+    }
+    .border-bottom-left-to-right:hover::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: #DC2626;
+        animation: borderLeftToRight 0.3s ease-in-out forwards;
+    }
+    @keyframes borderLeftToRight {
+        to {
+            width: 100%;
         }
-        .border-bottom-left-to-right {
-            position: relative;
-            border-radius: 0.75rem;
+    }
+    
+    /* Comparison Table Styles */
+    .comparison-table {
+        background: #000000;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #ffffff;
+    }
+    
+    .spec-row {
+        border-bottom: 1px solid #ffffff;
+        transition: background-color 0.3s ease;
+    }
+    
+    .spec-row:hover {
+        background-color: #1a1a1a;
+    }
+    
+    .spec-name {
+        background-color: #000000;
+        font-weight: 600;
+        padding: 1rem;
+        border-right: 1px solid #ffffff;
+        color: #ffffff;
+    }
+    
+    .spec-value {
+        padding: 1rem;
+        text-align: center;
+        color: #ffffff;
+    }
+    
+    .tick {
+        color: #22c55e;
+        font-weight: bold;
+        background-color: #000000;
+        border: 1px solid #22c55e;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    
+    .cross {
+        color: #ef4444;
+        font-weight: bold;
+        background-color: #000000;
+        border: 1px solid #ef4444;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    
+    .vehicle-header {
+        background: #000000;
+        padding: 1.5rem;
+        text-align: center;
+        border-bottom: 2px solid #ffffff;
+        border-right: 1px solid #ffffff;
+        min-width: 200px;
+        color: #ffffff;
+    }
+    
+    .vehicle-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #ffffff;
+    }
+    
+    .vehicle-brand {
+        font-size: 0.9rem;
+        color: #ffffff;
+        margin-top: 0.25rem;
+    }
+    
+    .score-cell {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #ffffff;
+    }
+    
+    .winner-cell {
+        background-color: #000000;
+        border: 2px solid #22c55e;
+    }
+    
+    .conclusion-box {
+        background: #000000;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+        border: 1px solid #ffffff;
+    }
+    
+    .recommendation-card {
+        background: #000000;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #ffffff;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .recommendation-card:hover {
+        border-color: #DC2626;
+        transform: translateY(-2px);
+    }
+    
+    .loading-spinner {
+        border: 3px solid #ffffff;
+        border-top: 3px solid #DC2626;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 2rem auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .model-selector {
+        background: #000000;
+        border: 1px solid #ffffff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .selection-row {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+    
+    .selection-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .selection-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #ffffff;
+        font-size: 0.9rem;
+    }
+    
+    .selection-dropdown {
+        background: #000000;
+        border: 1px solid #ffffff;
+        border-radius: 6px;
+        padding: 0.5rem;
+        color: #ffffff;
+        font-size: 0.9rem;
+        height: 40px;
+    }
+    
+    .selection-dropdown:focus {
+        outline: none;
+        border-color: #DC2626;
+    }
+    
+    .selection-dropdown:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .selected-model-display {
+        background: #1a1a1a;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        border: 1px solid #ffffff;
+    }
+    
+    .selected-model-image {
+        width: 60px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-right: 1rem;
+        border: 1px solid #ffffff;
+    }
+    
+    .remove-model-btn {
+        background: #DC2626;
+        color: #ffffff;
+        border: none;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    
+    .remove-model-btn:hover {
+        background: #b91c1c;
+    }
+    
+    .compact-layout {
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .vehicle-number {
+        background: #DC2626;
+        color: #ffffff;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    
+    .compare-button {
+        background: #DC2626;
+        color: #ffffff;
+        border: 1px solid #DC2626;
+    }
+    
+    .compare-button:hover {
+        background: #b91c1c;
+        border-color: #b91c1c;
+    }
+    
+    .share-button {
+        background: #000000;
+        color: #ffffff;
+        border: 1px solid #ffffff;
+    }
+    
+    .share-button:hover {
+        background: #1a1a1a;
+        border-color: #DC2626;
+    }
+    
+    .winner-text {
+        color: #22c55e;
+        font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+        .selection-row {
+            flex-direction: column;
+            gap: 0.5rem;
         }
-        .border-bottom-left-to-right:hover::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #DC2626;
-            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        
+        .selection-group {
+            min-width: 100%;
         }
-        @keyframes borderLeftToRight {
-            to {
-                width: 100%;
-            }
+        
+        .vehicle-header {
+            min-width: 150px;
         }
-        .filter-button:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+        
+        .compact-layout {
+            flex-direction: column;
         }
-        .breadcrumb a:hover {
-            color: #DC2626;
-        }
-        #mobile-menu-overlay {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
-            width: 16rem;
-            height: 100%;
-            z-index: 1000;
-            pointer-events: auto;
-            will-change: transform, opacity;
-        }
-        .mobile-menu-open {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        #mobile-menu-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            pointer-events: auto;
-        }
-        #mobile-menu-backdrop.active {
-            display: block;
-        }
-        .vehicle-types-selector ul {
-            direction: rtl;
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-        .vehicle-types-selector ul::-webkit-scrollbar {
-            display: none;
-        }
-        .sub-nav-link {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.3s ease;
-        }
-        .sub-nav-link:hover .icon {
-            background-color: #DC2626;
-        }
-        .sub-nav-link:hover span {
-            color: #DC2626;
-        }
-        .sub-nav-link.active .icon {
-            background-color: #DC2626;
-        }
-        .sub-nav-link.active span {
-            color: #DC2626;
-        }
-        .sub-nav-link span {
-            color: #FFFFFF;
-        }
-        .sub-nav-link .icon {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 0.5rem;
-        }
-        .color-box {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .color-box:hover {
-            transform: scale(1.1);
-        }
-    </style>
+    }
+</style>
 </head>
-<body class="min-h-screen flex flex-col text-white font-['Poppins']">
+<body class="min-h-screen flex flex-col text-white font-['Poppins']" style="background-color: #000000;">
     
 <%- include('../partials/navbar') %>
 
     <!-- Main Section -->
-    <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl">
+    <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl" style="background-color: #000000;">
         <!-- Breadcrumb -->
         <div class="breadcrumb text-white text-sm sm:text-base flex items-center mb-4">
             <a href="/" class="hover:text-red-600">Gyarage</a> 
             <span class="mx-2 text-red-600">&gt;&gt;</span> 
-            <a href="/usa" class="hover:text-red-600">USA</a> 
-            <span class="mx-2 text-red-600">&gt;&gt;</span> 
-            <a href="/usa/compare" class="text-red-600 font-bold">Compare</a>
+            <a href="/compare" class="text-red-600 font-bold">Compare</a>
         </div>
 
         <!-- Compare Section -->
         <section class="mb-16">
-            <div class="bg-gradient-to-b from-red-500 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
-                <b>Compare</b>
+            <div class="bg-gradient-to-b from-red-600 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
+                <b>Compare Vehicles</b>
             </div>
-            <div class="bg-gradient-to-b from-red-500 to-black text-white rounded-xl shadow-xl p-6 lg:p-10 border-bottom-left-to-right">
+            
+            <div class="bg-gradient-to-b from-red-600 to-black text-white rounded-xl shadow-xl p-6 lg:p-10 border-bottom-left-to-right">
+                <!-- Vehicle Selection -->
                 <div class="howmany flex flex-col md:flex-row items-center justify-center md:justify-start space-y-4 md:space-y-0 md:space-x-8 text-xl sm:text-2xl font-bold mb-8">
                     <span>How many vehicles you want to compare?</span>
                     <div class="relative inline-block w-40">
-                        <select id="number" name="number" class="w-full h-12 rounded-lg bg-white text-black font-semibold text-lg border-2 border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
+                        <select id="vehicle-count" name="vehicle-count" class="w-full h-12 rounded-lg bg-white text-black font-semibold text-lg border-2 border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
+                            <option value="2">2 Vehicles</option>
+                            <option value="3">3 Vehicles</option>
+                            <option value="4">4 Vehicles</option>
                         </select>
                     </div>
                 </div>
 
-                <div id="compare-selection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right">
-                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 1</b></div>
-                        <div class="flex flex-col space-y-4">
-                            <div class="cselector flex flex-col items-start space-y-2">
-                                <label for="category1" class="text-sm font-semibold text-gray-300">Choose Category</label>
-                                <select id="category1" name="category1" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="suv">SUV</option>
-                                    <option value="sedan">Sedan</option>
-                                    <option value="truck">Truck</option>
-                                    <option value="motorcycle">Motorcycle</option>
-                                </select>
-                            </div>
-                            <div class="bselector flex flex-col items-start space-y-2">
-                                <label for="brand1" class="text-sm font-semibold text-gray-300">Choose Brand</label>
-                                <select id="brand1" name="brand1" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="bmw">BMW</option>
-                                    <option value="mercedes">Mercedes</option>
-                                    <option value="volvo">Volvo</option>
-                                    <option value="honda">Honda</option>
-                                </select>
-                            </div>
-                            <div class="mselector flex flex-col items-start space-y-2">
-                                <label for="model1" class="text-sm font-semibold text-gray-300">Choose Model</label>
-                                <select id="model1" name="model1" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="gwagon">G Wagon</option>
-                                    <option value="s-class">S-Class</option>
-                                    <option value="gls">GLS</option>
-                                    <option value="eoq">EOQ</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right">
-                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 2</b></div>
-                        <div class="flex flex-col space-y-4">
-                            <div class="cselector flex flex-col items-start space-y-2">
-                                <label for="category2" class="text-sm font-semibold text-gray-300">Choose Category</label>
-                                <select id="category2" name="category2" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="suv">SUV</option>
-                                    <option value="sedan">Sedan</option>
-                                    <option value="truck">Truck</option>
-                                    <option value="motorcycle">Motorcycle</option>
-                                </select>
-                            </div>
-                            <div class="bselector flex flex-col items-start space-y-2">
-                                <label for="brand2" class="text-sm font-semibold text-gray-300">Choose Brand</label>
-                                <select id="brand2" name="brand2" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="bmw">BMW</option>
-                                    <option value="mercedes">Mercedes</option>
-                                    <option value="volvo">Volvo</option>
-                                    <option value="honda">Honda</option>
-                                </select>
-                            </div>
-                            <div class="mselector flex flex-col items-start space-y-2">
-                                <label for="model2" class="text-sm font-semibold text-gray-300">Choose Model</label>
-                                <select id="model2" name="model2" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="gwagon">G Wagon</option>
-                                    <option value="s-class">S-Class</option>
-                                    <option value="gls">GLS</option>
-                                    <option value="eoq">EOQ</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right hidden" id="vehicle-3">
-                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 3</b></div>
-                        <div class="flex flex-col space-y-4">
-                            <div class="cselector flex flex-col items-start space-y-2">
-                                <label for="category3" class="text-sm font-semibold text-gray-300">Choose Category</label>
-                                <select id="category3" name="category3" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="suv">SUV</option>
-                                    <option value="sedan">Sedan</option>
-                                    <option value="truck">Truck</option>
-                                    <option value="motorcycle">Motorcycle</option>
-                                </select>
-                            </div>
-                            <div class="bselector flex flex-col items-start space-y-2">
-                                <label for="brand3" class="text-sm font-semibold text-gray-300">Choose Brand</label>
-                                <select id="brand3" name="brand3" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="bmw">BMW</option>
-                                    <option value="mercedes">Mercedes</option>
-                                    <option value="volvo">Volvo</option>
-                                    <option value="honda">Honda</option>
-                                </select>
-                            </div>
-                            <div class="mselector flex flex-col items-start space-y-2">
-                                <label for="model3" class="text-sm font-semibold text-gray-300">Choose Model</label>
-                                <select id="model3" name="model3" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="gwagon">G Wagon</option>
-                                    <option value="s-class">S-Class</option>
-                                    <option value="gls">GLS</option>
-                                    <option value="eoq">EOQ</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right hidden" id="vehicle-4">
-                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 4</b></div>
-                        <div class="flex flex-col space-y-4">
-                            <div class="cselector flex flex-col items-start space-y-2">
-                                <label for="category4" class="text-sm font-semibold text-gray-300">Choose Category</label>
-                                <select id="category4" name="category4" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="suv">SUV</option>
-                                    <option value="sedan">Sedan</option>
-                                    <option value="truck">Truck</option>
-                                    <option value="motorcycle">Motorcycle</option>
-                                </select>
-                            </div>
-                            <div class="bselector flex flex-col items-start space-y-2">
-                                <label for="brand4" class="text-sm font-semibold text-gray-300">Choose Brand</label>
-                                <select id="brand4" name="brand4" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="bmw">BMW</option>
-                                    <option value="mercedes">Mercedes</option>
-                                    <option value="volvo">Volvo</option>
-                                    <option value="honda">Honda</option>
-                                </select>
-                            </div>
-                            <div class="mselector flex flex-col items-start space-y-2">
-                                <label for="model4" class="text-sm font-semibold text-gray-300">Choose Model</label>
-                                <select id="model4" name="model4" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="gwagon">G Wagon</option>
-                                    <option value="s-class">S-Class</option>
-                                    <option value="gls">GLS</option>
-                                    <option value="eoq">EOQ</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-inner p-6 border-bottom-left-to-right hidden" id="vehicle-5">
-                        <div class="text-white text-2xl font-bold mb-4 text-center"><b>Vehicle 5</b></div>
-                        <div class="flex flex-col space-y-4">
-                            <div class="cselector flex flex-col items-start space-y-2">
-                                <label for="category5" class="text-sm font-semibold text-gray-300">Choose Category</label>
-                                <select id="category5" name="category5" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="suv">SUV</option>
-                                    <option value="sedan">Sedan</option>
-                                    <option value="truck">Truck</option>
-                                    <option value="motorcycle">Motorcycle</option>
-                                </select>
-                            </div>
-                            <div class="bselector flex flex-col items-start space-y-2">
-                                <label for="brand5" class="text-sm font-semibold text-gray-300">Choose Brand</label>
-                                <select id="brand5" name="brand5" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="bmw">BMW</option>
-                                    <option value="mercedes">Mercedes</option>
-                                    <option value="volvo">Volvo</option>
-                                    <option value="honda">Honda</option>
-                                </select>
-                            </div>
-                            <div class="mselector flex flex-col items-start space-y-2">
-                                <label for="model5" class="text-sm font-semibold text-gray-300">Choose Model</label>
-                                <select id="model5" name="model5" class="w-full h-10 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 pr-10 pl-4">
-                                    <option value="gwagon">G Wagon</option>
-                                    <option value="s-class">S-Class</option>
-                                    <option value="gls">GLS</option>
-                                    <option value="eoq">EOQ</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Vehicle Selection Containers -->
+                <div id="vehicle-selection" class="space-y-4 mb-8">
+                    <!-- Vehicle selection boxes will be dynamically generated here -->
                 </div>
-                <button id="compare-button" class="mt-6 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">Compare</button>
+
+                <!-- Compare Button -->
+                <button id="compare-button" class="w-full md:w-auto compare-button font-bold py-3 px-8 rounded-lg transition duration-300 text-lg flex items-center justify-center mx-auto">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Compare Selected Vehicles
+                </button>
             </div>
         </section>
 
-        <!-- Comparison Table -->
-        <section class="mt-16" id="comparison-table" style="display: none;">
-            <div class="comparingtable rounded-xl p-6 shadow-xl overflow-x-auto bg-gradient-to-b from-red-700 to-black border-bottom-left-to-right mx-4">
-                <table class="w-full min-w-[800px] text-center border-collapse">
-                    <thead>
-                        <tr class="bg-red-600 text-white">
-                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white">On The Basis</th>
-                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-1"></th>
-                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-2"></th>
-                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-3"></th>
-                            <th class="p-4 font-bold text-xl border-b-2 border-white border-r border-white" id="vehicle-name-4"></th>
-                            <th class="p-4 font-bold text-xl border-b-2 border-white" id="vehicle-name-5"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="comparison-body">
-                        <tr class="hover:bg-red-800 transition-colors">
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white">Price</td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-1"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-2"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-3"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="price-4"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900" id="price-5"></td>
-                        </tr>
-                        <tr class="hover:bg-red-800 transition-colors">
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white">Color</td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-1"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-2"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-3"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900 border-r border-white" id="color-4"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg bg-gray-900" id="color-5"></td>
-                        </tr>
-                        <tr class="hover:bg-red-800 transition-colors bg-red-600">
-                            <td class="p-4 border-b border-gray-500 text-lg bg-red-600 font-bold border-r border-white">Score out of 5</td>
-                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-1" data-score="5"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-2" data-score="4"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-3" data-score="3"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold border-r border-white" id="score-4" data-score="2"></td>
-                            <td class="p-4 border-b border-gray-500 text-lg score-cell bg-red-600 font-bold" id="score-5" data-score="1"></td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner" style="display: none;"></div>
+
+        <!-- Comparison Results -->
+        <section id="comparison-results" style="display: none;">
+            <!-- Comparison Table -->
+            <div class="mb-12">
+                <div class="bg-gradient-to-b from-red-600 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
+                    <b id="comparison-title">Comparison Results</b>
+                </div>
+                
+                <div class="comparison-table overflow-x-auto">
+                    <table class="w-full min-w-[800px]">
+                        <thead>
+                            <tr id="comparison-header">
+                                <th class="vehicle-header">Specifications</th>
+                                <!-- Vehicle headers will be dynamically added here -->
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-body">
+                            <!-- Comparison rows will be dynamically added here -->
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: #000000;">
+                                <td class="spec-name font-bold text-lg">Total Score</td>
+                                <!-- Score cells will be dynamically added here -->
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Conclusion Box -->
+            <div class="conclusion-box mb-12">
+                <h3 class="text-2xl font-bold mb-4 text-white">Comparison Conclusion</h3>
+                <div id="conclusion-content">
+                    <!-- Conclusion content will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Share Section -->
+            <div class="text-center mb-12">
+                <button id="share-button" class="share-button font-bold py-3 px-8 rounded-lg transition duration-300 text-lg flex items-center justify-center mx-auto">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    Share This Comparison
+                </button>
             </div>
         </section>
 
         <!-- Recommended Products -->
         <section class="mt-16">
-            <div class="bg-gradient-to-b from-red-500 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
-                <b>Recommended Products</b>
+            <div class="bg-gradient-to-b from-red-600 to-black text-white rounded-md flex items-center justify-start text-3xl font-bold mb-6 shadow-lg h-12 px-4 sm:px-6">
+                <b>Recommended Vehicles</b>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
-                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
-                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b>BMW 7 Series</b></div>
-                    <div class="text-red-400 font-bold mt-2 text-lg">$100,000</div>
-                    <a href="/usa/models/bmw-7-series" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
-                </div>
-                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
-                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b>Mercedes S-Class</b></div>
-                    <div class="text-red-400 font-bold mt-2 text-lg">$150,000</div>
-                    <a href="/usa/models/mercedes-s-class" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
-                </div>
-                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
-                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b>Audi A8</b></div>
-                    <div class="text-red-400 font-bold mt-2 text-lg">$120,000</div>
-                    <a href="/usa/models/audi-a8" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
-                </div>
-                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
-                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b>Honda Civic</b></div>
-                    <div class="text-red-400 font-bold mt-2 text-lg">$80,000</div>
-                    <a href="/usa/models/honda-civic" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
-                </div>
-                <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center lg:hover:scale-105 border-bottom-left-to-right shadow-md">
-                    <div class="w-full h-28 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b>Toyota Camry</b></div>
-                    <div class="text-red-400 font-bold mt-2 text-lg">$90,000</div>
-                    <a href="/usa/models/toyota-camry" class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</a>
-                </div>
+            <div id="recommended-vehicles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Recommended vehicles will be dynamically loaded here -->
             </div>
         </section>
     </main>
 
-    
 <%- include('../partials/footer') %>
 
+<script>
+    // Global variables
+    let selectedModels = [];
+    let vehicleTypes = <%- JSON.stringify(vehicleTypes || []) %>;
 
-    <script>
-        // Simulate Sign-In Status
-        const isSignedIn = false;
-        const authLink = document.getElementById('auth-link');
-        if (isSignedIn) {
-            authLink.innerHTML = '<svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 18.364A4 4 0 018 17h8a4 4 0 012.879 1.364M15 10a3 3 0 11-6 0 3 3 0 016 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-            authLink.href = '/profile';
-        } else {
-            authLink.textContent = 'Sign In';
-            authLink.href = '/signin';
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeVehicleSelection();
+        loadRecommendedVehicles();
+        setupEventListeners();
+    });
+
+    // Initialize vehicle selection boxes
+    function initializeVehicleSelection() {
+        const vehicleCount = document.getElementById('vehicle-count');
+        const vehicleSelection = document.getElementById('vehicle-selection');
+        
+        vehicleCount.addEventListener('change', updateVehicleSelection);
+        updateVehicleSelection();
+    }
+
+    // Update vehicle selection boxes based on count
+    function updateVehicleSelection() {
+        const count = parseInt(document.getElementById('vehicle-count').value);
+        const vehicleSelection = document.getElementById('vehicle-selection');
+        
+        vehicleSelection.innerHTML = '';
+        selectedModels = Array(count).fill(null);
+        
+        for (let i = 0; i < count; i++) {
+            const selectionBox = document.createElement('div');
+            selectionBox.className = 'model-selector';
+            selectionBox.innerHTML = `
+                <div class="compact-layout">
+                    <div class="vehicle-number">${i + 1}</div>
+                    <div class="flex-1">
+                        <div class="selection-row">
+                            <div class="selection-group">
+                                <label class="selection-label">Vehicle Type</label>
+                                <select class="selection-dropdown vehicle-type-select" data-index="${i}" onchange="onVehicleTypeChange(${i})">
+                                    <option value="">Select Type</option>
+                                    ${vehicleTypes.map(type => 
+                                        `<option value="${type.vehicle_type_id}">${type.vehicle_type_name}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="selection-group">
+                                <label class="selection-label">Brand</label>
+                                <select class="selection-dropdown brand-select" data-index="${i}" onchange="onBrandChange(${i})" disabled>
+                                    <option value="">Select Brand</option>
+                                </select>
+                            </div>
+                            
+                            <div class="selection-group">
+                                <label class="selection-label">Model</label>
+                                <select class="selection-dropdown model-select" data-index="${i}" onchange="onModelChange(${i})" disabled>
+                                    <option value="">Select Model</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="selected-model-${i}" class="selected-model-display hidden">
+                            <!-- Selected model will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            vehicleSelection.appendChild(selectionBox);
+        }
+    }
+
+    // Handle vehicle type change
+    async function onVehicleTypeChange(index) {
+        const vehicleTypeSelect = document.querySelector(`.vehicle-type-select[data-index="${index}"]`);
+        const brandSelect = document.querySelector(`.brand-select[data-index="${index}"]`);
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        const vehicleTypeId = vehicleTypeSelect.value;
+        
+        // Reset downstream selections
+        brandSelect.innerHTML = '<option value="">Select Brand</option>';
+        brandSelect.disabled = true;
+        modelSelect.innerHTML = '<option value="">Select Model</option>';
+        modelSelect.disabled = true;
+        selectedDisplay.classList.add('hidden');
+        selectedModels[index] = null;
+        
+        if (!vehicleTypeId) return;
+        
+        try {
+            // Fetch brands for selected vehicle type
+            const response = await fetch(`/compare/brands/${vehicleTypeId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                brandSelect.innerHTML = '<option value="">Select Brand</option>' + 
+                    data.brands.map(brand => 
+                        `<option value="${brand.brand_id}">${brand.name}</option>`
+                    ).join('');
+                brandSelect.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error fetching brands:', error);
+            alert('Error loading brands');
+        }
+    }
+
+    // Handle brand change
+    async function onBrandChange(index) {
+        const vehicleTypeSelect = document.querySelector(`.vehicle-type-select[data-index="${index}"]`);
+        const brandSelect = document.querySelector(`.brand-select[data-index="${index}"]`);
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        const vehicleTypeId = vehicleTypeSelect.value;
+        const brandId = brandSelect.value;
+        
+        // Reset downstream selections
+        modelSelect.innerHTML = '<option value="">Select Model</option>';
+        modelSelect.disabled = true;
+        selectedDisplay.classList.add('hidden');
+        selectedModels[index] = null;
+        
+        if (!vehicleTypeId || !brandId) return;
+        
+        try {
+            // Fetch models for selected brand and vehicle type
+            const response = await fetch(`/compare/models/${vehicleTypeId}/${brandId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                modelSelect.innerHTML = '<option value="">Select Model</option>' + 
+                    data.models.map(model => 
+                        `<option value="${model.id}">${model.model_name}</option>`
+                    ).join('');
+                modelSelect.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error fetching models:', error);
+            alert('Error loading models');
+        }
+    }
+
+    // Handle model change
+    async function onModelChange(index) {
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        const modelId = modelSelect.value;
+        
+        if (!modelId) {
+            selectedDisplay.classList.add('hidden');
+            selectedModels[index] = null;
+            return;
+        }
+        
+        try {
+            // Fetch model details
+            const response = await fetch(`/compare/model/${modelId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const model = data.model;
+                selectedModels[index] = model;
+                
+                selectedDisplay.innerHTML = `
+                    <div class="flex items-center">
+                        <img src="${model.model_image || '/images/placeholder.jpg'}" 
+                             alt="${model.model_name}" 
+                             class="selected-model-image"
+                             onerror="this.src='/images/placeholder.jpg'">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${model.brand_name} ${model.model_name}</div>
+                            <div class="text-red-600 text-xs">
+                                ${model.starting_price ? '₹' + new Intl.NumberFormat('en-IN').format(model.starting_price) : 'Price not available'}
+                            </div>
+                        </div>
+                    </div>
+                    <button class="remove-model-btn" onclick="removeModel(${index})">
+                        Remove
+                    </button>
+                `;
+                selectedDisplay.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error fetching model details:', error);
+            alert('Error loading model details');
+        }
+    }
+
+    // Remove selected model
+    function removeModel(index) {
+        const vehicleTypeSelect = document.querySelector(`.vehicle-type-select[data-index="${index}"]`);
+        const brandSelect = document.querySelector(`.brand-select[data-index="${index}"]`);
+        const modelSelect = document.querySelector(`.model-select[data-index="${index}"]`);
+        const selectedDisplay = document.getElementById(`selected-model-${index}`);
+        
+        // Reset all selections for this box
+        vehicleTypeSelect.value = '';
+        brandSelect.innerHTML = '<option value="">Select Brand</option>';
+        brandSelect.disabled = true;
+        modelSelect.innerHTML = '<option value="">Select Model</option>';
+        modelSelect.disabled = true;
+        selectedDisplay.classList.add('hidden');
+        selectedModels[index] = null;
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        document.getElementById('compare-button').addEventListener('click', performComparison);
+        document.getElementById('share-button').addEventListener('click', shareComparison);
+    }
+
+    // Perform comparison
+    async function performComparison() {
+        const selectedCount = selectedModels.filter(model => model !== null).length;
+        
+        if (selectedCount < 2) {
+            alert('Please select at least 2 vehicles to compare');
+            return;
         }
 
-        // Mobile Menu Toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
-        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+        // Show loading spinner
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('comparison-results').style.display = 'none';
 
-        const toggleMenu = () => {
-            mobileMenuOverlay.classList.toggle('mobile-menu-open');
-            mobileMenuBackdrop.classList.toggle('active');
-        };
+        try {
+            const modelIds = selectedModels.filter(model => model !== null).map(model => model.id);
+            
+            const response = await fetch('/compare', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ modelIds: modelIds })
+            });
 
-        mobileMenuButton.addEventListener('click', (e) => { e.preventDefault(); toggleMenu(); }, { passive: false });
-        mobileMenuButton.addEventListener('touchstart', (e) => { e.preventDefault(); toggleMenu(); }, { passive: false });
-        closeMobileMenuButton.addEventListener('click', (e) => { e.preventDefault(); mobileMenuOverlay.classList.remove('mobile-menu-open'); mobileMenuBackdrop.classList.remove('active'); }, { passive: false });
-        mobileMenuBackdrop.addEventListener('click', (e) => { e.preventDefault(); mobileMenuOverlay.classList.remove('mobile-menu-open'); mobileMenuBackdrop.classList.remove('active'); }, { passive: false });
-        mobileMenuOverlay.addEventListener('click', (e) => e.stopPropagation(), { passive: false });
+            const data = await response.json();
+            
+            if (data.success) {
+                displayComparisonResults(data.comparisonData);
+                if (data.popularModels) {
+                    displayRecommendedVehicles(data.popularModels);
+                }
+            } else {
+                alert(data.message || 'Error performing comparison');
+            }
+        } catch (error) {
+            console.error('Comparison error:', error);
+            alert('Error performing comparison');
+        } finally {
+            document.getElementById('loading-spinner').style.display = 'none';
+        }
+    }
 
-        // Search Functionality
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-input').value;
-            if (query) alert('Search for: ' + query);
-            else alert('Please enter a search query.');
+    // Display comparison results
+    function displayComparisonResults(comparisonData) {
+        const resultsSection = document.getElementById('comparison-results');
+        const comparisonHeader = document.getElementById('comparison-header');
+        const comparisonBody = document.getElementById('comparison-body');
+        const conclusionContent = document.getElementById('conclusion-content');
+        const comparisonTitle = document.getElementById('comparison-title');
+        const scoreRow = document.querySelector('tfoot tr');
+        
+        // Update title with compared vehicles
+        const titleModels = comparisonData.models.map(model => `${model.brand} ${model.name}`).join(' vs ');
+        comparisonTitle.textContent = `Comparing ${titleModels}`;
+
+        // Clear previous results
+        comparisonHeader.innerHTML = '<th class="vehicle-header">Specifications</th>';
+        comparisonBody.innerHTML = '';
+        
+        // Create table headers - Brand name and Model name only
+        comparisonData.models.forEach((model, index) => {
+            const headerCell = document.createElement('th');
+            headerCell.className = 'vehicle-header';
+            if (index === 0) {
+                headerCell.classList.add('winner-cell');
+            }
+            headerCell.innerHTML = `
+                <div class="vehicle-name">${model.brand}</div>
+                <div class="vehicle-brand">${model.name}</div>
+            `;
+            comparisonHeader.appendChild(headerCell);
         });
 
-        // Highlight Active Nav Links
-        document.addEventListener('DOMContentLoaded', () => {
-            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
-            const subNavLinks = document.querySelectorAll('.sub-nav-link');
-            const currentPath = window.location.pathname;
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === '/usa/compare') {
-                    link.classList.add('bg-red-700', 'text-white');
-                    link.classList.remove('hover:bg-red-700');
+        // Create specification rows
+        comparisonData.specifications.forEach(spec => {
+            const row = document.createElement('tr');
+            row.className = 'spec-row';
+            
+            const specNameCell = document.createElement('td');
+            specNameCell.className = 'spec-name';
+            specNameCell.textContent = spec;
+            row.appendChild(specNameCell);
+            
+            comparisonData.models.forEach(model => {
+                const specValueCell = document.createElement('td');
+                specValueCell.className = 'spec-value';
+                
+                // Use includes instead of has for array
+                if (model.specs.includes(spec)) {
+                    specValueCell.innerHTML = '<span class="tick">✓</span>';
+                } else {
+                    specValueCell.innerHTML = '<span class="cross">✗</span>';
+                }
+                
+                row.appendChild(specValueCell);
+            });
+            
+            comparisonBody.appendChild(row);
+        });
+
+        // Add score row to footer
+        scoreRow.innerHTML = '<td class="spec-name font-bold text-lg">Total Score</td>';
+        
+        comparisonData.models.forEach(model => {
+            const scoreCell = document.createElement('td');
+            scoreCell.className = 'spec-value score-cell';
+            
+            // Fix: Ensure score doesn't exceed total specifications
+            const actualScore = Math.min(model.score, comparisonData.totalSpecifications);
+            scoreCell.textContent = `${actualScore}/${comparisonData.totalSpecifications}`;
+            scoreRow.appendChild(scoreCell);
+        });
+
+        // Generate conclusion
+        generateConclusion(comparisonData, conclusionContent);
+        
+        // Show results section
+        resultsSection.style.display = 'block';
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Generate conclusion
+    function generateConclusion(comparisonData, container) {
+        // Sort models by score in descending order
+        const sortedModels = [...comparisonData.models].sort((a, b) => b.score - a.score);
+        const winner = sortedModels[0];
+        
+        // Fix: Ensure score doesn't exceed total specifications
+        const winnerScore = Math.min(winner.score, comparisonData.totalSpecifications);
+        const winnerPercentage = Math.round((winnerScore / comparisonData.totalSpecifications) * 100);
+        
+        let conclusionHTML = `
+            <div class="mb-4">
+                <h4 class="text-lg font-semibold winner-text mb-2">${winner.brand} ${winner.name} - Winner</h4>
+                <p class="text-white">The <span class="winner-text">${winner.brand} ${winner.name}</span> leads with <span class="winner-text">${winnerPercentage}%</span> of specifications met, scoring <span class="winner-text">${winnerScore}</span> out of <span class="winner-text">${comparisonData.totalSpecifications}</span> total specifications.</p>
+            </div>
+        `;
+
+        if (sortedModels.length > 1) {
+            conclusionHTML += `<div class="mb-4">
+                <h4 class="text-lg font-semibold text-white mb-2">Ranking Summary</h4>
+                <ul class="list-disc list-inside text-white space-y-1">`;
+            
+            sortedModels.forEach((model, index) => {
+                const position = index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : '4th';
+                const modelScore = Math.min(model.score, comparisonData.totalSpecifications);
+                const modelPercentage = Math.round((modelScore / comparisonData.totalSpecifications) * 100);
+                
+                if (index === 0) {
+                    conclusionHTML += `<li><span class="winner-text">${position} Place: ${model.brand} ${model.name} (${modelPercentage}%) - WINNER</span></li>`;
+                } else {
+                    conclusionHTML += `<li>${position} Place: ${model.brand} ${model.name} (${modelPercentage}%)</li>`;
                 }
             });
-            subNavLinks.forEach(link => {
-                if (link.getAttribute('href') === '/usa/brands/car') link.classList.add('active');
+            
+            conclusionHTML += `</ul></div>`;
+        }
+
+        // Missing specifications for winner
+        const missingSpecs = comparisonData.specifications.filter(spec => !winner.specs.includes(spec));
+        if (missingSpecs.length > 0) {
+            conclusionHTML += `
+                <div class="mb-4">
+                    <h4 class="text-lg font-semibold text-white mb-2">Considerations for ${winner.brand} ${winner.name}</h4>
+                    <p class="text-white mb-2">The ${winner.brand} ${winner.name} is missing the following specifications that you might want to consider:</p>
+                    <div class="text-sm text-white bg-black rounded p-3 border border-white">
+                        ${missingSpecs.slice(0, 8).join(', ')}${missingSpecs.length > 8 ? ` and ${missingSpecs.length - 8} more...` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Recommendations
+        conclusionHTML += `
+            <div class="mt-6">
+                <h4 class="text-lg font-semibold text-white mb-2">Recommendation</h4>
+                <p class="text-white">
+                    Based on your comparison, the <strong class="winner-text">${winner.brand} ${winner.name}</strong> offers the best overall specifications. 
+                    ${missingSpecs.length > 0 ? 'However, consider if the missing features are important for your needs.' : 'It provides comprehensive features across all categories.'}
+                </p>
+            </div>
+        `;
+
+        container.innerHTML = conclusionHTML;
+    }
+
+    // Share comparison
+    function shareComparison() {
+        const comparisonUrl = window.location.href;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Vehicle Comparison - Gyarage',
+                text: 'Check out this vehicle comparison I created on Gyarage',
+                url: comparisonUrl,
+            })
+            .catch(error => console.log('Error sharing:', error));
+        } else {
+            // Fallback: Copy to clipboard
+            navigator.clipboard.writeText(comparisonUrl).then(() => {
+                alert('Comparison link copied to clipboard!');
             });
+        }
+    }
+
+    // Load recommended vehicles
+    function loadRecommendedVehicles() {
+        // This would show initial recommendations
+        // Actual recommendations will be updated after comparison
+        const container = document.getElementById('recommended-vehicles');
+        container.innerHTML = '<div class="col-span-full text-center text-white">Select vehicles to compare to see recommendations</div>';
+    }
+
+    // Display recommended vehicles
+    function displayRecommendedVehicles(vehicles) {
+        const container = document.getElementById('recommended-vehicles');
+        container.innerHTML = '';
+        
+        if (!vehicles || vehicles.length === 0) {
+            container.innerHTML = '<div class="col-span-full text-center text-white">No recommendations available</div>';
+            return;
+        }
+        
+        vehicles.forEach(vehicle => {
+            const card = document.createElement('div');
+            card.className = 'recommendation-card';
+            card.innerHTML = `
+                <img src="${vehicle.model_image || '/images/placeholder.jpg'}" 
+                     alt="${vehicle.model_name}" 
+                     class="w-full h-32 object-cover rounded-lg mb-3 border border-white"
+                     onerror="this.src='/images/placeholder.jpg'">
+                <div class="font-semibold text-center text-white">${vehicle.brand_name} ${vehicle.model_name}</div>
+                <div class="text-red-600 font-bold text-center mt-2">
+                    ${vehicle.starting_price ? '₹' + new Intl.NumberFormat('en-IN').format(vehicle.starting_price) : 'Price not available'}
+                </div>
+                <a href="/modeldetails/${vehicle.id}" class="block text-center mt-3 compare-button py-2 px-4 rounded transition duration-300">
+                    Check Details
+                </a>
+            `;
+            container.appendChild(card);
         });
-
-        // Dynamic Vehicle Selection
-        const numberSelect = document.getElementById('number');
-        const compareSelection = document.getElementById('compare-selection');
-        const vehicleDivs = [null, document.getElementById('vehicle-3'), document.getElementById('vehicle-4'), document.getElementById('vehicle-5')];
-
-        numberSelect.addEventListener('change', () => {
-            const count = parseInt(numberSelect.value);
-            vehicleDivs.forEach((div, index) => {
-                if (div) div.classList.toggle('hidden', index + 3 > count);
-            });
-        });
-
-        // Compare Button Functionality
-        const compareButton = document.getElementById('compare-button');
-        const comparisonTable = document.getElementById('comparison-table');
-        const comparisonBody = document.getElementById('comparison-body');
-
-        compareButton.addEventListener('click', () => {
-            const count = parseInt(numberSelect.value);
-            const categories = [];
-            const brands = [];
-            const models = [];
-            for (let i = 1; i <= count; i++) {
-                categories.push(document.getElementById(`category${i}`).value);
-                brands.push(document.getElementById(`brand${i}`).value);
-                models.push(document.getElementById(`model${i}`).value);
-                document.getElementById(`vehicle-name-${i}`).textContent = `${brands[i-1]} ${models[i-1]}`;
-            }
-
-            // Placeholder data for comparison
-            const prices = ["$100,000 - $120,000", "$150,000 - $170,000", "$80,000 - $90,000", "$110,000 - $130,000", "$90,000 - $100,000"];
-            const colors = ["Red, Blue, Black, White", "Black, White, Silver", "Blue, Red, Green", "Silver, Black", "White, Gray"];
-            const scores = [5, 4, 3, 2, 1];
-
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById(`price-${i}`).textContent = i <= count ? prices[i-1] : '';
-                document.getElementById(`color-${i}`).textContent = i <= count ? colors[i-1] : '';
-                document.getElementById(`score-${i}`).textContent = i <= count ? `${scores[i-1]}/5` : '';
-                document.getElementById(`score-${i}`).setAttribute('data-score', i <= count ? scores[i-1] : 0);
-            }
-
-            // Highlight best score
-            const scoreCells = document.querySelectorAll('.score-cell');
-            if (scoreCells.length >= 2) {
-                let maxScore = -1;
-                let maxIndex = -1;
-                scoreCells.forEach((cell, index) => {
-                    const score = parseFloat(cell.getAttribute('data-score'));
-                    if (score > maxScore && score > 0) {
-                        maxScore = score;
-                        maxIndex = index;
-                    }
-                });
-                scoreCells.forEach((cell, index) => {
-                    cell.classList.remove('bg-green-600');
-                    if (index === maxIndex) cell.classList.add('bg-green-600');
-                });
-            }
-
-            comparisonTable.style.display = 'block';
-        });
-    </script>
+    }
+</script>
 </body>
 </html>
