@@ -12,6 +12,7 @@ const rootDir = require('./utils/pathutil');
 
 // 404 Controller import
 const notFoundController = require('./controller/publicpages/404');
+const searchRoutes = require('./routes/search');
 
 const app = express();
 
@@ -61,6 +62,8 @@ app.get('/notfound', notFoundController.getNotFound);
 
 // 4. Admin → /admin
 app.use('/admin', auth, adminRouter);
+
+app.use('/', searchRoutes);
 
 // 5. 404 Handler (LAST) - catch all other routes
 app.use((req, res) => {

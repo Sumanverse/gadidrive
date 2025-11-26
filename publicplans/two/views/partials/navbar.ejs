@@ -1,5 +1,5 @@
 <!-- views/partials/navbar.ejs -->
-<header class="w-full py-4 px-4 sm:px-6 lg:px-8">
+<header class="w-full py-4 px-4 sm:px-6 lg:px-8 bg-black sticky top-0 z-50 shadow-xl">
     <nav class="container mx-auto flex justify-between items-center">
         <div class="flex items-center space-x-3">
             <button id="mobile-menu-button" class="lg:hidden text-white">
@@ -9,31 +9,39 @@
             </button>
 
             <!-- DESKTOP NAV -->
-            <ul id="desktop-nav-links" class="hidden lg:flex space-x-4 text-white text-lg font-semibold">
-                <li><a href="/" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">Home</a></li>
-                <li><a href="/brands" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">Brands</a></li>
-                <li><a href="/category" class="bg-red-600 px-3 py-2 rounded-lg transition">Category</a></li>
-                <li><a href="/compare" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">Compare</a></li>
-                <li><a href="/news" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">News</a></li>
+            <ul id="desktop-nav-links" class="hidden lg:flex space-x-6 text-white text-lg font-semibold">
+                <li><a href="/" class="hover:bg-red-600 px-4 py-2 rounded-lg transition">Home</a></li>
+                <li><a href="/brands" class="hover:bg-red-600 px-4 py-2 rounded-lg transition">Brands</a></li>
+                <li><a href="/category" class="bg-red-600 px-4 py-2 rounded-lg transition">Category</a></li>
+                <li><a href="/compare" class="hover:bg-red-600 px-4 py-2 rounded-lg transition">Compare</a></li>
+                <li><a href="/news" class="hover:bg-red-600 px-4 py-2 rounded-lg transition">News</a></li>
             </ul>
         </div>
 
-        <div class="flex items-center space-x-3 lg:w-auto w-full justify-center lg:justify-end">
-            <div class="relative lg:w-48 w-4/5">
-                <input type="text" id="search-input" placeholder="Search vehicles..." 
-                       class="w-full p-2 pr-10 text-sm text-black bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600">
-                <button id="search-button" class="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 text-lg text-black">
-                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- SEARCH FORM — Full Page Search -->
+        <div class="flex items-center lg:w-auto w-full justify-center lg:justify-end">
+            <form action="/search" method="GET" class="relative lg:w-96 w-full max-w-lg">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search brands, models, news, authors..."
+                    class="w-full px-6 py-3.5 pr-14 text-black rounded-full focus:outline-none focus:ring-4 focus:ring-red-600 text-lg font-medium shadow-2xl placeholder-gray-500"
+                    required
+                    autocomplete="off"
+                    value="<%= typeof query !== 'undefined' ? query : '' %>"
+                >
+                <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-red-600 transition">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </button>
-            </div>
+            </form>
         </div>
     </nav>
 
-    <!-- MOBILE MENU -->
-    <div id="mobile-menu-backdrop"></div>
-    <div id="mobile-menu-overlay" class="lg:hidden fixed inset-y-0 left-0 w-64 bg-black">
+    <!-- MOBILE MENU (unchanged) -->
+    <div id="mobile-menu-backdrop" class="hidden"></div>
+    <div id="mobile-menu-overlay" class="lg:hidden fixed inset-y-0 left-0 w-64 bg-black transform -translate-x-full transition-transform duration-300">
         <div class="flex justify-end p-4">
             <button id="close-mobile-menu" class="text-white">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,11 +50,11 @@
             </button>
         </div>
         <ul class="flex flex-col space-y-4 p-4 text-white text-lg font-semibold">
-            <li><a href="/" class="mobile-nav-link hover:bg-red-600 px-3 py-2 rounded-lg transition">Home</a></li>
-            <li><a href="/brands" class="mobile-nav-link hover:bg-red-600 px-3 py-2 rounded-lg transition">Brands</a></li>
-            <li><a href="/category" class="mobile-nav-link bg-red-600 px-3 py-2 rounded-lg transition">Category</a></li>
-            <li><a href="/compare" class="mobile-nav-link hover:bg-red-600 px-3 py-2 rounded-lg transition">Compare</a></li>
-            <li><a href="/news" class="mobile-nav-link hover:bg-red-600 px-3 py-2 rounded-lg transition">News</a></li>
+            <li><a href="/" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">Home</a></li>
+            <li><a href="/brands" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">Brands</a></li>
+            <li><a href="/category" class="bg-red-600 px-3 py-2 rounded-lg transition">Category</a></li>
+            <li><a href="/compare" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">Compare</a></li>
+            <li><a href="/news" class="hover:bg-red-600 px-3 py-2 rounded-lg transition">News</a></li>
         </ul>
     </div>
 </header>
