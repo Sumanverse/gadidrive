@@ -109,7 +109,8 @@ exports.gethome = async (req, res, next) => {
             brands: popularBrands,
             articlesAfterBrands: articlesAfterBrands,
             models: popularModels,
-            articlesAfterModels: articlesAfterModels
+            articlesAfterModels: articlesAfterModels,
+            currentPage: 'home' 
         });
     } catch (error) {
         console.error('Home page error:', error);

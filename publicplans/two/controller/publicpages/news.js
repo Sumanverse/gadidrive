@@ -18,12 +18,12 @@ exports.getnews = async (req, res, next) => {
         res.render('./publicpages/news', {
             title: 'USA - news',
             articles: paginatedArticles,
-            currentPage: page,
             totalPages: totalPages,
             hasNextPage: page < totalPages,
             hasPrevPage: page > 1,
             nextPage: page + 1,
-            prevPage: page - 1
+            prevPage: page - 1,
+            currentPage: 'news'
         });
     } catch (err) {
         console.error('Error fetching news:', err);

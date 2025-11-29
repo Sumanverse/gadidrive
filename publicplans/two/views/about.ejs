@@ -1,317 +1,238 @@
-<%- include('./partials/head.ejs', { title: 'Gyarage - About' }) %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head', { 
+        title: 'About Gyarage | Nepal\'s No.1 Automobile Platform', 
+        description: 'Gyarage is Nepal\'s leading automotive platform offering detailed car & bike specifications, comparisons, latest news, and expert reviews.',
+        keywords: 'Gyarage, about gyarage, nepal car website, nepal bike specs, automobile nepal'
+    }) %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #dc2626;
+            --card-bg: #111111;
+            --border-gray: #374151;
+        }
+        body { background: #000; color: white; font-family: 'Poppins', sans-serif; margin: 0; }
 
-        body {
-            background-color: #000000;
+        .custom-title { font-size: 4.5rem; font-weight: 900; text-align: center; letter-spacing: -2px; line-height: 1; margin-bottom: 1.5rem; }
+        @media (min-width: 768px) { .custom-title { font-size: 6.5rem; } }
+        .custom-title .about { color: white; }
+        .custom-title .gya { color: #dc2626; font-weight: 900; }
+        .custom-title .rage { color: white; }
+
+        .about-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gray);
+            border-radius: 16px;
+            padding: 2rem;
+            border-left: 5px solid var(--primary-red);
         }
-        .border-bottom-left-to-right {
-            position: relative;
-            border-radius: 0.75rem;
+
+        .section-title {
+            font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 4rem; position: relative; color: white;
         }
-        .border-bottom-left-to-right:hover::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #DC2626;
-            animation: borderLeftToRight 0.3s ease-in-out forwards;
+        .section-title::after {
+            content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 4px; background: var(--primary-red); border-radius: 2px;
         }
-        @keyframes borderLeftToRight {
-            to { width: 100%; }
+
+        /* WHY CHOOSE US - 100% GUARANTEED VISIBLE ICONS */
+        .why-item { text-align: center; padding: 2rem 1rem; }
+        .why-icon-container { width: 140px; height: 140px; margin: 0 auto 1.5rem; }
+        .why-icon-bg {
+            width: 100%; height: 100%; background: #f92b2b; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: none !important;
         }
-        .icon-button {
-            transition: transform 0.2s;
+        .why-icon-img {
+            width: 85px; height: 85px;
+            filter: brightness(0); /* Forces pure black */
         }
-        .icon-button:hover {
-            transform: scale(1.1);
+        .why-content h4 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white; }
+        .why-content p { color: #d1d5db; line-height: 1.6; font-size: 1rem; }
+
+        .signin-btn {
+            display: inline-block; background: var(--primary-red); color: white;
+            padding: 1.1rem 3.8rem; border-radius: 50px; font-weight: 600; font-size: 1.25rem;
+            text-decoration: none; transition: all 0.3s ease;
         }
-        #mobile-menu-overlay {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
-            width: 16rem;
-            height: 100%;
-            z-index: 1000;
-            pointer-events: auto;
-        }
-        .mobile-menu-open {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        #mobile-menu-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            pointer-events: auto;
-        }
-        #mobile-menu-backdrop.active {
-            display: block;
+        .signin-btn:hover { background: #f92b2b; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(220,38,38,0.3); }
+        .signin-btn i { margin-right: 12px; }
+
+        .contact-item i { font-size: 2.5rem; color: var(--primary-red); }
+        .contact-item a { color: #9ca3af; text-decoration: none; }
+        .contact-item a:hover { color: var(--primary-red); }
+
+        @media (max-width: 768px) {
+            .custom-title { font-size: 3.5rem; }
+            .why-icon-container { width: 110px; height: 110px; background: #f92b2b;}
+            .why-icon-img { width: 62px; height: 62px; background: #f92b2b;}
+            .section-title { font-size: 2rem; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col text-white font-['Poppins']">
-    
-<%- include('./partials/navbar') %>
+<body class="min-h-screen flex flex-col">
+    <%- include('partials/navbar') %>
 
-    <!-- Main Section -->
-    <main class="flex-grow container mx-auto px-4 py-8 max-w-screen-2xl">
-        <!-- Breadcrumb -->
-        <div class="breadcrumb text-white text-sm sm:text-base flex items-center mb-6">
-            <a href="/" class="hover:text-red-600">Gyarage</a> 
-            <span class="mx-2 text-red-600">&gt;&gt;</span> 
-            <a href="/aboutus" class="text-red-600 font-bold">About</a>
-        </div>
+    <main class="flex-grow container mx-auto px-6 py-12 max-w-7xl">
 
-        <div class="space-y-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between mb-6">
-                <a href="/signin" class="bg-red-600 text-white px-4 py-2 rounded-lg text-lg font-semibold hover:bg-red-700 transition duration-300 transform hover:scale-105 shadow-lg mb-4 sm:mb-0">
-                    Sign In
-                </a>
-                <h1 class="text-3xl lg:text-4xl font-bold text-white text-center sm:text-right">About Gyarage</h1>
+        <!-- Hero -->
+        <section class="text-center py-16 mb-10">
+            <h1 class="custom-title">
+                <span class="about">About</span> <span class="gya">Gya</span><span class="rage">rage</span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-4xl mx-auto leading-relaxed">
+                Nepal's Most Trusted Automobile Platform — Built for Drivers, By Drivers
+            </p>
+        </section>
+
+        <!-- Our Story -->
+        <section id="our-story" class="mb-10">
+            <h2 class="section-title">Our Story</h2>
+            <div class="about-card max-w-5xl mx-auto text-center">
+                <p class="text-lg leading-relaxed text-gray-300">
+                    Founded in Kathmandu by a team of car & bike lovers, <strong>Gyarage</strong> started with one goal: 
+                    to give Nepalese drivers a clean, fast, and honest place to research vehicles — without confusing ads or outdated info.
+                </p>
+                <p class="mt-6 text-gray-400">
+                    Today, we're proud to be one of the fastest-growing auto platforms in Nepal, helping thousands make better vehicle choices every month.
+                </p>
             </div>
-            <div class="p-6 bg-gray-800 rounded-lg shadow-lg border border-gray-700 border-bottom-left-to-right space-y-12">
-                <div>
-                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4 text-center">Introduction (Who We Are)</h2>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div class="p-8 bg-gray-800 rounded-lg border border-gray-700 shadow-lg border-bottom-left-to-right w-full">
-                            <p class="text-gray-300 text-lg leading-relaxed text-center">
-                                Gyarage is Nepal’s premier platform for automotive enthusiasts, offering expert reviews and insights on vehicles. Founded by passionate gearheads, we aim to be the trusted source for reliable automotive information in Nepal.
-                            </p>
-                        </div>
-                    </div>
+        </section>
+
+        <!-- Mission & Vision -->
+        <section class="mb-10">
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="about-card">
+                    <h3 class="text-3xl font-bold mb-6 flex items-center gap-4">
+                        <i class="fas fa-bullseye text-red-600 text-4xl"></i> Our Mission
+                    </h3>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        To help every Nepalese driver find the perfect vehicle with confidence — through accurate specs, fair comparisons, and the latest updates.
+                    </p>
                 </div>
-                <div>
-                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4 text-center">Purpose/Mission (Why We Exist)</h2>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div class="p-8 bg-gray-800 rounded-lg border border-gray-700 shadow-lg border-bottom-left-to-right w-full">
-                            <p class="text-gray-300 text-lg leading-relaxed text-center">
-                                Our mission is to empower Nepalese drivers with comprehensive, unbiased, and up-to-date information on vehicles, helping them make informed decisions that match their needs and lifestyles.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4 text-center">What We Offer (What We Do)</h2>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div class="p-8 bg-gray-800 rounded-lg border border-gray-700 shadow-lg border-bottom-left-to-right w-full">
-                            <p class="text-gray-300 text-lg leading-relaxed text-center">
-                                We provide detailed reviews, specifications, and comparisons of motorcycles and cars. Gyarage also offers the latest automotive news, expert tips, and advertising opportunities for businesses.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4 text-center">Contact Us</h2>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div class="p-8 bg-gray-800 rounded-lg border border-gray-700 shadow-lg border-bottom-left-to-right w-full">
-                            <p class="text-gray-300 text-lg leading-relaxed text-center">
-                                Email: <a href="mailto:support@gyarage.com" class="text-red-400 hover:text-red-300">support@gyarage.com</a><br>
-                                Phone: +977-1-1234567
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4 text-center">Advertise With Us</h2>
-                    <div class="grid grid-cols-1 gap-6">
-                        <div class="p-8 bg-gray-800 rounded-lg border border-gray-700 shadow-lg border-bottom-left-to-right w-full">
-                            <p class="text-gray-300 text-lg leading-relaxed text-center">
-                                To advertise with Gyarage, contact us at <a href="mailto:ads@gyarage.com" class="text-red-400 hover:text-red-300">ads@gyarage.com</a>. We offer tailored solutions including banner ads, sponsored content, and product placements.
-                            </p>
-                        </div>
-                    </div>
+                <div class="about-card">
+                    <h3 class="text-3xl font-bold mb-6 flex items-center gap-4">
+                        <i class="fas fa-eye text-red-600 text-4xl"></i> Our Vision
+                    </h3>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        To be the #1 trusted name in Nepal when it comes to cars, bikes, and everything automotive.
+                    </p>
                 </div>
             </div>
+        </section>
+
+        <!-- What We Offer -->
+        <section id="services" class="mb-10">
+            <h2 class="section-title">What We Offer</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="about-card text-center">
+                    <i class="fas fa-car-side text-5xl text-red-600 mb-6"></i>
+                    <h3 class="text-2xl font-bold mb-4">Detailed Specifications</h3>
+                    <p class="text-gray-400">Complete technical details, features, and pricing for every model available in Nepal.</p>
+                </div>
+                <div class="about-card text-center">
+                    <i class="fas fa-balance-scale text-5xl text-red-600 mb-6"></i>
+                    <h3 class="text-2xl font-bold mb-4">Easy Comparison</h3>
+                    <p class="text-gray-400">Compare any two vehicles side-by-side with our powerful comparison tool.</p>
+                </div>
+                <div class="about-card text-center">
+                    <i class="fas fa-newspaper text-5xl text-red-600 mb-6"></i>
+                    <h3 class="text-2xl font-bold mb-4">Latest News & Updates</h3>
+                    <p class="text-gray-400">New launches, price changes, government policies, and industry news.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Gyarage - 100% WORKING ICONS -->
+        <section class="mb-10 py-10">
+            <h2 class="section-title">Why Choose Gyarage?</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 max-w-7xl mx-auto">
+
+                <!-- 1. Accuracy -->
+                <div class="why-item">
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg">
+                            <img src="/images/accuracy.png" alt="Accuracy" class="why-icon-img">
+                        </div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Highly Accurate</h4>
+                        <p>We verify every spec to ensure you get the most reliable data.</p>
+                    </div>
+                </div>
+
+                <!-- 2. Fast -->
+                <div class="why-item">
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg">
+                            <img src="/images/fast.png" alt="Fast" class="why-icon-img">
+                        </div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Lightning Fast</h4>
+                        <p>Optimized for speed on any device, anywhere in Nepal.</p>
+                    </div>
+                </div>
+
+                <!-- 3. Made in Nepal -->
+                <div class="why-item">
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg">
+                            <img src="/images/nepal.png" alt="Nepal Flag" class="why-icon-img">
+                        </div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Made in Nepal</h4>
+                        <p>Built with love in Kathmandu for Nepali drivers.</p>
+                    </div>
+                </div>
+
+                <!-- 4. Free -->
+                <div class="why-item">  
+                    <div class="why-icon-container">
+                        <div class="why-icon-bg">
+                            <img src="/images/free.png" alt="Free" class="why-icon-img">
+                        </div>
+                    </div>
+                    <div class="why-content">
+                        <h4>Completely Free</h4>
+                        <p>No login, no paywall — everything is 100% free forever.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Contact, Privacy, Terms, Sign In — sabai same -->
+        <section id="contact" class="mb-10">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="about-card max-w-4xl mx-auto text-center">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="contact-item"><i class="fas fa-envelope"></i><p class="font-semibold">Email</p><a href="mailto:support@gyarage.com">support@gyarage.com</a></div>
+                    <div class="contact-item"><i class="fas fa-phone"></i><p class="font-semibold">Phone</p><p class="text-gray-400">+977 980-000-0000</p></div>
+                    <div class="contact-item"><i class="fas fa-map-marker-alt"></i><p class="font-semibold">Location</p><p class="text-gray-400">Kathmandu, Nepal</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="privacy" class="mb-10"><div class="about-card"><h2 class="text-3xl font-bold mb-6 flex items-center gap-4"><i class="fas fa-shield-alt text-red-600"></i> Privacy Policy</h2><p class="text-gray-300">We value your privacy. Gyarage does not require sign-up and never sells your data.</p></div></section>
+
+        <section id="terms" class="mb-10"><div class="about-card"><h2 class="text-3xl font-bold mb-6 flex items-center gap-4"><i class="fas fa-file-contract text-red-600"></i> Terms of Service</h2><p class="text-gray-300">All information is for reference only. Prices and specs may vary by dealer and location.</p></div></section>
+
+        <div class="text-center my-5">
+            <a href="/signin" class="signin-btn"><i class="fas fa-user"></i> Sign In</a>
         </div>
 
-        <!-- Sign In Modal -->
-        <div id="signInModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md">
-                <h3 class="text-2xl font-bold text-white mb-4">Sign In</h3>
-                <div id="error-message" class="hidden bg-red-600 text-white p-4 rounded-lg text-sm text-center mb-6">
-                    Invalid username or password
-                </div>
-                <form id="signin-form" class="space-y-6">
-                    <div>
-                        <label for="username" class="block text-sm font-semibold text-gray-300 mb-1">Username</label>
-                        <input type="text" id="username" name="username" placeholder="Enter your username"
-                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
-                               required>
-                    </div>
-                    <div>
-                        <label for="password" class="block text-sm font-semibold text-gray-300 mb-1">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Enter your password"
-                               class="w-full px-4 py-2 bg-gray-700 border border-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
-                               required>
-                    </div>
-                    <div class="flex items-center">
-                        <label class="flex items-center text-sm text-gray-300 cursor-pointer">
-                            <input type="checkbox" name="remember" class="mr-2 accent-red-500">
-                            Remember me
-                        </label>
-                    </div>
-                    <div class="flex justify-between">
-                        <button type="button" id="close-signin-modal" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
-                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Sign In</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </main>
 
-    
-<%- include('./partials/footer') %>
-
+    <%- include('partials/footer') %>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM fully loaded');
-
-            // Mobile Menu Toggle
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-            const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
-            const closeMobileMenuButton = document.getElementById('close-mobile-menu');
-
-            if (!mobileMenuButton || !mobileMenuOverlay || !mobileMenuBackdrop || !closeMobileMenuButton) {
-                console.error('Mobile menu elements missing:', {
-                    mobileMenuButton: !!mobileMenuButton,
-                    mobileMenuOverlay: !!mobileMenuOverlay,
-                    mobileMenuBackdrop: !!mobileMenuBackdrop,
-                    closeMobileMenuButton: !!closeMobileMenuButton
-                });
-                return;
-            }
-
-            const toggleMenu = () => {
-                console.log('Toggling menu');
-                mobileMenuOverlay.classList.toggle('mobile-menu-open');
-                mobileMenuBackdrop.classList.toggle('active');
-            };
-
-            mobileMenuButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Hamburger menu clicked');
-                toggleMenu();
-            }, { passive: false });
-
-            mobileMenuButton.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Hamburger menu touched');
-                toggleMenu();
-            }, { passive: false });
-
-            closeMobileMenuButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Close menu clicked');
-                mobileMenuOverlay.classList.remove('mobile-menu-open');
-                mobileMenuBackdrop.classList.remove('active');
-            }, { passive: false });
-
-            mobileMenuBackdrop.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Backdrop clicked, closing menu');
-                mobileMenuOverlay.classList.remove('mobile-menu-open');
-                mobileMenuBackdrop.classList.remove('active');
-            }, { passive: false });
-
-            mobileMenuOverlay.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log('Clicked inside menu, preventing close');
-            }, { passive: false });
-
-            // Search Functionality
-            document.getElementById('search-button').addEventListener('click', () => {
-                const query = document.getElementById('search-input').value;
-                console.log('Search button clicked, query:', query);
-                if (query) {
-                    alert('Searching for: ' + query);
-                } else {
-                    alert('Please enter a search query.');
-                }
-            });
-
-            // Highlight Active Nav Link
-            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
-            const footerLinks = document.querySelectorAll('footer a');
-            const currentPath = window.location.pathname;
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('bg-red-600', 'text-white');
-                    link.classList.remove('hover:bg-red-600');
-                }
-            });
-            footerLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('bg-red-600', 'text-white');
-                    link.classList.remove('hover:text-black');
-                }
-            });
-
-            // Sign In Modal Controls
-            document.getElementById('openSignInModal').addEventListener('click', () => {
-                console.log('Open sign-in modal clicked');
-                document.getElementById('signInModal').classList.remove('hidden');
-            });
-
-            document.getElementById('close-signin-modal').addEventListener('click', () => {
-                console.log('Close sign-in modal clicked');
-                document.getElementById('signInModal').classList.add('hidden');
-                document.getElementById('error-message').classList.add('hidden');
-            });
-
-            // Form Submission
-            document.getElementById('signin-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                console.log('Sign-in form submitted');
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const errorMessage = document.getElementById('error-message');
-
-                if (username === '' || password === '') {
-                    errorMessage.classList.remove('hidden');
-                    errorMessage.textContent = 'Please fill in all fields';
-                    return;
-                }
-
-                // Placeholder for backend validation
-                console.log('Form submitted:', { username, password });
-                // Example: Simulate invalid credentials
-                if (username !== 'admin' || password !== 'password') {
-                    errorMessage.classList.remove('hidden');
-                    errorMessage.textContent = 'Invalid username or password';
-                    return;
-                }
-
-                // Successful sign-in
-                document.getElementById('signInModal').classList.add('hidden');
-                errorMessage.classList.add('hidden');
-                console.log('Sign-in successful, redirecting...');
-                // Backend submission placeholder
-                // fetch('/signin', { method: 'POST', body: new FormData(e.target) })
-                //     .then(response => response.json())
-                //     .then(data => {
-                //         if (data.success) {
-                //             window.location.href = '/usa/dashboard';
-                //         } else {
-                //             errorMessage.classList.remove('hidden');
-                //             errorMessage.textContent = data.message || 'Invalid username or password';
-                //         }
-                //     });
-            });
-
-            // Auto-logout on browser/device close (Placeholder)
-            window.onbeforeunload = () => {
-                console.log('Window closing, triggering logout');
-                return undefined;
-            };
-        });
+        document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+            if (a.getAttribute('href').startsWith('#')) { e.preventDefault(); document.querySelector(a.getAttribute('href')).scrollIntoView({behavior: 'smooth'}); }
+        }));
     </script>
 </body>
 </html>

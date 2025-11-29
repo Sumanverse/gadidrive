@@ -13,7 +13,8 @@ exports.getcompare = async (req, res, next) => {
             vehicleTypes: vehicleTypes || [],
             popularModels: popularModels || [],
             selectedModels: [],
-            comparisonData: null
+            comparisonData: null,
+            currentPage: 'compare     '
         });
     } catch (error) {
         console.error('Error in compare controller:', error);

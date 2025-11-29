@@ -22,7 +22,8 @@ exports.getbrands = async (req, res, next) => {
             vehicleTypes: vehicleTypes,
             brands: brands,
             selectedVehicleType: selectedVehicleType,
-            title: 'USA - Brands'
+            title: 'USA - Brands',
+            currentPage: 'brands'
         });
     } catch (error) {
         console.error('Error in brands controller:', error);

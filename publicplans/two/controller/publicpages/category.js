@@ -24,7 +24,8 @@ exports.getcategory = async (req, res, next) => {
         res.render('./publicpages/category', {
             vehicleTypes: vehicleTypes,
             selectedVehicleType: selectedVehicleType,
-            categories: categories
+            categories: categories,
+            currentPage: 'category'
         });
     } catch (error) {
         console.error('Error in getcategory:', error);
