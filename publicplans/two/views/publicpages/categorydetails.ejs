@@ -1,296 +1,283 @@
 <%- include('../partials/head.ejs', { 
-    title: title,
-    description: description,
-    keywords: keywords,
+    title: `${category.name} ${category.vehicle_type_name}s in USA | Electric, ICE, Hybrid Models | Gyarage`,
+    description: `All latest ${category.name} ${category.vehicle_type_name}s in USA - Electric, Petrol, Diesel, Hybrid with price and specs.`,
+    keywords: `${category.name}, ${category.name} USA, ${category.name} electric, ${category.name} hybrid, ${category.vehicle_type_name}`,
     canonical: `/categorydetails/${category.category_id}`
 }) %>
 
-        body {
-            background-color: #000000;
-        }
-        .border-bottom-left-to-right {
-            position: relative;
-            border-radius: 0.75rem;
-        }
-        .border-bottom-left-to-right:hover::after {
-            content: "";
+<style>
+    /* Premium Red Filter - EXACT SAME AS BRANDSDETAILS */
+    .premium-filter-container { z-index: 10; }
+
+    #engineFilter {
+        background: linear-gradient(135deg, #DC2626, #B91C1C);
+        border: 2px solid #EF4444;
+        color: white;
+        padding: 14px 44px 14px 24px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        min-width: 260px;
+        cursor: pointer;
+        box-shadow: 
+            inset 0 6px 20px rgba(220, 38, 38, 0.4),
+            inset 0 2px 8px rgba(255, 255, 255, 0.2);
+        transition: all 0.35s ease;
+        appearance: none;
+        font-family: 'Poppins', sans-serif;
+
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 18px center;
+        background-size: 16px;
+    }
+
+    #engineFilter:hover {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        transform: translateY(-3px);
+        box-shadow: 0 14px 35px rgba(220, 38, 38, 0.6);
+    }
+
+    #engineFilter:focus {
+        outline: none;
+        box-shadow: 0 0 0 5px rgba(220, 38, 38, 0.4), 0 14px 35px rgba(220, 38, 38, 0.6);
+    }
+
+    #engineFilter option {
+        background: #111;
+        color: white;
+        padding: 12px 20px;
+        font-weight: 500;
+    }
+
+    #engineFilter option:checked {
+        background: #DC2626;
+        color: white;
+    }
+
+    @media (min-width: 769px) {
+        .premium-filter-container {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #DC2626;
-            animation: borderLeftToRight 0.3s ease-in-out forwards;
+            bottom: -70px;
+            right: 0;
         }
-        @keyframes borderLeftToRight {
-            to {
-                width: 100%;
-            }
+    }
+
+    @media (max-width: 768px) {
+        .premium-filter-container {
+            position: static;
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
         }
-        .filter-button:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+        #engineFilter {
+            min-width: 100%;
+            max-width: 380px;
+            padding: 14px 44px 14px 20px;
+            background-position: right 16px center;
         }
-        .breadcrumb a:hover {
-            color: #DC2626;
-        }
-        #mobile-menu-overlay {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
-            width: 16rem;
-            height: 100%;
-            z-index: 1000;
-            pointer-events: auto;
-            will-change: transform, opacity;
-        }
-        .mobile-menu-open {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        #mobile-menu-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            pointer-events: auto;
-        }
-        #mobile-menu-backdrop.active {
-            display: block;
-        }
-        .model-image {
-            width: 100%;
-            height: 7rem;
-            object-fit: cover;
-            border-radius: 0.5rem;
-            background-color: #f3f4f6;
-        }
-        .category-image, .brand-image {
-            width: 100%;
-            height: 8rem;
-            object-fit: cover;
-            border-radius: 0.5rem;
-            background-color: #f3f4f6;
-        }
-    </style>
+    }
+</style>
 </head>
-<body class="min-h-screen flex flex-col text-white font-['Poppins']">
-    
-<%- include('../partials/navbar') %>
 
-    <!-- Main Section -->
-    <main class="flex-grow container mx-auto px-4 py-4 max-w-screen-2xl">
-        <!-- Breadcrumb and Filter -->
-        <div class="flex flex-row justify-between items-center mb-4">
-            <div class="breadcrumb text-white text-sm sm:text-base flex items-center">
-                <a href="/" class="hover:text-red-600">Gyarage</a> 
-                <span class="mx-2 text-red-600">&gt;&gt;</span> 
-                <a href="/usa" class="hover:text-red-600">USA</a> 
-                <span class="mx-2 text-red-600">&gt;&gt;</span> 
-                <a href="/category?vehicle_type=<%= category.vehicle_type_id %>" class="hover:text-red-600"><%= category.vehicle_type_name %> Categories</a>
-                <span class="mx-2 text-red-600">&gt;&gt;</span> 
-                <a href="/categorydetails/<%= category.category_id %>" class="text-red-600 font-bold"><%= category.name %></a>
-            </div>
-            <div>
-                <button id="filter-button" class="filter-button bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition">
-                    Filter
-                </button>
+<body class="min-h-screen flex flex-col text-white font-['Poppins'] bg-black">
+    <%- include('../partials/navbar') %>
+
+    <main class="flex-grow container mx-auto px-6 py-16 max-w-screen-2xl">
+
+        <!-- Title + Premium Filter -->
+        <div class="relative mb-44">
+            <h1 id="pageTitle" class="text-4xl md:text-6xl font-bold text-white text-center leading-tight">
+                All <%= category.name %> <%= category.vehicle_type_name %>s in USA
+            </h1>
+
+            <div class="premium-filter-container">
+                <select id="engineFilter">
+                    <option value="all">All Models</option>
+                    <option value="electric">Electric Only</option>
+                    <option value="ice">ICE (Petrol/Diesel)</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="phev">Plug-in Hybrid (PHEV)</option>
+                </select>
             </div>
         </div>
 
-        <!-- Dynamic Title Section -->
-        <section class="title-section mx-auto max-w-screen-2xl mt-8">
-            <div class="text-3xl font-bold text-white mb-6 text-center">
-                All <%= category.name %> <%= category.vehicle_type_name %> Models Available in USA
-            </div>
-        </section>
+        <h1 class="sr-only" id="seoTitle">All <%= category.name %> <%= category.vehicle_type_name %>s in USA - Latest Price & Specs</h1>
 
-        <!-- Models Section -->
-        <section class="models mx-auto max-w-screen-2xl mt-8">
+        <div id="modelsContainer" class="mt-5">
+
             <!-- Electric Models -->
-            <% if (electricModels.length > 0) { %>
-                <div class="text-2xl font-bold text-white mb-6">Electric <%= category.name %></div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-    <% electricModels.forEach((model) => { %>
-    <a href="/modeldetails/<%= model.id %>" class="block">
-        <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center border-bottom-left-to-right shadow-md hover:transform cursor-pointer">
-            <% if (model.model_image) { %>
-                <img src="<%= model.model_image %>" alt="<%= model.model_name %>" class="w-full h-36 object-cover rounded-lg mb-4 shadow-inner">
-            <% } else { %>
-                <div class="w-full h-36 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-            <% } %>
-            <div class="flex items-center justify-center gap-2 mb-2">
-                <% if (model.brand_name) { %>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b><%= model.brand_name %></b></div>
-                <% } %>
-                <div class="text-white font-semibold text-base line-clamp-1"><b><%= model.model_name %></b></div>
-            </div>
-            <div class="text-red-400 font-bold mt-2 text-lg">
-                <% if (model.starting_price) { %>
-                    $<%= Number(model.starting_price).toLocaleString() %>
-                <% } else { %>
-                    Price TBA
-                <% } %>
-            </div>
-            <div class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</div>
-        </div>
-    </a>
-    <% }); %>
-</div>
+            <% if (electricModels?.length > 0) { %>
+                <div class="engine-section" data-engine="electric">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <% electricModels.forEach(model => { %>
+                            <a href="/modeldetails/<%= model.id %>" class="block group">
+                                <div class="bg-gradient-to-b from-red-600 to-black rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                                    <% if (model.model_image) { %>
+                                        <img src="<%= model.model_image %>" alt="<%= model.model_name %> <%= category.name %>" class="w-full h-40 object-cover">
+                                    <% } else { %>
+                                        <div class="w-full h-40 bg-gray-800 border border-gray-700"></div>
+                                    <% } %>
+                                    <div class="p-5 text-center">
+                                        <h3 class="font-bold text-lg"><%= model.model_name %></h3>
+                                        <% if (model.brand_name) { %>
+                                            <p class="text-gray-400 text-sm"><%= model.brand_name %></p>
+                                        <% } %>
+                                        <p class="text-red-400 font-bold text-xl mt-2">
+                                            <%= model.starting_price ? '$' + Number(model.starting_price).toLocaleString() : 'Price TBA' %>
+                                        </p>
+                                        <button class="mt-4 px-6 py-2 bg-white text-black rounded-full text-sm font-bold hover:bg-red-600 hover:text-white transition">
+                                            Check out
+                                        </button>
+                                    </div>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
             <% } %>
 
             <!-- ICE Models -->
-            <% if (iceModels.length > 0) { %>
-                <div class="text-2xl font-bold text-white mt-12 mb-6">ICE Engine <%= category.name %></div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-    <% iceModels.forEach((model) => { %>
-    <a href="/modeldetails/<%= model.id %>" class="block">
-        <div class="bg-gradient-to-b from-red-500 to-black rounded-xl shadow-xl transition-all duration-300 p-4 flex flex-col items-center text-center border-bottom-left-to-right shadow-md hover:transform cursor-pointer">
-            <% if (model.model_image) { %>
-                <img src="<%= model.model_image %>" alt="<%= model.model_name %>" class="w-full h-36 object-cover rounded-lg mb-4 shadow-inner">
-            <% } else { %>
-                <div class="w-full h-36 bg-white rounded-lg mb-4 shadow-inner border-transparent"></div>
-            <% } %>
-            <div class="flex items-center justify-center gap-2 mb-2">
-                <% if (model.brand_name) { %>
-                    <div class="text-white font-semibold text-base line-clamp-1"><b><%= model.brand_name %></b></div>
-                <% } %>
-                <div class="text-white font-semibold text-base line-clamp-1"><b><%= model.model_name %></b></div>
-            </div>
-            <div class="text-red-400 font-bold mt-2 text-lg">
-                <% if (model.starting_price) { %>
-                    $<%= Number(model.starting_price).toLocaleString() %>
-                <% } else { %>
-                    Price TBA
-                <% } %>
-            </div>
-            <div class="mt-4 px-4 py-2 bg-white text-black rounded-full text-sm font-semibold transition duration-300 transform hover:bg-red-600 hover:text-white">Check out</div>
-        </div>
-    </a>
-    <% }); %>
-</div>
-            <% } %>
-
-            <!-- No Models Message -->
-            <% if (electricModels.length === 0 && iceModels.length === 0) { %>
-                <div class="text-center text-white text-xl py-12">
-                    No <%= category.name %> <%= category.vehicle_type_name %> models available yet. Check back soon!
+            <% if (iceModels?.length > 0) { %>
+                <div class="engine-section" data-engine="ice">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <% iceModels.forEach(model => { %>
+                            <a href="/modeldetails/<%= model.id %>" class="block group">
+                                <div class="bg-gradient-to-b from-red-600 to-black rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                                    <% if (model.model_image) { %>
+                                        <img src="<%= model.model_image %>" alt="<%= model.model_name %> <%= category.name %>" class="w-full h-40 object-cover">
+                                    <% } else { %>
+                                        <div class="w-full h-40 bg-gray-800 border border-gray-700"></div>
+                                    <% } %>
+                                    <div class="p-5 text-center">
+                                        <h3 class="font-bold text-lg"><%= model.model_name %></h3>
+                                        <% if (model.brand_name) { %>
+                                            <p class="text-gray-400 text-sm"><%= model.brand_name %></p>
+                                        <% } %>
+                                        <p class="text-red-400 font-bold text-xl mt-2">
+                                            <%= model.starting_price ? '$' + Number(model.starting_price).toLocaleString() : 'Price TBA' %>
+                                        </p>
+                                        <button class="mt-4 px-6 py-2 bg-white text-black rounded-full text-sm font-bold hover:bg-red-600 hover:text-white transition">
+                                            Check out
+                                        </button>
+                                    </div>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
                 </div>
             <% } %>
-        </section>
+
+            <!-- Hybrid Models -->
+            <% if (hybridModels?.length > 0) { %>
+                <div class="engine-section" data-engine="hybrid">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <% hybridModels.forEach(model => { %>
+                            <a href="/modeldetails/<%= model.id %>" class="block group">
+                                <div class="bg-gradient-to-b from-red-600 to-black rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                                    <% if (model.model_image) { %>
+                                        <img src="<%= model.model_image %>" alt="<%= model.model_name %> <%= category.name %>" class="w-full h-40 object-cover">
+                                    <% } else { %>
+                                        <div class="w-full h-40 bg-gray-800 border border-gray-700"></div>
+                                    <% } %>
+                                    <div class="p-5 text-center">
+                                        <h3 class="font-bold text-lg"><%= model.model_name %></h3>
+                                        <% if (model.brand_name) { %>
+                                            <p class="text-gray-400 text-sm"><%= model.brand_name %></p>
+                                        <% } %>
+                                        <p class="text-red-400 font-bold text-xl mt-2">
+                                            <%= model.starting_price ? '$' + Number(model.starting_price).toLocaleString() : 'Price TBA' %>
+                                        </p>
+                                        <button class="mt-4 px-6 py-2 bg-white text-black rounded-full text-sm font-bold hover:bg-red-600 hover:text-white transition">
+                                            Check out
+                                        </button>
+                                    </div>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- PHEV Models -->
+            <% if (phevModels?.length > 0) { %>
+                <div class="engine-section" data-engine="phev">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <% phevModels.forEach(model => { %>
+                            <a href="/modeldetails/<%= model.id %>" class="block group">
+                                <div class="bg-gradient-to-b from-red-600 to-black rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                                    <% if (model.model_image) { %>
+                                        <img src="<%= model.model_image %>" alt="<%= model.model_name %> <%= category.name %>" class="w-full h-40 object-cover">
+                                    <% } else { %>
+                                        <div class="w-full h-40 bg-gray-800 border border-gray-700"></div>
+                                    <% } %>
+                                    <div class="p-5 text-center">
+                                        <h3 class="font-bold text-lg"><%= model.model_name %></h3>
+                                        <% if (model.brand_name) { %>
+                                            <p class="text-gray-400 text-sm"><%= model.brand_name %></p>
+                                        <% } %>
+                                        <p class="text-red-400 font-bold text-xl mt-2">
+                                            <%= model.starting_price ? '$' + Number(model.starting_price).toLocaleString() : 'Price TBA' %>
+                                        </p>
+                                        <button class="mt-4 px-6 py-2 bg-white text-black rounded-full text-sm font-bold hover:bg-red-600 hover:text-white transition">
+                                            Check out
+                                        </button>
+                                    </div>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } %>
+
+        </div>
+
+        <!-- No Results - EXACT SAME AS BRANDSDETAILS -->
+        <div id="noResults" class="text-center py-32 hidden">
+            <p class="text-4xl font-bold text-gray-500">No models found for selected filter</p>
+        </div>
 
     </main>
 
-<%- include('../partials/footer') %>
+    <%- include('../partials/footer') %>
 
+    <!-- Perfect Working Filter Script -->
     <script>
-        // Simulate Sign-In Status (Replace with backend auth later)
-        const isSignedIn = false;
-        const authLink = document.getElementById('auth-link');
-        if (isSignedIn) {
-            authLink.innerHTML = '<svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 18.364A4 4 0 018 17h8a4 4 0 012.879 1.364M15 10a3 3 0 11-6 0 3 3 0 016 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
-            authLink.href = '/profile';
-        } else {
-            authLink.textContent = 'Sign In';
-            authLink.href = '/signin';
-        }
-
-        // Mobile Menu Toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
-        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
-        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
-
-        if (!mobileMenuButton || !mobileMenuOverlay || !mobileMenuBackdrop || !closeMobileMenuButton) {
-            console.error('Mobile menu elements missing:', {
-                mobileMenuButton: !!mobileMenuButton,
-                mobileMenuOverlay: !!mobileMenuOverlay,
-                mobileMenuBackdrop: !!mobileMenuBackdrop,
-                closeMobileMenuButton: !!closeMobileMenuButton
-            });
-            return;
-        }
-
-        const toggleMenu = () => {
-            console.log('Toggling menu');
-            mobileMenuOverlay.classList.toggle('mobile-menu-open');
-            mobileMenuBackdrop.classList.toggle('active');
-            console.log('Menu state:', mobileMenuOverlay.classList.contains('mobile-menu-open') ? 'Open' : 'Closed');
-        };
-
-        mobileMenuButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Hamburger menu clicked');
-            toggleMenu();
-        }, { passive: false });
-
-        mobileMenuButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Hamburger menu touched');
-            toggleMenu();
-        }, { passive: false });
-
-        closeMobileMenuButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Close menu clicked');
-            mobileMenuOverlay.classList.remove('mobile-menu-open');
-            mobileMenuBackdrop.classList.remove('active');
-            console.log('Menu state: Closed');
-        }, { passive: false });
-
-        mobileMenuBackdrop.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Backdrop clicked, closing menu');
-            mobileMenuOverlay.classList.remove('mobile-menu-open');
-            mobileMenuBackdrop.classList.remove('active');
-            console.log('Menu state: Closed');
-        }, { passive: false });
-
-        mobileMenuOverlay.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Clicked inside menu, preventing close');
-        }, { passive: false });
-
-        // Search Functionality (Placeholder)
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-input').value;
-            if (query) {
-                alert('Search for: ' + query);
-            } else {
-                alert('Please enter a search query.');
-            }
-        });
-
-        // Filter Functionality (Placeholder)
-        document.getElementById('filter-button').addEventListener('click', () => {
-            alert('Filter options will be implemented with backend.');
-        });
-
-        // Highlight Active Nav Links
         document.addEventListener('DOMContentLoaded', () => {
-            const navLinks = document.querySelectorAll('#desktop-nav-links a, .mobile-nav-link');
-            
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === '/category') {
-                    link.classList.add('bg-red-600', 'text-white');
-                    link.classList.remove('hover:bg-red-600');
-                }
-            });
-        });
+            const filter = document.getElementById('engineFilter');
+            const pageTitle = document.getElementById('pageTitle');
+            const seoTitle = document.getElementById('seoTitle');
+            const sections = document.querySelectorAll('.engine-section');
+            const noResults = document.getElementById('noResults');
 
-        // Add loading states for better UX
-        document.addEventListener('DOMContentLoaded', function() {
-            const modelLinks = document.querySelectorAll('a[href^="/modeldetails/"]');
-            modelLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    this.style.opacity = '0.7';
-                    this.innerHTML = 'Loading...';
+            const catName = "<%= category.name %>";
+            const typeName = "<%= category.vehicle_type_name %>s";
+
+            const titles = {
+                all: `All ${catName} ${typeName} in USA`,
+                electric: `${catName} Electric ${typeName} in USA`,
+                ice: `${catName} ICE ${typeName} in USA`,
+                hybrid: `${catName} Hybrid ${typeName} in USA`,
+                phev: `${catName} Plug-in Hybrid ${typeName} in USA`
+            };
+
+            function updateView() {
+                const val = filter.value;
+                let hasVisible = false;
+
+                sections.forEach(sec => {
+                    const show = val === 'all' || sec.dataset.engine === val;
+                    sec.style.display = show ? 'block' : 'none';
+                    if (show && sec.querySelector('a')) hasVisible = true;
                 });
-            });
+
+                pageTitle.textContent = titles[val] || titles.all;
+                seoTitle.textContent = (titles[val] || titles.all) + " - Latest Price & Specs";
+                noResults.classList.toggle('hidden', val === 'all' || hasVisible);
+            }
+
+            filter.addEventListener('change', updateView);
+            updateView();
         });
     </script>
 </body>

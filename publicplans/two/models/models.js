@@ -729,6 +729,67 @@ static async getAllModelsForComparison(conn) {
     }
 }
 
+static async getSimilarModels(currentModelId, conn) {
+    const connObj = await this._getConn(conn);
+    try {
+        const [current] = await connObj.conn.execute(
+            `SELECT brand_id, category_id, vehicle_type_id, starting_price 
+             FROM models WHERE id = ?`, 
+            [currentModelId]
+        );
+
+        if (current.length === 0) return [];
+
+        const { brand_id, category_id, vehicle_type_id, starting_price } = current[0];
+        const price = starting_price || 0;
+
+        const [rows] = await connObj.conn.execute(`
+            SELECT 
+                m.id,
+                m.model_name,
+                m.model_image,
+                m.starting_price,
+                b.name AS brand_name,
+                c.name AS category_name,
+                v.vehicle_type_name
+            FROM models m
+            JOIN brands b ON m.brand_id = b.brand_id                    -- thik
+            JOIN categories c ON m.category_id = c.category_id            -- thik
+            JOIN vehicletype v ON m.vehicle_type_id = v.vehicle_type_id  -- thik
+            WHERE m.id != ?
+              AND m.status IN ('published', 'import')
+              AND (
+                m.brand_id = ? 
+                OR m.category_id = ? 
+                OR m.vehicle_type_id = ?
+                OR (m.starting_price IS NOT NULL AND ABS(m.starting_price - ?) <= 7000000) -- ±70 lakh samma
+              )
+            ORDER BY 
+                CASE 
+                    WHEN m.brand_id = ? THEN 1
+                    WHEN m.category_id = ? THEN 2  
+                    WHEN m.vehicle_type_id = ? THEN 3
+                    ELSE 4 
+                END,
+                ABS(m.starting_price - ?) ASC
+            LIMIT 12
+        `, [
+            currentModelId,
+            brand_id, category_id, vehicle_type_id, price,
+            brand_id, category_id, vehicle_type_id, price
+        ]);
+
+        console.log("Similar models found:", rows.length); // yo line thap temporarily
+        return rows;
+
+    } catch (error) {
+        console.error('getSimilarModels error:', error.message);
+        return [];
+    } finally {
+        await this._release(connObj);
+    }
+}
+
 }
 
 module.exports = Model;

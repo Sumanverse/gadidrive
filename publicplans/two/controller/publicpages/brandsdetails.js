@@ -1,3 +1,4 @@
+// controller/publicpages/brandsdetails.js
 const Brand = require('../../models/brands');
 const Model = require('../../models/models');
 const VehicleType = require('../../models/vehicletype');
@@ -18,13 +19,26 @@ exports.getbrandsdetails = async (req, res, next) => {
         // Get all models for this brand
         const models = await Model.getModelsByBrandId(brandId);
         
-        // Group models by engine type
-        const electricModels = models.filter(model => 
-            model.engine_type && model.engine_type.toLowerCase().includes('electric')
-        );
-        const iceModels = models.filter(model => 
-            !model.engine_type || !model.engine_type.toLowerCase().includes('electric')
-        );
+        // Properly group models by engine type (case-insensitive + accurate)
+        const electricModels = models.filter(model => {
+            const type = model.engine_type?.toLowerCase() || '';
+            return type.includes('electric') && !type.includes('hybrid');
+        });
+
+        const iceModels = models.filter(model => {
+            const type = model.engine_type?.toLowerCase() || '';
+            return !type.includes('electric') && !type.includes('hybrid');
+        });
+
+        const hybridModels = models.filter(model => {
+            const type = model.engine_type?.toLowerCase() || '';
+            return type.includes('hybrid') && !type.includes('phev') && !type.includes('plug-in');
+        });
+
+        const phevModels = models.filter(model => {
+            const type = model.engine_type?.toLowerCase() || '';
+            return type.includes('phev') || type.includes('plug-in hybrid');
+        });
 
         // Get related brands (same vehicle type)
         const relatedBrands = await Brand.getBrandsByVehicleType(brand.vehicle_type_id);
@@ -34,8 +48,10 @@ exports.getbrandsdetails = async (req, res, next) => {
 
         res.render('publicpages/brandsdetails', {
             brand: brand,
-            electricModels: electricModels,
-            iceModels: iceModels,
+            electricModels,
+            iceModels,
+            hybridModels,    // added
+            phevModels,      // added
             relatedBrands: relatedBrands.filter(b => b.brand_id != brandId).slice(0, 4),
             categories: categories.slice(0, 4),
             title: `All ${brand.name} ${brand.vehicle_type_name} Models Available in USA | Gyarage`,

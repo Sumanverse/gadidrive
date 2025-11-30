@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>  
     <%- include('../partials/head', {
         title: model?.model_name ? `${model.model_name} - ${model.brand_name} | Full Specifications & Details` : 'Model Details',
         description: model?.engine_type ? `Explore ${model.model_name} by ${model.brand_name}. ${model.engine_type} engine, ${model.starting_price ? 'starting at ' + model.starting_price : ''}. Full specifications, colors, variants and features.` : 'Complete model specifications and details',
         keywords: `${model?.model_name || ''},${model?.brand_name || ''},${model?.vehicle_type_name || ''},${model?.category_name || ''},${model?.engine_type || ''},car specifications,bike details,vehicle features`,
         canonical: `/modeldetails/${model?.id || ''}`
     }) %>
-    
-    <!-- Add Font Awesome for better icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --primary-red: #dc2626;
@@ -221,38 +218,106 @@
             color: black;
         }
         
-        /* UPDATED: Modal Overlay - FULL PAGE WIDTH */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
+        /* FINAL FIX - 100% WIDE & CENTERED MODALS */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex !important;
+}
+
+.modal-content-wide {
+    background: #111111;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 1100px;           /* thulo banako */
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid #374151;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+
+.variant-table-wide {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+}
+
+.variant-row-wide {
+    background: rgba(55, 65, 81, 0.4);
+    border-radius: 12px;
+    padding: 1.8rem 2.5rem;
+    margin: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.variant-row-wide:hover {
+    background: rgba(220, 38, 38, 0.15);
+    transform: translateY(-2px);
+    transition: all 0.3s;
+}
+
+.variant-price {
+    text-align: right;
+    color: #dc2626;
+    font-weight: 800;
+}
+
+/* About & Available ko lagi ni wide */
+.about-content-final, .sites-grid-wide {
+    width: 100%;
+    padding: 1rem 2rem;
+}
+
+.sites-grid-wide {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.site-card-wide {
+    background: rgba(55, 65, 81, 0.5);
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+    border: 2px solid #374151;
+    transition: all 0.3s;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.site-card-wide:hover {
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.2);
+    transform: translateY(-8px);
+}
         
         /* UPDATED: Modal Content - FULL PAGE WIDTH */
         .modal-content {
             background: var(--card-bg);
             border-radius: 16px;
-            max-width: 95vw; /* FULL PAGE WIDTH */
-            width: 95vw; /* FULL PAGE WIDTH */
-            max-height: 90vh;
+            width: 95%;
+            max-width: 1200px; /* YO THYO MAIN FIX */
+            max-height: 95vh;
             overflow-y: auto;
             border: 1px solid #374151;
             position: relative;
-            animation: modalSlideIn 0.3s ease;
-            margin-top: 40px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
         }
         
@@ -271,12 +336,12 @@
             position: sticky;
             top: 0;
             background: var(--card-bg);
-            padding: 2rem 3rem;
+            padding: 1.5rem 2rem;
             border-bottom: 2px solid var(--primary-red);
-            z-index: 10;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 10;
         }
         
         .modal-title {
@@ -284,8 +349,8 @@
             font-weight: 800;
             color: white;
             margin: 0;
-            text-align: center;
             flex: 1;
+            text-align: center;
         }
         
         .modal-close {
@@ -301,23 +366,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
         }
+        .modal-close:hover { background: var(--dark-red); transform: scale(1.1); }
         
-        .modal-close:hover {
-            background: var(--dark-red);
-            transform: scale(1.1);
-        }
-        
-        /* UPDATED: Modal Body - FULL WIDTH CONTENT */
         .modal-body {
             padding: 3rem 4rem;
             background: var(--card-bg);
-            border-radius: 0 0 16px 16px;
-            min-height: 400px;
-            width: 100%;
-            box-sizing: border-box;
         }
         
         .external-close {
@@ -350,53 +404,31 @@
         /* UPDATED: Variants Table - FULL WIDTH */
         .variant-table {
             width: 100%;
-            background: rgba(55, 65, 81, 0.5);
-            border-radius: 8px;
+            border-collapse: collapse;
+            background: rgba(55, 65, 81, 0.3);
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid #374151;
         }
-        
         .variant-row {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            padding: 1.25rem 1.5rem;
+            padding: 1.5rem 2rem;
             border-bottom: 1px solid #374151;
             align-items: center;
         }
         
-        .variant-row:last-child {
-            border-bottom: none;
-        }
-        
-        .variant-row:nth-child(even) {
-            background: rgba(55, 65, 81, 0.7);
-        }
-        
-        .variant-name {
-            font-weight: 700;
-            color: white;
-            font-size: 1.3rem;
-        }
-        
-        .variant-price {
-            font-weight: 700;
-            color: var(--primary-red);
-            font-size: 1.1rem;
-            text-align: right;
-        }
+        .variant-row:last-child { border-bottom: none; }
+        .variant-row:nth-child(even) { background: rgba(55, 65, 81, 0.5); }
+        .variant-name { font-weight: 700; font-size: 1.3rem; }
+        .variant-price { font-weight: 700; color: var(--primary-red); font-size: 1.3rem; text-align: right; }
         
         /* UPDATED: News-style About Content - FULL WIDTH */
         .about-content {
-            line-height: 1.8;
-            color: var(--text-light);
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 12px;
-            border: 2px solid #374151;
-            width: 100%;
-            font-size: 1.2rem;
-            box-sizing: border-box;
+            line-height: 1.9;
+            font-size: 1.15rem;
         }
+        .about-content p { margin-bottom: 1.5rem; text-align: justify; }
         
         .about-text {
             margin-bottom: 2rem;
@@ -570,33 +602,18 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
-            width: 100%;
         }
-        
         .site-card {
             background: rgba(55, 65, 81, 0.5);
             padding: 2rem;
             border-radius: 12px;
             text-align: center;
             border: 2px solid #374151;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: white;
-            display: block;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            box-sizing: border-box;
+            transition: all 0.3s;
         }
-        
         .site-card:hover {
             border-color: var(--primary-red);
-            background: rgba(55, 65, 81, 0.8);
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
         
         .site-card .font-semibold {
@@ -607,6 +624,15 @@
         
         .site-card .text-sm {
             font-size: 1rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .modal-body { padding: 2rem 1.5rem; }
+            .modal-title { font-size: 1.6rem; }
+            .variant-row { padding: 1rem; grid-template-columns: 1fr 1fr; }
+            .variant-name, .variant-price { font-size: 1.1rem; }
+            .sites-grid { grid-template-columns: 1fr; }
         }
         
         /* Centered Colors Section - UPDATED WITH SEO TITLES */
@@ -1168,7 +1194,6 @@
         
         /* Modal content styling */
         .modal-content {
-            background: var(--card-bg);
             border-radius: 16px;
             max-width: 500px;
             width: 90%;
@@ -1178,12 +1203,18 @@
         }
         
         .modal-header {
-            padding: 1.5rem 2rem;
-            border-bottom: 2px solid var(--primary-red);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    position: sticky;
+    top: 0;
+    background: rgba(17, 17, 17, 0.98) !important;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid #dc2626;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
         
         .close-btn {
             background: var(--primary-red);
@@ -1816,23 +1847,17 @@
             Share
         </button>
     </div>
-</main>
 
 <!-- About Modal - FULL PAGE WIDTH -->
 <div class="modal-overlay" id="about-modal">
-    <div class="modal-content">
-        <button class="external-close" onclick="closeModal('about-modal')">&times;</button>
-        <div class="modal-header" style="padding: 0; border-bottom: none;">
-            <!-- Title Box that spans full width -->
-            <div class="title-box" style="background: #ffffff; padding: 2rem; width: 100%; border-radius: 16px 0 0 0;">
-                <h2 class="modal-title" style="color: #000000; margin: 0; text-align: center; font-weight: 800; font-size: 2rem;">
-                    About <%= model?.brand_name %> <%= model?.model_name %> in Nepal
-                </h2>
+    <div class="modal-content-wide">
+            <button class="external-close" onclick="closeModal('about-modal')">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">About <%= model?.brand_name %> <%= model?.model_name %> in Nepal</h2>
+                <button class="modal-close" onclick="closeModal('about-modal')">&times;</button>
             </div>
-            <button class="modal-close" onclick="closeModal('about-modal')" style="position: absolute; top: 2rem; right: 2rem; background: #dc2626; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; z-index: 10;">&times;</button>
-        </div>
-        <div class="modal-body" style="background: #000000; padding: 3rem 4rem; border-radius: 0 0 16px 16px; min-height: 400px; width: 100%;">
-            <div style="background: #000000; color: #ffffff; line-height: 1.7; width: 100%;">
+            <div class="modal-body about-content">
+            <div style="color: #ffffff; line-height: 1.7; width: 100%;">
                 <% 
                 let hasVisibleContent = false;
                 
@@ -1844,20 +1869,20 @@
                 %>
                 
                 <% if (sortedAboutContents && sortedAboutContents.length > 0) { %>
-                    <section class="news-content mb-8" itemprop="articleBody" style="background: #000000; width: 100%;">
+                    <section class="news-content mb-8" itemprop="articleBody" style="width: 100%;">
                         <% sortedAboutContents.forEach((content, index) => { 
                             // FIX: content_order 0 bhayepani display garne
                             if ((content.type === 'article' || content.type === 'text') && content.value && content.value.trim() !== '') {
                                 hasVisibleContent = true;
                         %>
-                            <div class="content-block" style="background: #000000; padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                            <div class="content-block" style="padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
                                 <p class="justified-text" style="color: #ffffff; font-size: 1.1rem; margin: 0.5rem 0; width: 100%;">
                                     <%= content.value %>
                                 </p>
                             </div>
                         <% } else if (content.type === 'photo' && content.image_path) { %>
                             <% hasVisibleContent = true; %>
-                            <div class="content-block" style="background: #000000; padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                            <div class="content-block" style="padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
                                 <div class="content-photo" style="position: relative; width: 100%;">
                                     <img src="<%= content.image_path %>" 
                                          alt="About <%= model.model_name %>" 
@@ -1869,7 +1894,7 @@
                                        target="_blank" 
                                        rel="noopener noreferrer"
                                        class="image-source-badge"
-                                       style="position: absolute; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.8); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 500;">
+                                       style="position: absolute; bottom: 10px; right: 10px; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; text-decoration: none; transition: all 0.3s ease; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 500;">
                                         Source
                                     </a>
                                     <% } %>
@@ -1877,7 +1902,7 @@
                             </div>
                         <% } else if (content.type === 'link' && content.value) { %>
                             <% hasVisibleContent = true; %>
-                            <div class="content-block" style="background: #000000; padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
+                            <div class="content-block" style="padding: 0.5rem 0; margin: 0.5rem 0; width: 100%;">
                                 <a href="<%= content.value.startsWith('http') ? content.value : 'https://' + content.value %>" 
                                    target="_blank" 
                                    rel="noopener noreferrer"
@@ -1890,13 +1915,13 @@
                         }); %>
                         
                         <% if (!hasVisibleContent) { %>
-                            <p class="text-gray-400 text-center py-8 no-content-message" style="background: #000000; color: #9ca3af; margin: 0.5rem 0; width: 100%;">
+                            <p class="text-gray-400 text-center py-8 no-content-message" style="color: #9ca3af; margin: 0.5rem 0; width: 100%;">
                                 No about content available for this model.
                             </p>
                         <% } %>
                     </section>
                 <% } else { %>
-                    <p class="text-gray-400 text-center py-8 no-content-message" style="background: #000000; color: #9ca3af; margin: 0.5rem 0; width: 100%;">
+                    <p class="text-gray-400 text-center py-8 no-content-message" style="color: #9ca3af; margin: 0.5rem 0; width: 100%;">
                         No about content available for this model.
                     </p>
                 <% } %>
@@ -1905,59 +1930,55 @@
     </div>
 </div>
 
-<!-- Variants Modal - FULL PAGE WIDTH -->
+<!-- ========== VARIANTS MODAL - WIDE ========== -->    
 <div class="modal-overlay" id="variants-modal">
-    <div class="modal-content">
-        <button class="external-close" onclick="closeModal('variants-modal')">&times;</button>
-        <div class="modal-header">
-            <h2 class="modal-title">All Variants of <%= model?.brand_name %> <%= model?.model_name %> in Nepal</h2>
-            <button class="modal-close" onclick="closeModal('variants-modal')">&times;</button>
-        </div>
-        <div class="modal-body" style="background: #000000; padding: 3rem 4rem; border-radius: 0 0 16px 16px; width: 100%;">
-            <% if (modelDetails && modelDetails.variants && modelDetails.variants.length > 0) { %>
-                <div class="variant-table" style="background: #000000; width: 100%;">
-                    <% modelDetails.variants.forEach(variant => { %>
-                        <div class="variant-row" style="background: #000000; border-bottom: 1px solid #374151; width: 100%;">
-                            <div class="variant-name font-semibold" style="color: #ffffff; width: 100%;"><%= variant.name %></div>
-                            <div class="variant-price" style="color: #dc2626; width: 100%;">₹<%= new Intl.NumberFormat('en-IN').format(variant.price) %></div>
-                        </div>
-                    <% }); %>
-                </div>
-            <% } else { %>
-                <p class="text-gray-400 text-center py-8" style="background: #000000; color: #9ca3af; width: 100%;">No variants available for this model.</p>
-            <% } %>
-        </div>
+    <div class="modal-content-wide">
+            <button class="external-close" onclick="closeModal('variants-modal')">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">All Variants of <%= model?.brand_name %> <%= model?.model_name %></h2>
+                <button class="modal-close" onclick="closeModal('variants-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="variant-table">
+                    <% if (modelDetails?.variants?.length > 0) {
+                        modelDetails.variants.forEach(variant => { %>
+                            <tr class="variant-row">
+                                <td class="variant-name"><%= variant.name %></td>
+                                <td class="variant-price">₹<%= new Intl.NumberFormat('en-IN').format(variant.price) %></td>
+                            </tr>
+                        <% })
+                    } else { %>
+                        <tr><td colspan="2" class="text-center py-8 text-gray-400">No variants available</td></tr>
+                    <% } %>
+                </table>
+            </div>
     </div>
 </div>
 
-<!-- Available Modal - FULL PAGE WIDTH -->
-<div class="modal-overlay" id="available-modal">
-    <div class="modal-content">
-        <button class="external-close" onclick="closeModal('available-modal')">&times;</button>
-        <div class="modal-header">
-            <h2 class="modal-title">Where to Buy <%= model?.brand_name %> <%= model?.model_name %> in Nepal</h2>
-            <button class="modal-close" onclick="closeModal('available-modal')">&times;</button>
-        </div>
-        <div class="modal-body" style="background: #000000; padding: 3rem 4rem; border-radius: 0 0 16px 16px; width: 100%;">
-            <% if (modelDetails && modelDetails.availableSites && modelDetails.availableSites.length > 0) { %>
-                <div class="sites-grid" style="width: 100%;">
-                    <% modelDetails.availableSites.forEach(site => { %>
-                        <a href="<%= site.link_phone.startsWith('http') ? site.link_phone : 'https://' + site.link_phone %>" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="site-card"
-                           style="background: #111111; border: 1px solid #374151; width: 100%;">
-                            <div class="font-semibold text-white mb-2"><%= site.name %></div>
-                            <div class="text-sm text-gray-300">Visit Site</div>
-                        </a>
-                    <% }); %>
+<!-- ========== AVAILABLE MODAL - WIDE ========== -->
+    <div class="modal-overlay" id="available-modal">
+        <div class="modal-content-wide">
+            <button class="external-close" onclick="closeModal('available-modal')">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Where to Buy <%= model?.brand_name %> <%= model?.model_name %></h2>
+                <button class="modal-close" onclick="closeModal('available-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="sites-grid">
+                    <% if (modelDetails?.availableSites?.length > 0) {
+                        modelDetails.availableSites.forEach(site => { %>
+                            <a href="<%= site.link_phone.startsWith('http') ? site.link_phone : 'https://' + site.link_phone %>" target="_blank" class="site-card">
+                                <div class="font-semibold text-lg"><%= site.name %></div>
+                                <div class="text-sm text-gray-300">Visit Site →</div>
+                            </a>
+                        <% })
+                    } else { %>
+                        <p class="text-gray-400 text-center col-span-full py-8">No showroom information available.</p>
+                    <% } %>
                 </div>
-            <% } else { %>
-                <p class="text-gray-400 text-center py-8" style="background: #000000; color: #9ca3af; width: 100%;">No available sites information.</p>
-            <% } %>
+            </div>
         </div>
     </div>
-</div>
 
 <!-- Improved Image Modal with External Navigation -->
 <div id="imageModal" class="image-modal">
@@ -2031,6 +2052,59 @@
         </button>
     </div>
 </div>
+
+<!-- YO "YOU MIGHT ALSO LIKE" SECTION -->
+<% if ((similarModels && similarModels.length > 0) || true) { %>  <!-- force show for testing -->
+    <section class="py-20 bg-black -mx-4 px-4">
+        <div class="max-w-screen-2xl mx-auto">
+            <h2 class="text-5xl font-extrabold text-center mb-16 text-white">
+                You Might Also Like
+            </h2>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                <% similarModels.forEach(similar => { %>
+                    <a href="/modeldetails/<%= similar.id %>" class="block group">
+                        <div class="bg-gradient-to-b from-red-600 to-black rounded-3xl overflow-hidden shadow-2xl transform transition-all duration-500 hover:scale-105 hover:shadow-red-600/50 border-2 border-red-900/70">
+                            <div class="h-56 relative overflow-hidden">
+                                <% if (similar.model_image) { %>
+                                    <img src="<%= similar.model_image %>" 
+                                         alt="<%= similar.brand_name %> <%= similar.model_name %>"
+                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                <% } else { %>
+                                    <div class="w-full h-full bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+                                        <i class="fas fa-car text-7xl text-gray-700"></i>
+                                    </div>
+                                <% } %>
+                                <div class="absolute inset-0 bg-gradient-to-t from-red-600/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            </div>
+                            
+                            <div class="p-6 text-center">
+                                <p class="text-gray-300 text-sm font-bold uppercase tracking-wider mb-2">
+                                    <%= similar.brand_name %>
+                                </p>
+                                <h3 class="text-white text-xl font-extrabold mb-3"><%= similar.model_name %></h3>
+                                
+                                <% if (similar.starting_price) { %>
+                                    <div class="text-3xl font-extrabold text-red-400 mb-4">
+                                        ₹<%= new Intl.NumberFormat('en-IN').format(similar.starting_price) %>
+                                    </div>
+                                <% } else { %>
+                                    <p class="text-gray-400 mb-4">Price Coming Soon</p>
+                                <% } %>
+                                
+                                <span class="inline-block px-6 py-3 bg-white text-black font-bold rounded-full text-sm shadow-xl hover:bg-red-600 hover:text-white transition-all">
+                                    <%= similar.category_name || similar.vehicle_type_name || 'Explore' %>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                <% }); %>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
+</main>
 
 <%- include('../partials/footer') %>
 
@@ -2206,16 +2280,15 @@
         }
     }
 
-    // Modal Functions
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
-        document.body.style.overflow = 'auto';
-    }
+// only modal open/close function use gar
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
 
     // Close modals when clicking outside
     document.querySelectorAll('.modal-overlay').forEach(modal => {
